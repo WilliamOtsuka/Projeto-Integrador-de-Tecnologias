@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - ONG SEM FOME</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="pagina-login">
+    <header class="site-header">
+        <nav class="navbar">
+            <div class="brand">
+                <h2 class="brand-title">ONG SEM FOME</h2>
+            </div>
+            <ul class="menu-principal">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="gerenciar_doadores.html">Doadores</a></li>
+                <li><a href="gerenciar_familias.html">Famílias</a></li>
+                <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+                <li><a href="gerenciar_categorias.html">Categorias</a></li>
+                <li><a href="gerenciar_campanhas.html">Campanhas</a></li>
+                <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+            </ul>
+            <div class="navbar-login">
+                <a href="login_page.html" class="btn-login" role="button">Login</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="content">
+        <section class="login-box" style="max-width:460px;margin:3rem auto;">
+            <div class="form-adicionar">
+                <h2 style="text-align:center;color:var(--primary-color);">Entrar na área administrativa</h2>
+                <p style="text-align:center;margin-top:8px;color:#444;">Digite seu usuário e senha para acessar o sistema.</p>
+                <form id="loginForm" style="margin-top:16px;">
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <label for="username">Usuário</label>
+                        <input type="text" id="username" name="username" required>
+                        <label for="password">Senha</label>
+                        <input type="password" id="password" name="password" required>
+                        <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;">
+                            <button type="submit" class="btn-primary">Entrar</button>
+                            <a href="index.html" class="btn-secondary" style="text-decoration:none;padding:8px 12px;display:inline-block;border-radius:6px;">Voltar</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="rodape">© 2023 ONG SEM FOME. Todos os direitos reservados.</footer>
+
+    <script src="/js/login.js"></script>
+</body>
+</html>

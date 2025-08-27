@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8">
+	<title>Gerenciar Famílias Beneficiadas</title>
+	<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="pagina-gerenciar">
+	<header class="site-header">
+		<nav class="navbar">
+			<div class="brand">
+				<h2 class="brand-title">ONG SEM FOME</h2>
+			</div>
+			<ul class="menu-principal">
+				<li><a href="index.html">Home</a></li>
+				<li><a href="gerenciar_doadores.html">Doadores</a></li>
+				<li class="ativo"><a href="gerenciar_familias.html">Famílias</a></li>
+				<li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+				<li><a href="gerenciar_categorias.html">Categorias</a></li>
+				<li><a href="gerenciar_campanhas.html">Campanhas</a></li>
+				<li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+			</ul>
+			<div class="navbar-login">
+				<a href="login_page.html" class="btn-login" role="button">Login</a>
+			</div>
+		</nav>
+	</header>
+	<h1 class="titulo-pagina">Gerenciar Famílias Beneficiadas</h1>
+	<p class="descricao-pagina">Página para cadastro, edição e exclusão de famílias beneficiadas.</p>
+	<section class="crud-familias">
+		<button id="btnAdicionarFamilia" class="btn-primary">Adicionar Família</button>
+		<table id="tabelaFamilias" class="data-table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Nome da Família</th>
+					<th>Responsável</th>
+					<th>Contato</th>
+					<th>Endereço</th>
+					<th>Ações</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- Linhas de famílias serão inseridas aqui via JS -->
+			</tbody>
+		</table>
+	</section>
+
+	<!-- Modal de Cadastro/Edição -->
+	<div id="modalFamilia" class="modal" style="display:none;">
+		<div class="modal-conteudo form-adicionar">
+			<span class="fechar" id="fecharModal">&times;</span>
+			<h2 id="tituloModal">Adicionar Família</h2>
+			<form id="formFamilia" class="form-grid">
+				<input type="hidden" id="familiaId">
+
+				<div class="form-field">
+					<label for="nomeFamilia">Nome da Família:</label>
+					<input type="text" id="nomeFamilia" required>
+				</div>
+
+				<div class="form-field">
+					<label for="responsavel">Responsável:</label>
+					<input type="text" id="responsavel" required>
+				</div>
+
+				<div class="form-field">
+					<label for="contato">Contato:</label>
+					<input type="text" id="contato" required>
+				</div>
+
+				<div class="form-field">
+					<label for="endereco">Endereço:</label>
+					<input type="text" id="endereco" required>
+				</div>
+
+				<div class="form-actions">
+					<button type="submit" id="salvarFamilia" class="btn-primary">Salvar</button>
+					<button type="button" class="btn-secondary" id="fecharModalBtn">Cancelar</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<script src="/js/gerenciar_familias.js"></script>
+	<footer class="rodape">
+		© 2023 ONG SEM FOME. Todos os direitos reservados.
+	</footer>
+</body>
+</html>
