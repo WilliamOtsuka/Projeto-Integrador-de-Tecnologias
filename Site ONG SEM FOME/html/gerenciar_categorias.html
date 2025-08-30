@@ -10,7 +10,7 @@
 		<nav class="navbar">
 			<div class="navbar-item">
 				<div class="brand">
-					<h2 class="brand-title">SEM FOME</h2>
+					<h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
 				</div>
 			</div>
 			<div class="navbar-item">
@@ -22,6 +22,7 @@
 					<li class="ativo"><a href="gerenciar_categorias.html">Categorias</a></li>
 					<li><a href="gerenciar_campanhas.html">Campanhas</a></li>
 					<li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+					<li><a href="registrar_entrada.html">Entradas</a></li>
 				</ul>
 			</div>
 			<div class="navbar-item">
@@ -33,6 +34,40 @@
 	</header>
 	<h1 class="titulo-pagina">Gerenciar Categorias de Produtos</h1>
 	<p class="descricao-pagina">Página para cadastro, edição e exclusão de categorias de produtos.</p>
+
+	<section class="crud-categorias">
+		<div id="modalCategoria" class="modal" style="display:none;">
+			<div class="modal-conteudo form-adicionar">
+				<span class="fechar" id="fecharModalCategoria">&times;</span>
+				<h2 id="tituloModalCategoria">Adicionar Categoria</h2>
+				<form id="formCategoria" class="form-grid">
+					<input type="hidden" id="categoriaId">
+					<div class="form-field" style="grid-column:1/-1;">
+						<label for="nomeCategoria">Nome da Categoria:</label>
+						<input type="text" id="nomeCategoria" required>
+					</div>
+					<div class="form-actions">
+						<button type="submit" class="btn-primary">Salvar</button>
+						<button type="button" class="btn-secondary" id="fecharModalCategoriaBtn">Cancelar</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<button id="btnAdicionarCategoria" class="btn-primary">Adicionar Categoria</button>
+		<table id="tabelaCategorias" class="data-table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Nome</th>
+					<th>Ações</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</section>
+
+	<script src="/js/gerenciar_categorias.js"></script>
 	<footer class="rodape">
 		© 2023 ONG SEM FOME. Todos os direitos reservados.
 	</footer>

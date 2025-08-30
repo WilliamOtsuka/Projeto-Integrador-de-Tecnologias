@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de Doador - SEM FOME</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="pagina-gerenciar">
+  <header class="site-header">
+    <nav class="navbar">
+      <div class="navbar-item">
+        <div class="brand">
+          <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+        </div>
+      </div>
+      <div class="navbar-item">
+        <ul class="menu-principal">
+          <li><a href="index.html">Home</a></li>
+          <li class="ativo"><a href="cadastro_doador.html">Cadastrar Doador</a></li>
+          <li><a href="gerenciar_doadores.html">Doadores</a></li>
+          <li><a href="gerenciar_familias.html">Famílias</a></li>
+          <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+          <li><a href="gerenciar_categorias.html">Categorias</a></li>
+          <li><a href="gerenciar_campanhas.html">Campanhas</a></li>
+          <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+        </ul>
+      </div>
+      <div class="navbar-item">
+        <div class="navbar-login">
+          <a href="login_page.html" class="btn-login" role="button">Login</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="content">
+    <section class="bloco-home" style="max-width: 820px;">
+      <h1 class="titulo-pagina" style="margin-top:0;">Cadastro de Doador</h1>
+      <p class="descricao-pagina">Preencha os dados abaixo para realizar seu cadastro como doador.</p>
+
+      <form id="formCadastroDoador" class="form-adicionar form-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="form-field">
+          <label for="nome">Nome completo</label>
+          <input type="text" id="nome" name="nome" placeholder="Ex.: Maria da Silva" required>
+        </div>
+        <div class="form-field">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+        </div>
+        <div class="form-field">
+          <label for="telefone">Telefone/WhatsApp</label>
+          <input type="tel" id="telefone" name="telefone" placeholder="(11) 90000-0000" required>
+        </div>
+        <div class="form-field">
+          <label for="cpfCnpj">CPF ou CNPJ</label>
+          <input type="text" id="cpfCnpj" name="cpfCnpj" placeholder="Somente números" required>
+        </div>
+        <div class="form-actions" style="grid-column: 1/-1; justify-content:flex-end;">
+          <button type="submit" class="btn-primary">Salvar Cadastro</button>
+          <a href="index.html" class="btn-secondary" style="text-decoration:none;">Cancelar</a>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="rodape">© 2025 SEM FOME. Todos os direitos reservados.</footer>
+  <script src="/js/cadastro_doador.js" defer></script>
+</body>
+</html>

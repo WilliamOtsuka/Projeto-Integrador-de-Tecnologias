@@ -32,20 +32,20 @@
 		</nav>
 	</header>
 
-    <main class="content">
-        <section class="login-box" style="max-width:460px;margin:3rem auto;">
-            <div class="form-adicionar">
-                <h2 style="text-align:center;color:var(--primary-color);">Entrar na área administrativa</h2>
-                <p style="text-align:center;margin-top:8px;color:#444;">Digite seu usuário e senha para acessar o sistema.</p>
-                <form id="loginForm" style="margin-top:16px;">
-                    <div style="display:flex;flex-direction:column;gap:10px;">
+	<main class="content">
+		<section class="login-box">
+			<div class="form-adicionar">
+				<h2 class="login-title">Entrar na área administrativa</h2>
+				<p class="login-subtitle">Digite seu usuário e senha para acessar o sistema.</p>
+				<form id="loginForm" class="login-form">
+					<div class="login-fields">
                         <label for="username">Usuário</label>
                         <input type="text" id="username" name="username" required>
                         <label for="password">Senha</label>
                         <input type="password" id="password" name="password" required>
-                        <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;">
-                            <button type="submit" class="btn-primary">Entrar</button>
-                            <a href="index.html" class="btn-secondary" style="text-decoration:none;padding:8px 12px;display:inline-block;border-radius:6px;">Voltar</a>
+						<div class="login-actions">
+                            <button type="submit" class="btn-primary btn-cadastro">Entrar</button>
+							<a href="index.html" class="btn-secondary btn-back">Voltar</a>
                         </div>
                     </div>
                 </form>

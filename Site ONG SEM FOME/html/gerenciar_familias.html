@@ -10,7 +10,7 @@
 		<nav class="navbar">
 			<div class="navbar-item">
 				<div class="brand">
-					<h2 class="brand-title">SEM FOME</h2>
+					<h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
 				</div>
 			</div>
 			<div class="navbar-item">
@@ -22,6 +22,7 @@
 					<li><a href="gerenciar_categorias.html">Categorias</a></li>
 					<li><a href="gerenciar_campanhas.html">Campanhas</a></li>
 					<li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+					<li><a href="registrar_entrada.html">Entradas</a></li>
 				</ul>
 			</div>
 			<div class="navbar-item">
@@ -34,6 +35,67 @@
 	<h1 class="titulo-pagina">Gerenciar Famílias Beneficiadas</h1>
 	<p class="descricao-pagina">Página para cadastro, edição e exclusão de famílias beneficiadas.</p>
 	<section class="crud-familias">
+		<!-- Modal de Cadastro/Edição -->
+		<div id="modalFamilia" class="modal" style="display:none;">
+			<div class="modal-conteudo form-adicionar">
+				<span class="fechar" id="fecharModalBtn">&times;</span>
+				<h2 id="tituloModal">Adicionar Família</h2>
+				<form id="formFamilia" class="form-grid">
+					<input type="hidden" id="familiaId">
+	
+					<div class="form-field">
+						<label for="nomeFamilia">Nome da Família:</label>
+						<input type="text" id="nomeFamilia" required>
+					</div>
+	
+					<div class="form-field">
+						<label for="responsavel">Responsável:</label>
+						<input type="text" id="responsavel" required>
+					</div>
+	
+					<div class="form-field">
+						<label for="contato">Contato:</label>
+						<input type="text" id="contato" required>
+					</div>
+
+					<!-- Endereço com CEP -->
+					<div class="form-field">
+						<label for="cepFamilia">CEP</label>
+						<input type="text" id="cepFamilia" inputmode="numeric" placeholder="12345-678" maxlength="9" required>
+						<small id="cepFamiliaStatus" style="color:#666"></small>
+					</div>
+					<div class="form-field">
+						<label for="logradouroFamilia">Rua</label>
+						<input type="text" id="logradouroFamilia" placeholder="Logradouro" required>
+					</div>
+					<div class="form-field">
+						<label for="numeroFamilia">Número</label>
+						<input type="text" id="numeroFamilia" placeholder="Número" required>
+					</div>
+					<div class="form-field">
+						<label for="complementoFamilia">Complemento</label>
+						<input type="text" id="complementoFamilia" placeholder="Apto, bloco, referência (opcional)">
+					</div>
+					<div class="form-field">
+						<label for="bairroFamilia">Bairro</label>
+						<input type="text" id="bairroFamilia" placeholder="Bairro" required>
+					</div>
+					<div class="form-field">
+						<label for="cidadeFamilia">Cidade</label>
+						<input type="text" id="cidadeFamilia" placeholder="Cidade" required>
+					</div>
+					<div class="form-field">
+						<label for="ufFamilia">UF</label>
+						<input type="text" id="ufFamilia" placeholder="UF" maxlength="2" required>
+					</div>
+	
+					<div class="form-actions">
+						<button type="submit" id="salvarFamilia" class="btn-primary">Salvar</button>
+						<button type="button" class="btn-secondary" id="fecharModalBtn">Cancelar</button>
+					</div>
+				</form>
+			</div>
+		</div>
 		<button id="btnAdicionarFamilia" class="btn-primary">Adicionar Família</button>
 		<table id="tabelaFamilias" class="data-table">
 			<thead>
@@ -52,41 +114,6 @@
 		</table>
 	</section>
 
-	<!-- Modal de Cadastro/Edição -->
-	<div id="modalFamilia" class="modal" style="display:none;">
-		<div class="modal-conteudo form-adicionar">
-			<span class="fechar" id="fecharModal">&times;</span>
-			<h2 id="tituloModal">Adicionar Família</h2>
-			<form id="formFamilia" class="form-grid">
-				<input type="hidden" id="familiaId">
-
-				<div class="form-field">
-					<label for="nomeFamilia">Nome da Família:</label>
-					<input type="text" id="nomeFamilia" required>
-				</div>
-
-				<div class="form-field">
-					<label for="responsavel">Responsável:</label>
-					<input type="text" id="responsavel" required>
-				</div>
-
-				<div class="form-field">
-					<label for="contato">Contato:</label>
-					<input type="text" id="contato" required>
-				</div>
-
-				<div class="form-field">
-					<label for="endereco">Endereço:</label>
-					<input type="text" id="endereco" required>
-				</div>
-
-				<div class="form-actions">
-					<button type="submit" id="salvarFamilia" class="btn-primary">Salvar</button>
-					<button type="button" class="btn-secondary" id="fecharModalBtn">Cancelar</button>
-				</div>
-			</form>
-		</div>
-	</div>
 
 	<script src="/js/gerenciar_familias.js"></script>
 	<footer class="rodape">
