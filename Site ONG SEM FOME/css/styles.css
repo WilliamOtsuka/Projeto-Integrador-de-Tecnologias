@@ -107,6 +107,11 @@ nav.navbar {
     background: #174c2e;
 }
 
+.btn-login:active,
+.btn-cadastro:active {
+    background-color: #1c643b;
+}
+
 .bloco-home,
 .bloco-sobre,
 .bloco-ajudar,
@@ -118,9 +123,19 @@ nav.navbar {
     background: #fff;
     box-shadow: 0 2px 12px rgba(32, 96, 61, 0.07);
     margin: 2.5em auto;
-    padding: 2.2em 2em 2em 2em;
-    max-width: 1100px;
+    padding: 2.2em 1em 2em 1em;
+    max-width: 900px;
     position: relative;
+}
+
+.bloco-sobre img {
+    width: 100%;
+    max-width: 100%;
+    height: 290px;
+    object-fit: cover;
+    object-position: center 10%;
+    display: block;
+    margin: 0 auto;
 }
 
 .btn-destaque {
@@ -142,6 +157,72 @@ nav.navbar {
 .btn-destaque:hover {
     background: #e68900;
     transform: scale(1.04);
+}
+
+.btn-destaque:active {
+    background-color: #d97800;
+    transform: scale(0.98);
+}
+
+
+.bloco-impacto {
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(32, 96, 61, 0.07);
+    margin: 2.5em auto;
+    padding: 2.2em 1.5em;
+    max-width: 880px;
+    position: relative;
+    text-align: center;
+}
+
+.impacto-grid {
+    display: flex;
+    gap: 1.1rem;
+    justify-content: space-between;
+    align-items: stretch;
+    margin: 1.2rem 0 0.8rem 0;
+    flex-wrap: nowrap;
+}
+
+.impacto-card {
+    background: linear-gradient(180deg, #fff 0%, #fbfbfb 100%);
+    border: 1px solid rgba(32, 96, 61, 0.06);
+    border-radius: 10px;
+    padding: 1.2rem;
+    flex: 1 1 30%;
+    min-width: 220px;
+    max-width: 33%;
+    box-shadow: 0 4px 14px rgba(32, 96, 61, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.impacto-numero {
+    font-size: 2.4rem;
+    color: var(--primary-color);
+    margin: 0 0 0.4rem 0;
+    font-weight: 900;
+}
+
+.impacto-titulo {
+    font-weight: bold;
+    color: var(--secondary-color);
+    margin: 0 0 0.6rem 0;
+}
+
+@media (max-width: 900px) {
+    .impacto-grid {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .impacto-card {
+        max-width: 100%;
+        min-width: auto;
+        width: 100%;
+    }
 }
 
 .bloco-depoimentos blockquote {
@@ -177,6 +258,7 @@ nav.navbar {
     }
 }
 
+
 h1,
 h2 {
     color: var(--primary-color);
@@ -186,7 +268,7 @@ h2 {
 
 .brand-title {
     color: var(--secondary-color);
-    margin: 0;
+    margin: 0 0 0 1.5em;
 }
 
 .hero {
@@ -578,4 +660,43 @@ p.info-destaque {
         font-size: 20px;
         padding: 10px 18px;
     }
+}
+
+/* Contato */
+.contato-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+}
+.contato-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.contato-icone {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(56,158,102,0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-color);
+}
+.contato-icone svg {
+    fill: currentColor;
+}
+.contato-texto strong { color: var(--secondary-color); display:block; }
+.contato-texto p { margin: 2px 0 0 0; color: #444; }
+
+@media (max-width: 900px) {
+    .contato-list { grid-template-columns: 1fr; }
 }
