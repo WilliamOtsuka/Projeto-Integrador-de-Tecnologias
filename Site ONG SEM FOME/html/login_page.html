@@ -1,60 +1,66 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Login - ONG SEM FOME</title>
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body class="pagina-login">
-	<header class="site-header">
-		<nav class="navbar">
-			<div class="navbar-item">
-				<div class="brand">
-					<h2 class="brand-title">SEM FOME</h2>
-				</div>
-			</div>
-			<div class="navbar-item">
-				<ul class="menu-principal">
-					<li class="ativo"><a href="index.html">Home</a></li>
-					<li><a href="gerenciar_doadores.html">Doadores</a></li>
-					<li><a href="gerenciar_familias.html">Famílias</a></li>
-					<li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
-					<li><a href="gerenciar_categorias.html">Categorias</a></li>
-					<li><a href="gerenciar_campanhas.html">Campanhas</a></li>
-					<li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
-				</ul>
-			</div>
-			<div class="navbar-item">
-				<div class="navbar-login">
-					<a href="login_page.html" class="btn-login" role="button">Login</a>
-				</div>
-			</div>
-		</nav>
-	</header>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="pagina-login">
+    <header class="site-header">
+      <nav class="navbar">
+        <div class="navbar-item">
+          <div class="brand">
+            <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+          </div>
+        </div>
+        <div class="navbar-item">
+          <ul class="menu-principal">
+            <li class="ativo"><a href="index.html">Home</a></li>
+            <li><a href="gerenciar_doadores.html">Doadores</a></li>
+            <li><a href="gerenciar_familias.html">Famílias</a></li>
+            <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+            <li><a href="gerenciar_categorias.html">Categorias</a></li>
+            <li><a href="gerenciar_campanhas.html">Campanhas</a></li>
+            <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+          </ul>
+        </div>
+        <div class="navbar-item">
+          <div class="navbar-login">
+            <a href="login_page.html" class="btn-login" role="button">Login</a>
+          </div>
+        </div>
+      </nav>
+    </header>
 
-	<main class="content">
-		<section class="login-box">
-			<div class="form-adicionar">
-				<h2 class="login-title">Entrar na área administrativa</h2>
-				<p class="login-subtitle">Digite seu usuário e senha para acessar o sistema.</p>
-				<form id="loginForm" class="login-form">
-					<div class="login-fields">
-                        <label for="username">Usuário</label>
-                        <input type="text" id="username" name="username" required>
-                        <label for="password">Senha</label>
-                        <input type="password" id="password" name="password" required>
-						<div class="login-actions">
-                            <button type="submit" class="btn-primary btn-cadastro">Entrar</button>
-							<a href="index.html" class="btn-secondary btn-back">Voltar</a>
-                        </div>
-                    </div>
-                </form>
+    <main class="content">
+      <section class="login-box">
+        <div class="form-adicionar">
+          <h2 class="login-title">Entrar na área administrativa</h2>
+          <p class="login-subtitle">
+            Digite seu usuário e senha para acessar o sistema.
+          </p>
+          <form id="loginForm" class="login-form">
+            <div class="login-fields">
+              <label for="username">Usuário</label>
+              <input type="text" id="username" name="username" required />
+              <label for="password">Senha</label>
+              <input type="password" id="password" name="password" required />
+              <div class="login-actions">
+                <button type="submit" class="btn-primary btn-cadastro">
+                  Entrar
+                </button>
+                <a href="index.html" class="btn-secondary btn-back">Voltar</a>
+              </div>
             </div>
-        </section>
+          </form>
+        </div>
+      </section>
     </main>
 
-    <footer class="rodape">© 2023 ONG SEM FOME. Todos os direitos reservados.</footer>
+    <footer class="rodape">
+      © 2023 ONG SEM FOME. Todos os direitos reservados.
+    </footer>
 
     <script src="/js/login.js"></script>
-</body>
+  </body>
 </html>

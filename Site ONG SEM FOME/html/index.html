@@ -1,169 +1,226 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SEM FOME - Home</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
 
-<head>
-	<meta charset="UTF-8">
-	<title>SEM FOME - Home</title>
-	<link rel="stylesheet" href="/css/styles.css">
-</head>
+  <body class="pagina-inicial">
+    <header class="site-header">
+      <nav class="navbar">
+        <div class="navbar-item">
+          <div class="brand">
+            <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+          </div>
+        </div>
+        <div class="navbar-item">
+          <ul class="menu-principal">
+            <li class="ativo"><a href="index.html">Home</a></li>
+            <li><a href="gerenciar_doadores.html">Doadores</a></li>
+            <li><a href="gerenciar_familias.html">Famílias</a></li>
+            <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+            <li><a href="gerenciar_categorias.html">Categorias</a></li>
+            <li><a href="gerenciar_campanhas.html">Campanhas</a></li>
+            <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+			<li><a href="registrar_entrada.html">Entrada</a></li>
+		</ul>
+        </div>
+        <div class="navbar-item">
+          <div class="navbar-login">
+            <a href="login_page.html" class="btn-login" role="button">Login</a>
+          </div>
+        </div>
+      </nav>
+    </header>
 
-<body class="pagina-inicial">
-	<header class="site-header">
-		<nav class="navbar">
-			<div class="navbar-item">
-				<div class="brand">
-					<h2 class="brand-title"><a href="index.html"></a>SEM FOME</a></h2>
-				</div>
-			</div>
-			<div class="navbar-item">
-				<ul class="menu-principal">
-					<li class="ativo"><a href="index.html">Home</a></li>
-					<li><a href="gerenciar_doadores.html">Doadores</a></li>
-					<li><a href="gerenciar_familias.html">Famílias</a></li>
-					<li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
-					<li><a href="gerenciar_categorias.html">Categorias</a></li>
-					<li><a href="gerenciar_campanhas.html">Campanhas</a></li>
-					<li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
-				</ul>
-			</div>
-			<div class="navbar-item">
-				<div class="navbar-login">
-					<a href="login_page.html" class="btn-login" role="button">Login</a>
-				</div>
-			</div>
-		</nav>
-	</header>
+    <section class="hero">
+      <div class="hero-image">
+        <div class="hero-overlay">
+          <h3 class="hero-titulo reveal" style="--reveal-delay: 0.05s">
+            SEM FOME
+          </h3>
+          <p class="hero-subtexto reveal" style="--reveal-delay: 0.15s">
+            Junte-se a nós e ajude a transformar vidas com solidariedade!
+          </p>
+        </div>
+      </div>
+    </section>
 
-	<section class="hero">
-		<div class="hero-image">
-			<div class="hero-overlay">
-				<h3 class="hero-titulo reveal" style="--reveal-delay: .05s">SEM FOME</h3>
-				<p class="hero-subtexto reveal" style="--reveal-delay: .15s">Junte-se a nós e ajude a transformar vidas com solidariedade!</p>
-			</div>
-		</div>
-	</section>
+    <main class="content">
+      <!-- 1. Página Inicial -->
+      <section class="bloco-home bloco-home--lado">
+        <div class="bloco-home__imagem">
+          <img
+            class="reveal"
+            style="--reveal-delay: 0.1s"
+            src="/img/fila.jpg"
+            alt="Voluntários distribuindo alimentos"
+          />
+        </div>
+        <div class="bloco-home__conteudo">
+          <h1 class="titulo-pagina reveal" style="--reveal-delay: 0.05s">
+            Juntos contra a fome!
+          </h1>
+          <p class="descricao-pagina reveal" style="--reveal-delay: 0.15s">
+            Milhares de famílias vivem em situação de vulnerabilidade alimentar.
+            Nossa missão é garantir que cada mesa tenha comida e dignidade. Com
+            a sua ajuda, podemos transformar realidades e levar esperança a quem
+            mais precisa.
+          </p>
+          <a
+            href="cadastro_doador.html"
+            class="btn-destaque reveal"
+            style="--reveal-delay: 0.25s"
+            >→ Doe agora</a
+          >
+        </div>
+      </section>
 
-	<main class="content">
-		<!-- 1. Página Inicial -->
-		<section class="bloco-home bloco-home--lado">
-			<div class="bloco-home__imagem">
-				<img class="reveal" style="--reveal-delay: .1s" src="/img/fila.jpg" alt="Voluntários distribuindo alimentos">
-			</div>
-			<div class="bloco-home__conteudo">
-				<h1 class="titulo-pagina reveal" style="--reveal-delay: .05s">Juntos contra a fome!</h1>
-				<p class="descricao-pagina reveal" style="--reveal-delay: .15s">
-					Milhares de famílias vivem em situação de vulnerabilidade alimentar. Nossa missão é garantir que
-					cada mesa tenha comida e dignidade. Com a sua ajuda, podemos transformar realidades e levar
-					esperança a quem mais precisa.
-				</p>
-				<a href="cadastro_doador.html" class="btn-destaque reveal" style="--reveal-delay: .25s">→ Doe agora</a>
-			</div>
-		</section>
+      <!-- 2. Sobre Nós -->
+      <section class="bloco-sobre">
+        <div>
+          <img
+            class="reveal"
+            style="--reveal-delay: 0.1s"
+            src="/img/sobre-nos.jpg"
+            alt="Sobre Nós"
+          />
+        </div>
+        <h2 class="reveal" style="--reveal-delay: 0.05s">Quem Somos</h2>
+        <p class="reveal" style="--reveal-delay: 0.15s">
+          A ONG Sem Fome nasceu com o propósito de combater a fome. Trabalhamos
+          com a coleta, organização e distribuição de cestas básicas para
+          famílias em situação de risco, contando com o apoio de voluntários e
+          parceiros solidários.<br /><br />
+          Transparência, solidariedade e esperança são os pilares que guiam
+          nossas ações.
+        </p>
+      </section>
 
-		<!-- 2. Sobre Nós -->
-		<section class="bloco-sobre">
-			<div>
-				<img class="reveal" style="--reveal-delay: .1s" src="/img/sobre-nos.jpg" alt="Sobre Nós">
-			</div>
-			<h2 class="reveal" style="--reveal-delay: .05s">Quem Somos</h2>
-			<p class="reveal" style="--reveal-delay: .15s">
-				A ONG Sem Fome nasceu com o propósito de combater a fome. Trabalhamos com a coleta, organização e
-				distribuição de cestas básicas para famílias em situação de risco, contando com o apoio de voluntários e
-				parceiros solidários.<br><br>
-				Transparência, solidariedade e esperança são os pilares que guiam nossas ações.
-			</p>
-		</section>
+      <!-- 3. Como Ajudar -->
+      <section class="bloco-ajudar bloco-home--lado">
+        <div class="bloco-home__imagem">
+          <img
+            class="reveal"
+            style="--reveal-delay: 0.1s"
+            src="/img/vecteezy_donations-food-with-canned-food-on-wooden-table-background_5192557.JPG"
+            alt="Como Ajudar"
+          />
+        </div>
+        <div class="bloco-home__conteudo">
+          <h2 class="reveal" style="--reveal-delay: 0.05s">
+            Seja parte da mudança
+          </h2>
+          <p class="reveal" style="--reveal-delay: 0.15s">
+            Existem várias formas de apoiar nossa causa:<br /><br />
+            • Doe alimentos ou recursos financeiros.<br />
+            • Torne-se um voluntário e ajude na logística e distribuição.<br />
+            • Seja um parceiro e mobilize sua empresa para campanhas de
+            arrecadação.<br /><br />
+            Cada gesto faz a diferença na vida de quem mais precisa.
+          </p>
+          <a
+            href="#ajudar"
+            class="btn-destaque reveal"
+            style="--reveal-delay: 0.25s"
+            >→ Quero ajudar</a
+          >
+        </div>
+      </section>
 
-		<!-- 3. Como Ajudar -->
-		<section class="bloco-ajudar bloco-home--lado">
-			<div class="bloco-home__imagem">
-				<img class="reveal" style="--reveal-delay: .1s" src="/img/vecteezy_donations-food-with-canned-food-on-wooden-table-background_5192557.JPG"
-					alt="Como Ajudar">
-			</div>
-			<div class="bloco-home__conteudo">
-				<h2 class="reveal" style="--reveal-delay: .05s">Seja parte da mudança</h2>
-				<p class="reveal" style="--reveal-delay: .15s">
-					Existem várias formas de apoiar nossa causa:<br><br>
-					• Doe alimentos ou recursos financeiros.<br>
-					• Torne-se um voluntário e ajude na logística e distribuição.<br>
-					• Seja um parceiro e mobilize sua empresa para campanhas de arrecadação.<br><br>
-					Cada gesto faz a diferença na vida de quem mais precisa.
-				</p>
-				<a href="#ajudar" class="btn-destaque reveal" style="--reveal-delay: .25s">→ Quero ajudar</a>
-			</div>
-		</section>
+      <!-- 5. Impacto Social (Resultados) -->
+      <section class="bloco-impacto">
+        <div class="impacto-grid">
+          <div class="impacto-card reveal" style="--reveal-delay: 0.05s">
+            <h3 class="impacto-numero">X</h3>
+            <p class="impacto-titulo">Toneladas arrecadadas</p>
+          </div>
 
-		<!-- 5. Impacto Social (Resultados) -->
-		<section class="bloco-impacto">
-			<div class="impacto-grid">
-				<div class="impacto-card reveal" style="--reveal-delay: .05s">
-					<h3 class="impacto-numero">X</h3>
-					<p class="impacto-titulo">Toneladas arrecadadas</p>
-				</div>
+          <div class="impacto-card reveal" style="--reveal-delay: 0.15s">
+            <h3 class="impacto-numero">Y</h3>
+            <p class="impacto-titulo">Famílias atendidas</p>
+          </div>
 
-				<div class="impacto-card reveal" style="--reveal-delay: .15s">
-					<h3 class="impacto-numero">Y</h3>
-					<p class="impacto-titulo">Famílias atendidas</p>
-				</div>
+          <div class="impacto-card reveal" style="--reveal-delay: 0.25s">
+            <h3 class="impacto-numero">Z</h3>
+            <p class="impacto-titulo">Voluntários</p>
+          </div>
+        </div>
+      </section>
 
-				<div class="impacto-card reveal" style="--reveal-delay: .25s">
-					<h3 class="impacto-numero">Z</h3>
-					<p class="impacto-titulo">Voluntários</p>
-				</div>
-			</div>
-		</section>
-
-		<!-- 8. Contato -->
-		<section class="bloco-contato">
-			<h2 class="reveal" style="--reveal-delay: .05s">Fale Conosco</h2>
-			<ul class="contato-list">
-				<li class="contato-item reveal" style="--reveal-delay: .1s">
-					<span class="contato-icone" aria-hidden="true">
-						<svg viewBox="0 0 24 24" width="22" height="22" focusable="false"
-							xmlns="http://www.w3.org/2000/svg">
-							<path
-								d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" />
-						</svg>
-					</span>
-					<div class="contato-texto">
-						<strong>Localização</strong>
-						<p>Endereço físico (se houver)</p>
-					</div>
-				</li>
-				<li class="contato-item reveal" style="--reveal-delay: .2s">
-					<span class="contato-icone" aria-hidden="true">
-						<svg viewBox="0 0 24 24" width="22" height="22" focusable="false"
-							xmlns="http://www.w3.org/2000/svg">
-							<path d="M20 2H4c-1.1 0-2 .9-2 2v16l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="none" />
-							<path
-								d="M20 2H4c-1.1 0-2 .9-2 2v16l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2.07 12.25c-.17.5-.98.93-1.37.95-.35.02-.79.03-1.27-.08-2.22-.5-3.9-1.95-4.79-4.08-.1-.24-.1-.41-.01-.57.11-.2.33-.32.54-.42.14-.07.31-.16.42-.28.12-.12.18-.26.27-.43.09-.18.05-.34-.02-.47l-.58-1.38c-.17-.41-.36-.35-.49-.35-.12 0-.26-.02-.4-.02-.14 0-.37.05-.57.26-.2.21-.76.74-.76 1.81s.78 2.1.89 2.25c.11.15 1.53 2.34 3.71 3.28.52.22.92.35 1.24.45.52.17.99.15 1.36.09.42-.06 1.3-.53 1.49-1.04.18-.5.18-.93.13-1.02-.05-.09-.2-.15-.42-.26-.22-.11-1.3-.64-1.5-.71-.2-.07-.35-.11-.49.11-.15.23-.57.71-.7.86-.13.15-.26.17-.48.06-.22-.11-.91-.33-1.73-1.05-.64-.56-1.07-1.25-1.19-1.46-.12-.21-.01-.33.09-.44.09-.09.22-.23.33-.35.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.49-1.17-.67-1.61-.18-.43-.36-.37-.49-.38-.13-.01-.28-.01-.43-.01-.16 0-.41.06-.63.28-.22.21-.85.83-.85 2.03 0 1.2.87 2.36.99 2.52.12.16 1.72 2.63 4.18 3.61.57.23 1.01.37 1.35.47.56.17 1.07.16 1.45.11.44-.06 1.39-.57 1.59-1.12.21-.55.21-1.03.15-1.12-.06-.09-.22-.15-.45-.26z" />
-						</svg>
-					</span>
-					<div class="contato-texto">
-						<strong>WhatsApp</strong>
-						<p>Telefone / WhatsApp</p>
-					</div>
-				</li>
-				<li class="contato-item reveal" style="--reveal-delay: .3s">
-					<span class="contato-icone" aria-hidden="true">
-						<svg viewBox="0 0 24 24" width="22" height="22" focusable="false"
-							xmlns="http://www.w3.org/2000/svg">
-							<path
-								d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-						</svg>
-					</span>
-					<div class="contato-texto">
-						<strong>E-mail</strong>
-						<p>Seu e-mail</p>
-					</div>
-				</li>
-			</ul>
-		</section>
-	</main>
-	<footer class="rodape">
-		© 2023 ONG SEM FOME. Todos os direitos reservados.
-	</footer>
-		<script src="/js/reveal.js"></script>
-</body>
-
+      <!-- 8. Contato -->
+      <section class="bloco-contato">
+        <h2 class="reveal" style="--reveal-delay: 0.05s">Fale Conosco</h2>
+        <ul class="contato-list">
+          <li class="contato-item reveal" style="--reveal-delay: 0.1s">
+            <span class="contato-icone" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                width="22"
+                height="22"
+                focusable="false"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"
+                />
+              </svg>
+            </span>
+            <div class="contato-texto">
+              <strong>Localização</strong>
+              <p>Endereço físico (se houver)</p>
+            </div>
+          </li>
+          <li class="contato-item reveal" style="--reveal-delay: 0.2s">
+            <span class="contato-icone" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                width="22"
+                height="22"
+                focusable="false"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M20 2H4c-1.1 0-2 .9-2 2v16l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"
+                  fill="none"
+                />
+                <path
+                  d="M20 2H4c-1.1 0-2 .9-2 2v16l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2.07 12.25c-.17.5-.98.93-1.37.95-.35.02-.79.03-1.27-.08-2.22-.5-3.9-1.95-4.79-4.08-.1-.24-.1-.41-.01-.57.11-.2.33-.32.54-.42.14-.07.31-.16.42-.28.12-.12.18-.26.27-.43.09-.18.05-.34-.02-.47l-.58-1.38c-.17-.41-.36-.35-.49-.35-.12 0-.26-.02-.4-.02-.14 0-.37.05-.57.26-.2.21-.76.74-.76 1.81s.78 2.1.89 2.25c.11.15 1.53 2.34 3.71 3.28.52.22.92.35 1.24.45.52.17.99.15 1.36.09.42-.06 1.3-.53 1.49-1.04.18-.5.18-.93.13-1.02-.05-.09-.2-.15-.42-.26-.22-.11-1.3-.64-1.5-.71-.2-.07-.35-.11-.49.11-.15.23-.57.71-.7.86-.13.15-.26.17-.48.06-.22-.11-.91-.33-1.73-1.05-.64-.56-1.07-1.25-1.19-1.46-.12-.21-.01-.33.09-.44.09-.09.22-.23.33-.35.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.49-1.17-.67-1.61-.18-.43-.36-.37-.49-.38-.13-.01-.28-.01-.43-.01-.16 0-.41.06-.63.28-.22.21-.85.83-.85 2.03 0 1.2.87 2.36.99 2.52.12.16 1.72 2.63 4.18 3.61.57.23 1.01.37 1.35.47.56.17 1.07.16 1.45.11.44-.06 1.39-.57 1.59-1.12.21-.55.21-1.03.15-1.12-.06-.09-.22-.15-.45-.26z"
+                />
+              </svg>
+            </span>
+            <div class="contato-texto">
+              <strong>WhatsApp</strong>
+              <p>Telefone / WhatsApp</p>
+            </div>
+          </li>
+          <li class="contato-item reveal" style="--reveal-delay: 0.3s">
+            <span class="contato-icone" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                width="22"
+                height="22"
+                focusable="false"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                />
+              </svg>
+            </span>
+            <div class="contato-texto">
+              <strong>E-mail</strong>
+              <p>Seu e-mail</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+    </main>
+    <footer class="rodape">
+      © 2023 ONG SEM FOME. Todos os direitos reservados.
+    </footer>
+    <script src="/js/reveal.js"></script>
+    <script src="/js/auth.js"></script>
+  </body>
 </html>

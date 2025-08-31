@@ -1,98 +1,113 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-	<meta charset="UTF-8">
-	<title>Gerenciar Doadores</title>
-	<link rel="stylesheet" href="/css/styles.css">
-</head>
-<body class="pagina-gerenciar">
-	<header class="site-header">
-		<nav class="navbar">
-			<div class="navbar-item">
-				<div class="brand">
-					<h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
-				</div>
-			</div>
-			<div class="navbar-item">
-				<ul class="menu-principal">
-					<li><a href="index.html">Home</a></li>
-					<li class="ativo"><a href="gerenciar_doadores.html">Doadores</a></li>
-					<li><a href="gerenciar_familias.html">Famílias</a></li>
-					<li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
-					<li><a href="gerenciar_categorias.html">Categorias</a></li>
-					<li><a href="gerenciar_campanhas.html">Campanhas</a></li>
-					<li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
-					<li><a href="registrar_entrada.html">Entradas</a></li>
-				</ul>
-			</div>
-			<div class="navbar-item">
-				<div class="navbar-login">
-					<a href="login_page.html" class="btn-login" role="button">Login</a>
-				</div>
-			</div>
-		</nav>
-	</header>
-	<h1 class="titulo-pagina">Gerenciar Doadores</h1>
-	<p class="descricao-pagina">Página para cadastro, edição e exclusão de doadores.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Gerenciar Doadores</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="pagina-gerenciar">
+    <header class="site-header">
+      <nav class="navbar">
+        <div class="navbar-item">
+          <div class="brand">
+            <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+          </div>
+        </div>
+        <div class="navbar-item">
+          <ul class="menu-principal">
+            <li><a href="index.html">Home</a></li>
+            <li class="ativo">
+              <a href="gerenciar_doadores.html">Doadores</a>
+            </li>
+            <li><a href="gerenciar_familias.html">Famílias</a></li>
+            <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+            <li><a href="gerenciar_categorias.html">Categorias</a></li>
+            <li><a href="gerenciar_campanhas.html">Campanhas</a></li>
+            <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+            <li><a href="registrar_entrada.html">Entradas</a></li>
+          </ul>
+        </div>
+        <div class="navbar-item">
+          <div class="navbar-login">
+            <a href="login_page.html" class="btn-login" role="button">Login</a>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <h1 class="titulo-pagina">Gerenciar Doadores</h1>
+    <p class="descricao-pagina">
+      Página para cadastro, edição e exclusão de doadores.
+    </p>
 
-	<section class="crud-doadores">
-		<!-- Modal de Cadastro/Edição -->
-		<div id="modalDoador" class="modal" style="display:none;">
-			<div class="modal-conteudo form-adicionar">
-				<span class="fechar" id="fecharModalDoador">&times;</span>
-				<h2 id="tituloModalDoador">Adicionar Doador</h2>
-				<form id="formDoador" class="form-grid">
-					<input type="hidden" id="doadorId">
+    <section class="crud-doadores">
+      <!-- Modal de Cadastro/Edição -->
+      <div id="modalDoador" class="modal" style="display: none">
+        <div class="modal-conteudo form-adicionar">
+          <span class="fechar" id="fecharModalDoador">&times;</span>
+          <h2 id="tituloModalDoador">Adicionar Doador</h2>
+          <form id="formDoador" class="form-grid">
+            <input type="hidden" id="doadorId" />
 
-					<div class="form-field">
-						<label for="nomeDoador">Nome:</label>
-						<input type="text" id="nomeDoador" required>
-					</div>
+            <div class="form-field">
+              <label for="nomeDoador">Nome:</label>
+              <input type="text" id="nomeDoador" required />
+            </div>
 
-					<div class="form-field">
-						<label for="emailDoador">E-mail:</label>
-						<input type="email" id="emailDoador" required>
-					</div>
+            <div class="form-field">
+              <label for="emailDoador">E-mail:</label>
+              <input type="email" id="emailDoador" required />
+            </div>
 
-					<div class="form-field">
-						<label for="telefoneDoador">Telefone:</label>
-						<input type="text" id="telefoneDoador" required>
-					</div>
+            <div class="form-field">
+              <label for="telefoneDoador">Telefone:</label>
+              <input type="text" id="telefoneDoador" required />
+            </div>
 
-					<div class="form-field">
-						<label for="documentoDoador">CPF/CNPJ:</label>
-						<input type="text" id="documentoDoador" required>
-					</div>
+            <div class="form-field">
+              <label for="documentoDoador">CPF/CNPJ:</label>
+              <input type="text" id="documentoDoador" required />
+            </div>
 
-					<div class="form-actions">
-						<button type="submit" id="salvarDoador" class="btn-primary">Salvar</button>
-						<button type="button" class="btn-secondary" id="fecharModalDoadorBtn">Cancelar</button>
-					</div>
-				</form>
-			</div>
-		</div>
+            <div class="form-actions">
+              <button type="submit" id="salvarDoador" class="btn-primary">
+                Salvar
+              </button>
+              <button
+                type="button"
+                class="btn-secondary"
+                id="fecharModalDoadorBtn"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
 
-		<button id="btnAdicionarDoador" class="btn-primary">Adicionar Doador</button>
-		<table id="tabelaDoadores" class="data-table">
-			<thead>
-				<tr>
-					<th>ID</th>
-					<th>Nome</th>
-					<th>E-mail</th>
-					<th>Telefone</th>
-					<th>Documento</th>
-					<th>Ações</th>
-				</tr>
-			</thead>
-			<tbody>
-				<!-- Linhas de doadores via JS -->
-			</tbody>
-		</table>
-	</section>
+      <button id="btnAdicionarDoador" class="btn-primary">
+        Adicionar Doador
+      </button>
+      <table id="tabelaDoadores" class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Documento</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Linhas de doadores via JS -->
+        </tbody>
+      </table>
+    </section>
 
-	<script src="/js/gerenciar_doadores.js"></script>
-	<footer class="rodape">
-		© 2023 ONG SEM FOME. Todos os direitos reservados.
-	</footer>
-</body>
+    <script src="/js/gerenciar_doadores.js"></script>
+    <script src="/js/auth.js"></script>
+    <footer class="rodape">
+      © 2023 ONG SEM FOME. Todos os direitos reservados.
+    </footer>
+  </body>
 </html>

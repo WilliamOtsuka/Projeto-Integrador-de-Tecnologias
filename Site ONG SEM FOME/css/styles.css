@@ -625,6 +625,14 @@ p.info-destaque {
     padding-right: 10px;
 }
 
+.form-field input, .form-field textarea, .form-field select {
+    font-family: inherit;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 6px;
+}
+
 .form-actions {
     margin-top: 12px;
     display: flex;

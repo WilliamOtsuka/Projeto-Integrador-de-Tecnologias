@@ -1,85 +1,103 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-	<meta charset="UTF-8">
-	<title>Gerenciar Campanhas de Arrecadação</title>
-	<link rel="stylesheet" href="/css/styles.css">
-</head>
-<body class="pagina-gerenciar">
-	<header class="site-header">
-		<nav class="navbar">
-			<div class="navbar-item">
-				<div class="brand">
-					<h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
-				</div>
-			</div>
-			<div class="navbar-item">
-				<ul class="menu-principal">
-					<li><a href="index.html">Home</a></li>
-					<li><a href="gerenciar_doadores.html">Doadores</a></li>
-					<li><a href="gerenciar_familias.html">Famílias</a></li>
-					<li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
-					<li><a href="gerenciar_categorias.html">Categorias</a></li>
-					<li class="ativo"><a href="gerenciar_campanhas.html">Campanhas</a></li>
-					<li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
-					<li><a href="registrar_entrada.html">Entradas</a></li>
-				</ul>
-			</div>
-			<div class="navbar-item">
-				<div class="navbar-login">
-					<a href="login_page.html" class="btn-login" role="button">Login</a>
-				</div>
-			</div>
-		</nav>
-	</header>
-	<h1 class="titulo-pagina">Gerenciar Campanhas de Arrecadação</h1>
-	<p class="descricao-pagina">Página para cadastro, edição e exclusão de campanhas de arrecadação.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Gerenciar Campanhas de Arrecadação</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="pagina-gerenciar">
+    <header class="site-header">
+      <nav class="navbar">
+        <div class="navbar-item">
+          <div class="brand">
+            <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+          </div>
+        </div>
+        <div class="navbar-item">
+          <ul class="menu-principal">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="gerenciar_doadores.html">Doadores</a></li>
+            <li><a href="gerenciar_familias.html">Famílias</a></li>
+            <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+            <li><a href="gerenciar_categorias.html">Categorias</a></li>
+            <li class="ativo">
+              <a href="gerenciar_campanhas.html">Campanhas</a>
+            </li>
+            <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+            <li><a href="registrar_entrada.html">Entradas</a></li>
+          </ul>
+        </div>
+        <div class="navbar-item">
+          <div class="navbar-login">
+            <a href="login_page.html" class="btn-login" role="button">Login</a>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <h1 class="titulo-pagina">Gerenciar Campanhas de Arrecadação</h1>
+    <p class="descricao-pagina">
+      Página para cadastro, edição e exclusão de campanhas de arrecadação.
+    </p>
 
-	<section class="crud-campanhas">
-		<div id="modalCampanha" class="modal" style="display:none;">
-			<div class="modal-conteudo form-adicionar">
-				<span class="fechar" id="fecharModalCampanha">&times;</span>
-				<h2 id="tituloModalCampanha">Adicionar Campanha</h2>
-				<form id="formCampanha" class="form-grid">
-					<input type="hidden" id="campanhaId">
-					<div class="form-field">
-						<label for="nomeCampanha">Nome da Campanha:</label>
-						<input type="text" id="nomeCampanha" required>
-					</div>
-					<div class="form-field">
-						<label for="metaCampanha">Meta (R$ ou itens):</label>
-						<input type="text" id="metaCampanha" placeholder="Ex.: 100 cestas" required>
-					</div>
-					<div class="form-field" style="grid-column:1/-1;">
-						<label for="descricaoCampanha">Descrição:</label>
-						<textarea id="descricaoCampanha" rows="3"></textarea>
-					</div>
-					<div class="form-actions">
-						<button type="submit" class="btn-primary">Salvar</button>
-						<button type="button" class="btn-secondary" id="fecharModalCampanhaBtn">Cancelar</button>
-					</div>
-				</form>
-			</div>
-		</div>
+    <section class="crud-campanhas">
+      <div id="modalCampanha" class="modal" style="display: none">
+        <div class="modal-conteudo form-adicionar">
+          <span class="fechar" id="fecharModalCampanha">&times;</span>
+          <h2 id="tituloModalCampanha">Adicionar Campanha</h2>
+          <form id="formCampanha" class="form-grid">
+            <input type="hidden" id="campanhaId" />
+            <div class="form-field">
+              <label for="nomeCampanha">Nome da Campanha:</label>
+              <input type="text" id="nomeCampanha" required />
+            </div>
+            <div class="form-field">
+              <label for="metaCampanha">Meta (R$ ou itens):</label>
+              <input
+                type="text"
+                id="metaCampanha"
+                placeholder="Ex.: 100 cestas"
+                required
+              />
+            </div>
+            <div class="form-field" style="grid-column: 1/-1">
+              <label for="descricaoCampanha">Descrição:</label>
+              <textarea id="descricaoCampanha" rows="3"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Salvar</button>
+              <button
+                type="button"
+                class="btn-secondary"
+                id="fecharModalCampanhaBtn"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
 
-		<button id="btnAdicionarCampanha" class="btn-primary">Adicionar Campanha</button>
-		<table id="tabelaCampanhas" class="data-table">
-			<thead>
-				<tr>
-					<th>ID</th>
-					<th>Nome</th>
-					<th>Meta</th>
-					<th>Descrição</th>
-					<th>Ações</th>
-				</tr>
-			</thead>
-			<tbody></tbody>
-		</table>
-	</section>
+      <button id="btnAdicionarCampanha" class="btn-primary">
+        Adicionar Campanha
+      </button>
+      <table id="tabelaCampanhas" class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Meta</th>
+            <th>Descrição</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
 
-	<script src="/js/gerenciar_campanhas.js"></script>
-	<footer class="rodape">
-		© 2023 ONG SEM FOME. Todos os direitos reservados.
-	</footer>
-</body>
+    <script src="/js/gerenciar_campanhas.js"></script>
+    <script src="/js/auth.js"></script>
+    <footer class="rodape">
+      © 2023 ONG SEM FOME. Todos os direitos reservados.
+    </footer>
+  </body>
 </html>
