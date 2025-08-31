@@ -1,125 +1,163 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Registrar Entrada de Doação</title>
-  <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body class="pagina-gerenciar">
-  <header class="site-header">
-    <nav class="navbar">
-      <div class="navbar-item">
-        <div class="brand">
-          <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Registrar Entrada de Doação</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="pagina-gerenciar">
+    <header class="site-header">
+      <nav class="navbar">
+        <div class="navbar-item">
+          <div class="brand">
+            <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+          </div>
+        </div>
+        <div class="navbar-item">
+          <ul class="menu-principal">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="gerenciar_doadores.html">Doadores</a></li>
+            <li><a href="gerenciar_familias.html">Famílias</a></li>
+            <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+            <li><a href="gerenciar_categorias.html">Categorias</a></li>
+            <li><a href="gerenciar_campanhas.html">Campanhas</a></li>
+            <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+            <li class="ativo"><a href="registrar_entrada.html">Entradas</a></li>
+          </ul>
+        </div>
+        <div class="navbar-item">
+          <div class="navbar-login">
+            <a href="login_page.html" class="btn-login" role="button">Login</a>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <h1 class="titulo-pagina">Registrar Entrada de Doação</h1>
+    <p class="descricao-pagina">
+      Cadastre e gerencie as entradas de doações recebidas.
+    </p>
+
+    <section class="crud-entradas">
+      <div id="modalEntrada" class="modal" style="display: none">
+        <div class="modal-conteudo form-adicionar">
+          <span class="fechar" id="fecharModalEntrada">&times;</span>
+          <h2 id="tituloModalEntrada">Adicionar Entrada</h2>
+          <form id="formEntrada" class="form-grid">
+            <input type="hidden" id="entradaId" />
+
+            <div class="form-field">
+              <label for="dataEntrada">Data:</label>
+              <input type="date" id="dataEntrada" required />
+            </div>
+
+            <div class="form-field">
+              <label for="doadorEntrada">Doador:</label>
+              <input
+                type="text"
+                id="doadorEntrada"
+                placeholder="Nome do doador"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="categoriaEntrada">Categoria:</label>
+              <select id="categoriaEntrada" required>
+                <option value="" disabled selected>Selecione uma categoria</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="quantidadeEntrada">Quantidade:</label>
+              <input
+                type="number"
+                id="quantidadeEntrada"
+                min="1"
+                step="1"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="unidadeEntrada">Unidade:</label>
+              <input
+                type="text"
+                id="unidadeEntrada"
+                placeholder="Ex.: un, kg, cx"
+                list="listaUnidades"
+                required
+              />
+              <datalist id="listaUnidades">
+                <option value="un"></option>
+                <option value="kg"></option>
+                <option value="g"></option>
+                <option value="l"></option>
+                <option value="ml"></option>
+                <option value="cx"></option>
+                <option value="pct"></option>
+                <option value="sac"></option>
+                <option value="kit"></option>
+              </datalist>
+            </div>
+
+            <div class="form-field">
+              <label for="campanhaEntrada">Campanha (opcional):</label>
+              <input
+                type="text"
+                id="campanhaEntrada"
+                placeholder="Vincule a uma campanha, se houver"
+              />
+            </div>
+
+            <div class="form-field" style="grid-column: 1/-1">
+              <label for="obsEntrada">Observações:</label>
+              <textarea
+                id="obsEntrada"
+                rows="2"
+                placeholder="Detalhes adicionais (opcional)"
+              ></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">Salvar</button>
+              <button
+                type="button"
+                class="btn-secondary"
+                id="fecharModalEntradaBtn"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-      <div class="navbar-item">
-        <ul class="menu-principal">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="gerenciar_doadores.html">Doadores</a></li>
-          <li><a href="gerenciar_familias.html">Famílias</a></li>
-          <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
-          <li><a href="gerenciar_categorias.html">Categorias</a></li>
-          <li><a href="gerenciar_campanhas.html">Campanhas</a></li>
-          <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
-          <li class="ativo"><a href="registrar_entrada.html">Entradas</a></li>
-        </ul>
-      </div>
-      <div class="navbar-item">
-        <div class="navbar-login">
-          <a href="login_page.html" class="btn-login" role="button">Login</a>
-        </div>
-      </div>
-    </nav>
-  </header>
 
-  <h1 class="titulo-pagina">Registrar Entrada de Doação</h1>
-  <p class="descricao-pagina">Cadastre e gerencie as entradas de doações recebidas.</p>
+      <button id="btnAdicionarEntrada" class="btn-primary">
+        Adicionar Entrada
+      </button>
+      <table id="tabelaEntradas" class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Doador</th>
+            <th>Categoria</th>
+            <th>Qtd</th>
+            <th>Unidade</th>
+            <th>Campanha</th>
+            <th>Observações</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
 
-  <section class="crud-entradas">
-    <div id="modalEntrada" class="modal" style="display:none;">
-      <div class="modal-conteudo form-adicionar">
-        <span class="fechar" id="fecharModalEntrada">&times;</span>
-        <h2 id="tituloModalEntrada">Adicionar Entrada</h2>
-        <form id="formEntrada" class="form-grid">
-          <input type="hidden" id="entradaId">
-
-          <div class="form-field">
-            <label for="dataEntrada">Data:</label>
-            <input type="date" id="dataEntrada" required>
-          </div>
-
-          <div class="form-field">
-            <label for="doadorEntrada">Doador:</label>
-            <input type="text" id="doadorEntrada" placeholder="Nome do doador" required>
-          </div>
-
-          <div class="form-field">
-            <label for="categoriaEntrada">Categoria:</label>
-            <input type="text" id="categoriaEntrada" placeholder="Ex.: Alimentos, Higiene" required>
-          </div>
-
-          <div class="form-field">
-            <label for="quantidadeEntrada">Quantidade:</label>
-            <input type="number" id="quantidadeEntrada" min="1" step="1" required>
-          </div>
-
-          <div class="form-field">
-            <label for="unidadeEntrada">Unidade:</label>
-            <input type="text" id="unidadeEntrada" placeholder="Ex.: un, kg, cx" list="listaUnidades" required>
-            <datalist id="listaUnidades">
-              <option value="un"></option>
-              <option value="kg"></option>
-              <option value="g"></option>
-              <option value="l"></option>
-              <option value="ml"></option>
-              <option value="cx"></option>
-              <option value="pct"></option>
-              <option value="sac"></option>
-              <option value="kit"></option>
-            </datalist>
-          </div>
-
-          <div class="form-field">
-            <label for="campanhaEntrada">Campanha (opcional):</label>
-            <input type="text" id="campanhaEntrada" placeholder="Vincule a uma campanha, se houver">
-          </div>
-
-          <div class="form-field" style="grid-column:1/-1;">
-            <label for="obsEntrada">Observações:</label>
-            <textarea id="obsEntrada" rows="2" placeholder="Detalhes adicionais (opcional)"></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn-primary">Salvar</button>
-            <button type="button" class="btn-secondary" id="fecharModalEntradaBtn">Cancelar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <button id="btnAdicionarEntrada" class="btn-primary">Adicionar Entrada</button>
-    <table id="tabelaEntradas" class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Data</th>
-          <th>Doador</th>
-          <th>Categoria</th>
-          <th>Qtd</th>
-          <th>Unidade</th>
-          <th>Campanha</th>
-          <th>Observações</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <script src="/js/registrar_entrada.js"></script>
-  <footer class="rodape">
-    © 2023 ONG SEM FOME. Todos os direitos reservados.
-  </footer>
-</body>
+    <script src="/js/registrar_entrada.js"></script>
+    <script src="/js/auth.js"></script>
+    <footer class="rodape">
+      © 2023 ONG SEM FOME. Todos os direitos reservados.
+    </footer>
+  </body>
 </html>
