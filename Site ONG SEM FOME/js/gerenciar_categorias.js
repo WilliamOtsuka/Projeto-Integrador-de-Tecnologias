@@ -77,9 +77,7 @@ document.getElementById("formCategoria").onsubmit = function (e) {
   const nome = document.getElementById("nomeCategoria").value;
   const nomeOk = (nome || "").trim().length >= 2;
 
-  document
-    .getElementById("nomeCategoria")
-    .setCustomValidity(nomeOk ? "" : "Informe o nome da categoria");
+  document.getElementById("nomeCategoria").setCustomValidity(nomeOk ? "" : "Informe o nome da categoria");
 
   if (!nomeOk) {
     document.getElementById("formCategoria").reportValidity();
