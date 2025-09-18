@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Distribuir Cestas</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="pagina-gerenciar">
+    <header class="site-header">
+      <nav class="navbar">
+        <div class="navbar-item">
+          <div class="brand">
+            <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+          </div>
+        </div>
+        <div class="navbar-item">
+          <ul class="menu-principal">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="gerenciar_doadores.html">Doadores</a></li>
+            <li><a href="gerenciar_familias.html">Famílias</a></li>
+            <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+            <li><a href="gerenciar_categorias.html">Categorias</a></li>
+            <li><a href="gerenciar_campanhas.html">Campanhas</a></li>
+            <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+            <li><a href="gerenciar_estoque.html">Estoque</a></li>
+          </ul>
+        </div>
+        <div class="navbar-item">
+          <div class="navbar-login">
+            <a href="login_page.html" class="btn-login" role="button">Login</a>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <h1 class="titulo-pagina">Distribuição de Cestas</h1>
+
+    <section class="crud">
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Data</label>
+          <input type="date" id="saData" />
+        </div>
+        <div class="form-field">
+          <label>Família</label>
+          <select id="saFamilia"></select>
+        </div>
+        <div class="form-field">
+          <label>Qtd cestas</label>
+          <input type="number" id="saQtd" min="1" value="1" />
+        </div>
+        <div class="form-field">
+          <label>Responsável</label>
+          <select id="saResponsavel"></select>
+        </div>
+        <div class="form-field" style="grid-column: 1 / -1;">
+          <label>Observações</label>
+          <textarea id="saObs" rows="2"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" id="btnDistribuir">Registrar Saída</button>
+        </div>
+      </div>
+
+      <p id="saldoCestas" style="margin-top:1rem"></p>
+
+      <h2 style="margin-top:24px">Saídas recentes</h2>
+      <table class="data-table" id="tabSaidas">
+        <thead>
+          <tr><th>ID</th><th>Data</th><th>Família</th><th>Qtd</th><th>Responsável</th><th>Obs</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="pagination" id="paginacaoSaidas" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+        <button id="prevSaidas" class="btn-secondary">Anterior</button>
+        <span id="infoSaidas">Página 1 de 1</span>
+        <button id="nextSaidas" class="btn-secondary">Próxima</button>
+      </div>
+    </section>
+
+  <script src="/js/distribuir_cestas.js"></script>
+    <script src="/js/auth.js"></script>
+    <footer class="rodape">© 2025 ONG SEM FOME. Todos os direitos reservados.</footer>
+  </body>
+</html>

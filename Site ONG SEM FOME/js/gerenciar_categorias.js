@@ -1,4 +1,7 @@
 let categorias = [];
+let pageCategorias = 1;
+const limitCategorias = 30;
+let totalCategorias = 0;
 
 // Renderiza a tabela
 function renderTabelaCategorias() {
@@ -129,9 +132,20 @@ window.excluirCategoria = function (id) {
 };
 
 // Carrega categorias
+function updatePaginacaoCategoriasInfo() {
+  const info = document.getElementById("infoCategorias");
+  if (!info) return;
+  const totalPages = Math.max(1, Math.ceil(totalCategorias / limitCategorias));
+  info.textContent = `Página ${pageCategorias} de ${totalPages}`;
+  const prev = document.getElementById("prevCategorias");
+  const next = document.getElementById("nextCategorias");
+  if (prev) prev.disabled = pageCategorias <= 1;
+  if (next) next.disabled = pageCategorias >= totalPages;
+}
+
 async function loadCategorias() {
   try {
-    const r = await fetch("/api/categorias");
+    const r = await fetch(`/api/categorias?page=${pageCategorias}&limit=${limitCategorias}`);
     if (!r.ok) {
       if (r.status === 401) {
         alert("Sessão expirada. Faça login.");
@@ -140,8 +154,12 @@ async function loadCategorias() {
       }
       throw new Error("Falha ao carregar categorias");
     }
-    categorias = await r.json();
+    const payload = await r.json();
+    const data = Array.isArray(payload) ? payload : (payload.data || []);
+    totalCategorias = (Array.isArray(payload) ? data.length : (payload.total ?? data.length)) || 0;
+    categorias = data;
     renderTabelaCategorias();
+    updatePaginacaoCategoriasInfo();
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar categorias");
@@ -149,6 +167,15 @@ async function loadCategorias() {
 }
 
 // Inicializa a página
+// Eventos de paginação
+const prevBtnCat = document.getElementById("prevCategorias");
+const nextBtnCat = document.getElementById("nextCategorias");
+if (prevBtnCat) prevBtnCat.addEventListener("click", async () => { if (pageCategorias > 1) { pageCategorias--; await loadCategorias(); }});
+if (nextBtnCat) nextBtnCat.addEventListener("click", async () => {
+  const totalPages = Math.max(1, Math.ceil(totalCategorias / limitCategorias));
+  if (pageCategorias < totalPages) { pageCategorias++; await loadCategorias(); }
+});
+
 loadCategorias();
 
 // Validações do campo de nome

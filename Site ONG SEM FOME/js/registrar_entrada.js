@@ -1,4 +1,7 @@
 let entradas = [];
+let pageEntradas = 1;
+const limitEntradas = 30;
+let totalEntradas = 0;
 
 // Validação/máscara (unidade, quantidade, datas, etc.)
 const onlyDigits = (v) => (v || "").replace(/\D/g, "");
@@ -50,35 +53,35 @@ function validaTextoMin(v, n) {
   return (v || "").trim().length >= n;
 }
 
+function formatDateDDMMYY(dStr) {
+  const d = new Date(dStr);
+  if (Number.isNaN(d.getTime())) return "-";
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${dd}/${mm}/${yy}`;
+}
+
 // Renderiza a tabela
 function renderTabelaEntradas() {
   const tbody = document.querySelector("#tabelaEntradas tbody");
-
   if (!tbody) return;
-
   tbody.innerHTML = "";
-  entradas.forEach((e) => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
+  entradas
+    .filter((e) => Number(e.quantidade || 0) > 0)
+    .forEach((e) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
             <td>${e.id}</td>
-            <td>${e.data}</td>
+            <td>${formatDateDDMMYY(e.data)}</td>
             <td>${e.doador}</td>
             <td>${e.categoria}</td>
             <td>${e.quantidade}</td>
             <td>${e.unidade}</td>
             <td>${e.campanha || "-"}</td>
-            <td>${e.obs || "-"}</td>
-            <td>
-                <button class="btn-edit" onclick="editarEntrada(${
-                  e.id
-                })">Editar</button>
-                <button class="btn-delete" onclick="excluirEntrada(${
-                  e.id
-                })">Excluir</button>
-            </td>`;
-    tbody.appendChild(tr);
-  });
+            <td>${e.obs || "-"}</td>`;
+      tbody.appendChild(tr);
+    });
 }
 
 // Abre o modal e preenche o formulário
@@ -247,30 +250,6 @@ document.getElementById("formEntrada").onsubmit = function (e) {
   })();
 };
 
-// Prepara modal em modo edição
-window.editarEntrada = function (id) {
-  const item = entradas.find((f) => f.id == id);
-
-  if (item) abrirModalEntrada(true, item);
-};
-
-// Confirma e exclui
-window.excluirEntrada = function (id) {
-  if (confirm("Tem certeza que deseja excluir esta entrada?")) {
-    (async () => {
-      try {
-        await fetch(`/api/entradas/${id}`, {
-          method: "DELETE",
-        });
-        await loadEntradas();
-      } catch (err) {
-        console.error(err);
-        alert("Erro ao excluir entrada");
-      }
-    })();
-  }
-};
-
 const dataEntradaEl = document.getElementById("dataEntrada");
 
 if (dataEntradaEl) {
@@ -294,9 +273,10 @@ const categoriaEntradaEl = document.getElementById("categoriaEntrada");
 // Carrega categorias e preenche o <select>
 async function categoriasSelect(selectEl) {
   try {
-    const r = await fetch("/api/categorias");
+    const r = await fetch(`/api/categorias?limit=1000`);
     if (!r.ok) throw new Error("Falha ao carregar categorias");
-    const cats = await r.json();
+    const payload = await r.json();
+    const cats = Array.isArray(payload) ? payload : (payload.data || []);
     selectEl.innerHTML = '<option value="" disabled selected>Selecione uma categoria</option>';
     cats
       .slice()
@@ -343,9 +323,20 @@ if (unidadeEntradaEl) {
   });
 }
 
+function updatePaginacaoEntradasInfo() {
+  const info = document.getElementById("infoEntradas");
+  if (!info) return;
+  const totalPages = Math.max(1, Math.ceil(totalEntradas / limitEntradas));
+  info.textContent = `Página ${pageEntradas} de ${totalPages}`;
+  const prev = document.getElementById("prevEntradas");
+  const next = document.getElementById("nextEntradas");
+  if (prev) prev.disabled = pageEntradas <= 1;
+  if (next) next.disabled = pageEntradas >= totalPages;
+}
+
 async function loadEntradas() {
   try {
-    const r = await fetch("/api/entradas");
+    const r = await fetch(`/api/entradas?page=${pageEntradas}&limit=${limitEntradas}`);
     if (!r.ok) {
       if (r.status === 401) {
         alert("Sessão expirada. Faça login.");
@@ -354,12 +345,25 @@ async function loadEntradas() {
       }
       throw new Error("Falha ao carregar entradas");
     }
-    entradas = await r.json();
+    const payload = await r.json();
+    const data = Array.isArray(payload) ? payload : (payload.data || []);
+    totalEntradas = (Array.isArray(payload) ? data.length : (payload.total ?? data.length)) || 0;
+    entradas = data;
     renderTabelaEntradas();
+    updatePaginacaoEntradasInfo();
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar entradas");
   }
 }
+
+// Eventos de paginação
+const prevBtnE = document.getElementById("prevEntradas");
+const nextBtnE = document.getElementById("nextEntradas");
+if (prevBtnE) prevBtnE.addEventListener("click", async () => { if (pageEntradas > 1) { pageEntradas--; await loadEntradas(); }});
+if (nextBtnE) nextBtnE.addEventListener("click", async () => {
+  const totalPages = Math.max(1, Math.ceil(totalEntradas / limitEntradas));
+  if (pageEntradas < totalPages) { pageEntradas++; await loadEntradas(); }
+});
 
 loadEntradas();

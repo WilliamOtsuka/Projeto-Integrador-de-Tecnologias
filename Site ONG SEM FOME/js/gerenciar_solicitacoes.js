@@ -1,4 +1,48 @@
 let solicitacoes = [];
+let pageSolic = 1;
+const limitSolic = 30;
+let totalSolic = 0;
+let filtros = { de: '', ate: '', status: '', prioridade: '', busca: '' };
+
+function formatDateDDMMYY(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const yy = String(d.getUTCFullYear()).slice(-2);
+  return `${dd}/${mm}/${yy}`;
+}
+
+function aplicaFiltros(lista) {
+  const de = filtros.de ? new Date(filtros.de) : null;
+  const ate = filtros.ate ? new Date(filtros.ate) : null;
+  const status = (filtros.status || '').toLowerCase();
+  const prioridade = (filtros.prioridade || '').toLowerCase();
+  const busca = (filtros.busca || '').trim().toLowerCase();
+  return lista.filter(s => {
+    // Data
+    if (de || ate) {
+      const sd = s.data_solicitacao ? new Date(s.data_solicitacao) : null;
+      if (!sd) return false;
+      if (de && sd < de) return false;
+      if (ate) {
+        const ateEnd = new Date(ate);
+        ateEnd.setHours(23,59,59,999);
+        if (sd > ateEnd) return false;
+      }
+    }
+    // Status/prioridade
+    if (status && String(s.status||'').toLowerCase() !== status) return false;
+    if (prioridade && String(s.prioridade||'').toLowerCase() !== prioridade) return false;
+    // Busca
+    if (busca) {
+      const blob = `${s.titulo||''} ${s.solicitante||''} ${s.categoria||''} ${s.descricao||''}`.toLowerCase();
+      if (!blob.includes(busca)) return false;
+    }
+    return true;
+  });
+}
 
 // Renderiza a tabela com os dados
 function renderTabelaSolicitacoes() {
@@ -7,12 +51,18 @@ function renderTabelaSolicitacoes() {
   if (!tbody) return;
 
   tbody.innerHTML = "";
-  solicitacoes.forEach((s) => {
+  const lista = aplicaFiltros(solicitacoes);
+  lista.forEach((s) => {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
       <td>${s.id}</td>
       <td>${s.titulo}</td>
+      <td>${formatDateDDMMYY(s.data_solicitacao)}</td>
+      <td>${s.solicitante || ''}</td>
+      <td>${s.status || 'pendente'}</td>
+      <td>${s.prioridade ? `<span class="badge ${String(s.prioridade).toLowerCase()==='urgente' ? 'badge-prioridade--urgente' : 'badge-prioridade--normal'}">${s.prioridade}</span>` : ''}</td>
+      <td>${s.quantidade || ''}</td>
       <td>${s.categoria}</td>
       <td>${s.descricao}</td>
       <td>
@@ -37,7 +87,12 @@ function abrirModalSolicitacao(editar = false, item = {}) {
     : "Adicionar Solicitação";
   document.getElementById("solicitacaoId").value = item.id || "";
   document.getElementById("tituloSolicitacao").value = item.titulo || "";
+  document.getElementById("dataSolicitacao").value = item.data_solicitacao || "";
   document.getElementById("categoriaSolicitacao").value = item.categoria || "";
+  document.getElementById("solicitanteSolicitacao").value = item.solicitante || "";
+  document.getElementById("statusSolicitacao").value = item.status || "pendente";
+  document.getElementById("prioridadeSolicitacao").value = item.prioridade || "normal";
+  document.getElementById("quantidadeSolicitacao").value = item.quantidade || "";
   document.getElementById("descricaoSolicitacao").value = item.descricao || "";
 }
 
@@ -86,7 +141,12 @@ document.getElementById("formSolicitacao").onsubmit = function (e) {
 
   const id = document.getElementById("solicitacaoId").value;
   const titulo = document.getElementById("tituloSolicitacao").value;
+  const data_solicitacao = document.getElementById("dataSolicitacao").value;
   const categoria = document.getElementById("categoriaSolicitacao").value;
+  const solicitante = document.getElementById("solicitanteSolicitacao").value;
+  const status = document.getElementById("statusSolicitacao").value;
+  const prioridade = document.getElementById("prioridadeSolicitacao").value;
+  const quantidade = document.getElementById("quantidadeSolicitacao").value;
   const descricao = document.getElementById("descricaoSolicitacao").value;
   const tituloOk = (titulo || "").trim().length >= 2;
   const categoriaOk = (categoria || "").trim().length >= 2;
@@ -109,13 +169,13 @@ document.getElementById("formSolicitacao").onsubmit = function (e) {
         await fetch(`/api/solicitacoes/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ titulo, categoria, descricao }),
+          body: JSON.stringify({ titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade }),
         });
       } else {
         await fetch("/api/solicitacoes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ titulo, categoria, descricao }),
+          body: JSON.stringify({ titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade }),
         });
       }
       fecharModalSolicitacao();
@@ -152,9 +212,20 @@ window.excluirSolicitacao = function (id) {
 };
 
 // Carrega solicitações
+function updatePaginacaoSolicInfo() {
+  const info = document.getElementById("infoSolicitacoes");
+  if (!info) return;
+  const totalPages = Math.max(1, Math.ceil(totalSolic / limitSolic));
+  info.textContent = `Página ${pageSolic} de ${totalPages}`;
+  const prev = document.getElementById("prevSolicitacoes");
+  const next = document.getElementById("nextSolicitacoes");
+  if (prev) prev.disabled = pageSolic <= 1;
+  if (next) next.disabled = pageSolic >= totalPages;
+}
+
 async function loadSolicitacoes() {
   try {
-    const r = await fetch("/api/solicitacoes");
+    const r = await fetch(`/api/solicitacoes?page=${pageSolic}&limit=${limitSolic}`);
     if (!r.ok) {
       if (r.status === 401) {
         alert("Sessão expirada. Faça login.");
@@ -163,13 +234,26 @@ async function loadSolicitacoes() {
       }
       throw new Error("Falha ao carregar solicitações");
     }
-    solicitacoes = await r.json();
+    const payload = await r.json();
+    const data = Array.isArray(payload) ? payload : (payload.data || []);
+    totalSolic = (Array.isArray(payload) ? data.length : (payload.total ?? data.length)) || 0;
+    solicitacoes = data;
     renderTabelaSolicitacoes();
+    updatePaginacaoSolicInfo();
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar solicitações");
   }
 }
+
+// Eventos de paginação
+const prevBtnS = document.getElementById("prevSolicitacoes");
+const nextBtnS = document.getElementById("nextSolicitacoes");
+if (prevBtnS) prevBtnS.addEventListener("click", async () => { if (pageSolic > 1) { pageSolic--; await loadSolicitacoes(); }});
+if (nextBtnS) nextBtnS.addEventListener("click", async () => {
+  const totalPages = Math.max(1, Math.ceil(totalSolic / limitSolic));
+  if (pageSolic < totalPages) { pageSolic++; await loadSolicitacoes(); }
+});
 
 loadSolicitacoes();
 
@@ -188,9 +272,10 @@ const categoriaInput = document.getElementById("categoriaSolicitacao");
 // Carrega categorias e preenche o <select>
 async function categoriasSelect(selectEl) {
   try {
-    const r = await fetch("/api/categorias");
+    const r = await fetch(`/api/categorias?limit=1000`);
     if (!r.ok) throw new Error("Falha ao carregar categorias");
-    const cats = await r.json();
+    const payload = await r.json();
+    const cats = Array.isArray(payload) ? payload : (payload.data || []);
     selectEl.innerHTML = '<option value="" disabled selected>Selecione uma categoria</option>';
     cats
       .slice()
@@ -213,4 +298,34 @@ if (categoriaInput) {
       (e.target.value || "").trim().length >= 2 ? "" : "Informe a categoria"
     )
   );
+}
+
+// Filtros
+const fDe = document.getElementById('fltDataDe');
+const fAte = document.getElementById('fltDataAte');
+const fStatus = document.getElementById('fltStatus');
+const fPrio = document.getElementById('fltPrioridade');
+const fBusca = document.getElementById('fltBusca');
+const fClear = document.getElementById('btnLimparFiltros');
+
+function onFiltroChange() {
+  filtros.de = fDe?.value || '';
+  filtros.ate = fAte?.value || '';
+  filtros.status = fStatus?.value || '';
+  filtros.prioridade = fPrio?.value || '';
+  filtros.busca = fBusca?.value || '';
+  renderTabelaSolicitacoes();
+}
+[fDe, fAte, fStatus, fPrio, fBusca].forEach(el => el && el.addEventListener('input', onFiltroChange));
+if (fClear) {
+  fClear.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (fDe) fDe.value = '';
+    if (fAte) fAte.value = '';
+    if (fStatus) fStatus.value = '';
+    if (fPrio) fPrio.value = '';
+    if (fBusca) fBusca.value = '';
+    filtros = { de: '', ate: '', status: '', prioridade: '', busca: '' };
+    renderTabelaSolicitacoes();
+  });
 }

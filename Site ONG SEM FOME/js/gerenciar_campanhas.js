@@ -1,4 +1,7 @@
 let campanhas = [];
+let pageCampanhas = 1;
+const limitCampanhas = 30;
+let totalCampanhas = 0;
 
 // Renderiza a tabela com os dados atuais
 function renderTabelaCampanhas() {
@@ -141,9 +144,20 @@ window.excluirCampanha = function (id) {
 };
 
 // Carrega campanhas
+function updatePaginacaoCampanhasInfo() {
+  const info = document.getElementById("infoCampanhas");
+  if (!info) return;
+  const totalPages = Math.max(1, Math.ceil(totalCampanhas / limitCampanhas));
+  info.textContent = `Página ${pageCampanhas} de ${totalPages}`;
+  const prev = document.getElementById("prevCampanhas");
+  const next = document.getElementById("nextCampanhas");
+  if (prev) prev.disabled = pageCampanhas <= 1;
+  if (next) next.disabled = pageCampanhas >= totalPages;
+}
+
 async function loadCampanhas() {
   try {
-    const r = await fetch("/api/campanhas");
+    const r = await fetch(`/api/campanhas?page=${pageCampanhas}&limit=${limitCampanhas}`);
     if (!r.ok) {
       if (r.status === 401) {
         alert("Sessão expirada. Faça login.");
@@ -152,8 +166,12 @@ async function loadCampanhas() {
       }
       throw new Error("Falha ao carregar campanhas");
     }
-    campanhas = await r.json();
+    const payload = await r.json();
+    const data = Array.isArray(payload) ? payload : (payload.data || []);
+    totalCampanhas = (Array.isArray(payload) ? data.length : (payload.total ?? data.length)) || 0;
+    campanhas = data;
     renderTabelaCampanhas();
+    updatePaginacaoCampanhasInfo();
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar campanhas");
@@ -161,6 +179,15 @@ async function loadCampanhas() {
 }
 
 // Inicializa a página
+// Eventos de paginação
+const prevBtnCamp = document.getElementById("prevCampanhas");
+const nextBtnCamp = document.getElementById("nextCampanhas");
+if (prevBtnCamp) prevBtnCamp.addEventListener("click", async () => { if (pageCampanhas > 1) { pageCampanhas--; await loadCampanhas(); }});
+if (nextBtnCamp) nextBtnCamp.addEventListener("click", async () => {
+  const totalPages = Math.max(1, Math.ceil(totalCampanhas / limitCampanhas));
+  if (pageCampanhas < totalPages) { pageCampanhas++; await loadCampanhas(); }
+});
+
 loadCampanhas();
 
 // Validações do formulário

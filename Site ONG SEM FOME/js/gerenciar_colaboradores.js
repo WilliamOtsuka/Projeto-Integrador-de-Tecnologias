@@ -1,4 +1,7 @@
 let colaboradores = [];
+let pageColabs = 1;
+const limitColabs = 30;
+let totalColabs = 0;
 
 // Renderiza a tabela com os dados
 function renderTabelaColaboradores() {
@@ -188,9 +191,20 @@ window.excluirColaborador = function (id) {
 };
 
 // Carrega colaboradores
+function updatePaginacaoColabsInfo() {
+  const info = document.getElementById("infoColaboradores");
+  if (!info) return;
+  const totalPages = Math.max(1, Math.ceil(totalColabs / limitColabs));
+  info.textContent = `Página ${pageColabs} de ${totalPages}`;
+  const prev = document.getElementById("prevColaboradores");
+  const next = document.getElementById("nextColaboradores");
+  if (prev) prev.disabled = pageColabs <= 1;
+  if (next) next.disabled = pageColabs >= totalPages;
+}
+
 async function loadColaboradores() {
   try {
-    const r = await fetch("/api/colaboradores");
+    const r = await fetch(`/api/colaboradores?page=${pageColabs}&limit=${limitColabs}`);
 
     if (!r.ok) {
       if (r.status === 401) {
@@ -200,8 +214,12 @@ async function loadColaboradores() {
       }
       throw new Error("Falha ao carregar colaboradores");
     }
-    colaboradores = await r.json();
+    const payload = await r.json();
+    const data = Array.isArray(payload) ? payload : (payload.data || []);
+    totalColabs = (Array.isArray(payload) ? data.length : (payload.total ?? data.length)) || 0;
+    colaboradores = data;
     renderTabelaColaboradores();
+    updatePaginacaoColabsInfo();
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar colaboradores");
@@ -209,6 +227,15 @@ async function loadColaboradores() {
 }
 
 // Inicializa a página
+// Eventos de paginação
+const prevBtnC = document.getElementById("prevColaboradores");
+const nextBtnC = document.getElementById("nextColaboradores");
+if (prevBtnC) prevBtnC.addEventListener("click", async () => { if (pageColabs > 1) { pageColabs--; await loadColaboradores(); }});
+if (nextBtnC) nextBtnC.addEventListener("click", async () => {
+  const totalPages = Math.max(1, Math.ceil(totalColabs / limitColabs));
+  if (pageColabs < totalPages) { pageColabs++; await loadColaboradores(); }
+});
+
 loadColaboradores();
 
 // Validações e máscaras do formulário

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Gerenciar Estoque</title>
+		<link rel="stylesheet" href="/css/styles.css" />
+	</head>
+	<body class="pagina-gerenciar">
+		<header class="site-header">
+			<nav class="navbar">
+				<div class="navbar-item">
+					<div class="brand">
+						<h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+					</div>
+				</div>
+				<div class="navbar-item">
+					<ul class="menu-principal">
+						<li><a href="index.html">Home</a></li>
+						<li><a href="gerenciar_doadores.html">Doadores</a></li>
+						<li><a href="gerenciar_familias.html">Famílias</a></li>
+						<li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+						<li><a href="gerenciar_categorias.html">Categorias</a></li>
+						<li><a href="gerenciar_campanhas.html">Campanhas</a></li>
+						<li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+							<li class="ativo"><a href="gerenciar_estoque.html">Estoque</a></li>
+					</ul>
+				</div>
+				<div class="navbar-item">
+					<div class="navbar-login">
+						<a href="login_page.html" class="btn-login" role="button">Login</a>
+					</div>
+				</div>
+			</nav>
+		</header>
+
+		<h1 class="titulo-pagina">Gerenciar Estoque</h1>
+		<p class="descricao-pagina">
+			Visão geral do estoque consolidado por categoria e unidade, calculado a partir das entradas registradas.
+		</p>
+
+		<section class="crud-estoque">
+			<div class="estoque-layout">
+				<aside class="estoque-sidebar">
+					<nav class="estoque-menu">
+						<h3 class="estoque-menu__titulo">Movimentações</h3>
+						<a class="menu-link" href="registrar_entrada.html">Registrar Entrada</a>
+						<a class="menu-link" href="distribuir_cestas.html">Registrar Saída</a>
+						<div class="estoque-menu__grupo">
+							<h4>Montagem de Cestas</h4>
+							<a class="menu-link" href="montar_cestas.html">Montar Cestas</a>
+						</div>
+					</nav>
+				</aside>
+
+				<div class="estoque-conteudo">
+					<div class="filtros" style="display:flex; gap:.8rem; align-items:end; flex-wrap:wrap; margin: 0 0 1rem 0;">
+				<div class="form-field">
+					<label for="filtroCategoria">Categoria:</label>
+					<select id="filtroCategoria">
+						<option value="">Todas</option>
+					</select>
+				</div>
+				<div class="form-field">
+					<label for="filtroBusca">Busca:</label>
+					<input type="text" id="filtroBusca" placeholder="Filtrar por categoria ou unidade" />
+				</div>
+				<!-- <div class="form-actions" style="margin-left:auto;">
+					<button id="btnExportCsv" class="btn-primary">Exportar CSV</button>
+				</div> -->
+					</div>
+
+			<table id="tabelaEstoque" class="data-table">
+				<thead>
+					<tr>
+						<th>Categoria</th>
+						<th>Unidade</th>
+						<th>Em Estoque</th>
+						<th>Última Entrada</th>
+						<th>Ações</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- Linhas geradas via JS -->
+				</tbody>
+			</table>
+
+			<div class="pagination" id="paginacaoEstoque" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+				<button id="prevEstoque" class="btn-secondary">Anterior</button>
+				<span id="infoEstoque">Página 1 de 1</span>
+				<button id="nextEstoque" class="btn-secondary">Próxima</button>
+			</div>
+
+			<!-- Modal Detalhes -->
+			<div id="modalDetalhesEstoque" class="modal" style="display:none;">
+				<div class="modal-conteudo" style="max-width: 900px;">
+					<span class="fechar" id="fecharModalDetalhes">&times;</span>
+					<h2 id="tituloModalDetalhes">Detalhes do Estoque</h2>
+					<div class="filtros" id="detFiltros" style="display:flex; gap:.8rem; align-items:end; flex-wrap:wrap; margin: 0 0 1rem 0;">
+						<div class="form-field">
+							<label for="detDataDe">Data início:</label>
+							<input type="date" id="detDataDe" />
+						</div>
+						<div class="form-field">
+							<label for="detDataAte">Data fim:</label>
+							<input type="date" id="detDataAte" />
+						</div>
+						<div class="form-field">
+							<label for="detDoador">Doador:</label>
+							<select id="detDoador">
+								<option value="">Todos</option>
+							</select>
+						</div>
+						<div class="form-field">
+							<label for="detCampanha">Campanha:</label>
+							<select id="detCampanha">
+								<option value="">Todas</option>
+							</select>
+						</div>
+						<div class="form-field">
+							<label for="detTipo">Tipo:</label>
+							<select id="detTipo">
+								<option value="">Todos</option>
+								<option value="Entrada">Entrada</option>
+								<option value="Saída">Saída</option>
+							</select>
+						</div>
+						<div class="form-field" style="flex:1 1 200px;">
+							<label for="detBusca">Busca:</label>
+							<input type="text" id="detBusca" placeholder="Filtrar por doador, campanha ou observações" />
+						</div>
+						<div class="form-actions" style="margin-left:auto;">
+							<button id="detBtnLimpar" class="btn-secondary">Limpar filtros</button>
+						</div>
+					</div>
+					<table id="tabelaDetalhesEstoque" class="data-table">
+						<thead>
+							<tr>
+								<th>Data</th>
+								<th>Doador</th>
+								<th>Quantidade</th>
+								<th>Unidade</th>
+								<th>Campanha</th>
+								<th>Observações</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+					<div class="pagination" id="paginacaoDetalhes" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+						<button id="prevDetalhes" class="btn-secondary">Anterior</button>
+						<span id="infoDetalhes">Página 1 de 1</span>
+						<button id="nextDetalhes" class="btn-secondary">Próxima</button>
+					</div>
+				</div>
+			</div>
+
+			<h2 style="margin-top:2rem;">Movimentações</h2>
+			<p class="descricao-pagina" style="margin-top:.2rem;">
+				Lista cronológica de entradas e saídas, com saldo por categoria/unidade.
+			</p>
+			<div class="filtros" id="movFiltros" style="display:flex; gap:.8rem; align-items:end; flex-wrap:wrap; margin: 0 0 1rem 0;">
+				<div class="form-field">
+					<label for="movFiltroCategoria">Categoria:</label>
+					<select id="movFiltroCategoria">
+						<option value="">Todas</option>
+					</select>
+				</div>
+				<div class="form-field">
+					<label for="movFiltroUnidade">Unidade:</label>
+					<select id="movFiltroUnidade">
+						<option value="">Todas</option>
+					</select>
+				</div>
+				<div class="form-field">
+					<label for="movFiltroCampanha">Campanha:</label>
+					<select id="movFiltroCampanha">
+						<option value="">Todas</option>
+					</select>
+				</div>
+				<div class="form-field">
+					<label for="movFiltroTipo">Tipo:</label>
+					<select id="movFiltroTipo">
+						<option value="">Todos</option>
+						<option value="Entrada">Entrada</option>
+						<option value="Saída">Saída</option>
+					</select>
+				</div>
+				<div class="form-actions" style="margin-left:auto;">
+					<button id="movBtnLimpar" class="btn-secondary">Limpar filtros</button>
+				</div>
+			</div>
+			<table id="tabelaMovimentacoes" class="data-table">
+				<thead>
+					<tr>
+						<th>Data/Hora</th>
+						<th>Tipo</th>
+						<th>Categoria</th>
+						<th>Unidade</th>
+						<th>Quantidade</th>
+						<th>Origem/Doador</th>
+						<th>Campanha</th>
+						<th>Observações</th>
+						<th>Saldo (cat/unid)</th>
+						<th>Ações</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+			<div class="pagination" id="paginacaoMov" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+				<label for="movPerPage">Por página:</label>
+				<select id="movPerPage" class="form-select">
+					<option value="10">10</option>
+					<option value="20" selected>20</option>
+					<option value="50">50</option>
+				</select>
+				<button id="prevMov" class="btn-secondary">Anterior</button>
+				<span id="infoMov">Página 1 de 1</span>
+				<button id="nextMov" class="btn-secondary">Próxima</button>
+			</div>
+			</div>
+			</div>
+		</section>
+
+		<script src="/js/gerenciar_estoque.js"></script>
+		<script src="/js/auth.js"></script>
+		<footer class="rodape">
+			© 2025 ONG SEM FOME. Todos os direitos reservados.
+		</footer>
+	</body>
+	</html>
+

@@ -37,6 +37,9 @@ app.use("/api/categorias", require("./routes/categorias"));
 app.use("/api/campanhas", require("./routes/campanhas"));
 app.use("/api/solicitacoes", require("./routes/solicitacoes"));
 app.use("/api/entradas", require("./routes/entradas"));
+app.use("/api/montagens/custom", require("./routes/montar_cestas"));
+app.use("/api/saidas", require("./routes/saidas"));
+app.use("/api/estoque", require("./routes/estoque.js"));
 
 // Error handler
 app.use((err, req, res, next) => {

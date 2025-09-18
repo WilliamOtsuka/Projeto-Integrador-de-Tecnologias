@@ -4,8 +4,12 @@ const pool = require('../config/db');
 const { requireAuth, asyncHandler } = require('../middleware/auth');
 
 router.get('/', requireAuth, asyncHandler(async (req, res) => {
-  const [rows] = await pool.query('SELECT * FROM entradas ORDER BY id DESC');
-  res.json(rows);
+  const page = Math.max(parseInt(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit) || 30, 1), 200);
+  const offset = (page - 1) * limit;
+  const [rows] = await pool.query('SELECT * FROM entradas ORDER BY id DESC LIMIT ? OFFSET ?', [limit, offset]);
+  const [[cnt]] = await pool.query('SELECT COUNT(*) AS total FROM entradas');
+  res.json({ data: rows, total: Number(cnt.total||0), page, limit });
 }));
 
 router.post('/', requireAuth, asyncHandler(async (req, res) => {

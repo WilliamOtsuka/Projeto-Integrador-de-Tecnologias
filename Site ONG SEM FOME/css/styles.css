@@ -7,21 +7,23 @@
     --font-family: Arial, Helvetica, sans-serif;
 }
 
+html, body {
+    height: 100%;
+}
 body {
     background: var(--background-color);
     color: var(--text-color);
     font-family: var(--font-family);
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-nav,
 nav.navbar {
     background: var(--primary-color);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-nav.navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -398,15 +400,14 @@ h2 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-footer {
+.rodape, footer {
     background: var(--secondary-color);
+    
     color: #fff;
     text-align: center;
     padding: 1em 0;
-    position: fixed;
     width: 100%;
-    bottom: 0;
-    left: 0;
+    margin-top: auto;
 }
 
 ul.lista-campanhas {
@@ -510,7 +511,7 @@ p.info-destaque {
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 0.75em 0 5em 0;
+    margin: 0.75em 0 1em 0;
     background: #fff;
     border-radius: 0px;
     overflow: hidden;
@@ -539,31 +540,22 @@ p.info-destaque {
 
 .table-actions button {
     margin-right: 6px;
-    padding: 6px 10px;
-    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    min-width: 46px;
+    padding: 0 12px;
+    border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.08);
     background: #fff;
     cursor: pointer;
 }
 
 .table-actions .btn-edit {
-    background: var(--primary-color);
-    color: #fff;
-    border: none;
-}
-
-.table-actions .btn-delete {
-    background: transparent;
-    color: #c0392b;
-    border: 1px solid rgba(192, 57, 43, 0.15);
-}
-
-.table-actions .btn-edit {
     background: var(--secondary-color);
     color: #fff;
     border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
     box-shadow: 0 2px 6px rgba(32, 96, 61, 0.12);
 }
 
@@ -575,12 +567,27 @@ p.info-destaque {
     background: transparent;
     color: #c0392b;
     border: 1px solid rgba(192, 57, 43, 0.18);
-    padding: 6px 10px;
-    border-radius: 6px;
 }
 
 .table-actions .btn-delete:hover {
     background: rgba(192, 57, 43, 0.06);
+}
+
+#tabelaMovimentacoes {
+    font-size: 0.9em;
+}
+
+.filters-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 1em;
+    flex-wrap: wrap;
+    
+}
+
+.form-field {
+    margin: 0 0.5em;
 }
 
 .form-adicionar {
@@ -622,7 +629,7 @@ p.info-destaque {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding-right: 10px;
+    padding: 5px;
 }
 
 .form-field input, .form-field textarea, .form-field select {
@@ -798,6 +805,67 @@ p.info-destaque {
     background: rgba(0, 0, 0, 0.04);
 }
 
+.estoque-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0;
+}
+
+.estoque-sidebar {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 14px 12px;
+    height: fit-content;
+}
+
+.estoque-menu__titulo {
+    margin: 6px 10px 8px;
+    font-size: 1.02rem;
+    color: var(--secondary-color);
+}
+
+.estoque-menu__grupo h4 {
+    margin: 14px 10px 8px;
+    font-size: .95rem;
+    color: #444;
+}
+
+.estoque-menu .menu-link {
+    display: block;
+    margin: 6px 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #234;
+    background: rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    font-weight: 600;
+}
+
+.estoque-menu .menu-link:hover {
+    background: rgba(255, 152, 0, 0.08);
+    border-color: rgba(255, 152, 0, 0.25);
+}
+
+.estoque-conteudo {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 14px 16px;
+}
+
+@media (max-width: 900px) {
+    .estoque-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Login form - enhanced visuals */
 .pagina-login .form-adicionar {
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -900,4 +968,10 @@ p.info-destaque {
     .contato-list {
         grid-template-columns: 1fr;
     }
+}
+
+.table-actions {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
 }

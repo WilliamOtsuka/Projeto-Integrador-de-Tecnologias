@@ -1,5 +1,8 @@
 // Estado local da página (lista de famílias carregadas da API)
 let familias = [];
+let pageFamilias = 1;
+const limitFamilias = 30;
+let totalFamilias = 0;
 
 // Helpers de formatação/validação (CEP, UF, telefone, etc.)
 const onlyDigits = (v) => (v || "").replace(/\D/g, "");
@@ -289,9 +292,20 @@ window.excluirFamilia = function (id) {
 };
 
 // Carrega famílias
+function updatePaginacaoFamiliasInfo() {
+  const info = document.getElementById("infoFamilias");
+  if (!info) return;
+  const totalPages = Math.max(1, Math.ceil(totalFamilias / limitFamilias));
+  info.textContent = `Página ${pageFamilias} de ${totalPages}`;
+  const prev = document.getElementById("prevFamilias");
+  const next = document.getElementById("nextFamilias");
+  if (prev) prev.disabled = pageFamilias <= 1;
+  if (next) next.disabled = pageFamilias >= totalPages;
+}
+
 async function loadFamilias() {
   try {
-    const r = await fetch("/api/familias");
+    const r = await fetch(`/api/familias?page=${pageFamilias}&limit=${limitFamilias}`);
     if (!r.ok) {
       if (r.status === 401) {
         alert("Sessão expirada. Faça login.");
@@ -300,14 +314,27 @@ async function loadFamilias() {
       }
       throw new Error("Falha ao carregar famílias");
     }
-    familias = await r.json();
+    const payload = await r.json();
+    const data = Array.isArray(payload) ? payload : (payload.data || []);
+    totalFamilias = (Array.isArray(payload) ? data.length : (payload.total ?? data.length)) || 0;
+    familias = data;
 
     renderTabela();
+    updatePaginacaoFamiliasInfo();
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar famílias");
   }
 }
+
+// Eventos de paginação
+const prevBtnF = document.getElementById("prevFamilias");
+const nextBtnF = document.getElementById("nextFamilias");
+if (prevBtnF) prevBtnF.addEventListener("click", async () => { if (pageFamilias > 1) { pageFamilias--; await loadFamilias(); }});
+if (nextBtnF) nextBtnF.addEventListener("click", async () => {
+  const totalPages = Math.max(1, Math.ceil(totalFamilias / limitFamilias));
+  if (pageFamilias < totalPages) { pageFamilias++; await loadFamilias(); }
+});
 
 loadFamilias();
 

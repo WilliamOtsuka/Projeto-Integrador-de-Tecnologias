@@ -1,4 +1,7 @@
 let doadores = [];
+let pageDoadores = 1;
+const limitDoadores = 30;
+let totalDoadores = 0;
 
 // Máscara/validação
 const onlyDigits = (v) => (v || "").replace(/\D/g, "");
@@ -97,9 +100,20 @@ function validaDoc(v) {
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 // Carregar/criar/atualizar/excluir doadores
+function updatePaginacaoDoadoresInfo() {
+  const info = document.getElementById("infoDoadores");
+  if (!info) return;
+  const totalPages = Math.max(1, Math.ceil(totalDoadores / limitDoadores));
+  info.textContent = `Página ${pageDoadores} de ${totalPages}`;
+  const prev = document.getElementById("prevDoadores");
+  const next = document.getElementById("nextDoadores");
+  if (prev) prev.disabled = pageDoadores <= 1;
+  if (next) next.disabled = pageDoadores >= totalPages;
+}
+
 async function loadDoadores() {
   try {
-    const r = await fetch("/api/doadores");
+    const r = await fetch(`/api/doadores?page=${pageDoadores}&limit=${limitDoadores}`);
 
     if (!r.ok) {
       if (r.status === 401) {
@@ -109,8 +123,12 @@ async function loadDoadores() {
       }
       throw new Error("Falha ao carregar doadores");
     }
-    doadores = await r.json();
+    const payload = await r.json();
+    const data = Array.isArray(payload) ? payload : (payload.data || []);
+    totalDoadores = (Array.isArray(payload) ? data.length : (payload.total ?? data.length)) || 0;
+    doadores = data;
     renderTabelaDoadores();
+    updatePaginacaoDoadoresInfo();
   } catch (err) {
     console.error(err);
     alert("Erro ao carregar doadores");
@@ -315,6 +333,15 @@ window.excluirDoador = function (id) {
 };
 
 // Inicializa a página
+// Eventos de paginação
+const prevBtnD = document.getElementById("prevDoadores");
+const nextBtnD = document.getElementById("nextDoadores");
+if (prevBtnD) prevBtnD.addEventListener("click", async () => { if (pageDoadores > 1) { pageDoadores--; await loadDoadores(); }});
+if (nextBtnD) nextBtnD.addEventListener("click", async () => {
+  const totalPages = Math.max(1, Math.ceil(totalDoadores / limitDoadores));
+  if (pageDoadores < totalPages) { pageDoadores++; await loadDoadores(); }
+});
+
 loadDoadores();
 
 // Validações e máscaras

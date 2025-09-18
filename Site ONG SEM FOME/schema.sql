@@ -76,10 +76,6 @@ CREATE TABLE IF NOT EXISTS entradas (
 );
 
 -- ------------------------------------------------------------
--- Seed de dados genéricos
--- Observação:
---  - Para tabelas sem UNIQUE, os INSERTs abaixo inserem SOMENTE se a tabela estiver vazia.
--- ------------------------------------------------------------
 
 -- Categorias
 INSERT IGNORE INTO categorias (nome) VALUES
@@ -89,7 +85,8 @@ INSERT IGNORE INTO categorias (nome) VALUES
   ('Leite'),
   ('Enlatados'),
   ('Higiene'),
-  ('Limpeza');
+  ('Limpeza'),
+  ('Cesta Básica');
 
 -- Doadores
 INSERT INTO doadores (nome, email, telefone, documento)
@@ -146,3 +143,22 @@ SELECT * FROM (
   UNION ALL SELECT CURDATE(), 'João Pereira', 'Leite', 30, 'L', 'Natal Solidário', 'Leite longa vida'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM entradas);
+
+-- Montagens (produção de cestas a partir do estoque)
+CREATE TABLE IF NOT EXISTS montagens (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  data DATE NOT NULL,
+  responsavel VARCHAR(120) NOT NULL,
+  qtd_cestas INT NOT NULL,
+  obs TEXT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS montagens_itens (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  montagem_id INT NOT NULL,
+  categoria VARCHAR(120) NOT NULL,
+  unidade VARCHAR(16) NOT NULL,
+  quantidade INT NOT NULL,
+  FOREIGN KEY (montagem_id) REFERENCES montagens(id) ON DELETE CASCADE
+);

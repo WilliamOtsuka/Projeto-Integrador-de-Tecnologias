@@ -24,7 +24,7 @@
             <li class="ativo">
               <a href="gerenciar_solicitacoes.html">Solicitações</a>
             </li>
-            <li><a href="registrar_entrada.html">Entradas</a></li>
+            <li><a href="gerenciar_estoque.html">Estoque</a></li>
           </ul>
         </div>
         <div class="navbar-item">
@@ -52,10 +52,48 @@
               <input type="text" id="tituloSolicitacao" required />
             </div>
             <div class="form-field">
+              <label for="dataSolicitacao">Data da solicitação:</label>
+              <input type="date" id="dataSolicitacao" />
+            </div>
+            <div class="form-field">
               <label for="categoriaSolicitacao">Categoria:</label>
               <select id="categoriaSolicitacao" required>
-                <option value="" disabled selected>Selecione uma categoria</option>
+                <option value="" disabled selected>
+                  Selecione uma categoria
+                </option>
               </select>
+            </div>
+            <div class="form-field">
+              <label for="solicitanteSolicitacao">Solicitante:</label>
+              <input
+                type="text"
+                id="solicitanteSolicitacao"
+                placeholder="Voluntário/Funcionário"
+              />
+            </div>
+            <div class="form-field">
+              <label for="statusSolicitacao">Status:</label>
+              <select id="statusSolicitacao">
+                <option value="pendente">Pendente</option>
+                <option value="aprovado">Aprovado</option>
+                <option value="em compra">Em compra</option>
+                <option value="atendido">Atendido</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="prioridadeSolicitacao">Prioridade:</label>
+              <select id="prioridadeSolicitacao">
+                <option value="normal">Normal</option>
+                <option value="urgente">Urgente</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="quantidadeSolicitacao">Quantidade:</label>
+              <input
+                type="text"
+                id="quantidadeSolicitacao"
+                placeholder="Ex.: 20kg de arroz, 15 kits de higiene"
+              />
             </div>
             <div class="form-field" style="grid-column: 1/-1">
               <label for="descricaoSolicitacao">Descrição:</label>
@@ -78,11 +116,64 @@
       <button id="btnAdicionarSolicitacao" class="btn-primary">
         Adicionar Solicitação
       </button>
+
+      <div class="filters-toolbar">
+        <div class="form-field">
+          <label for="fltDataDe">Data de:</label>
+          <input type="date" id="fltDataDe" />
+        </div>
+        <div class="form-field">
+          <label for="fltDataAte">Data até:</label>
+          <input type="date" id="fltDataAte" />
+        </div>
+        <div class="form-field">
+          <label for="fltStatus">Status:</label>
+          <select id="fltStatus">
+            <option value="">Todos</option>
+            <option value="pendente">Pendente</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="em compra">Em compra</option>
+            <option value="atendido">Atendido</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="fltPrioridade">Prioridade:</label>
+          <select id="fltPrioridade">
+            <option value="">Todas</option>
+            <option value="normal">Normal</option>
+            <option value="urgente">Urgente</option>
+          </select>
+        </div>
+        <div class="form-field" style="flex: 1; min-width: 220px">
+          <label for="fltBusca">Buscar:</label>
+          <input
+            type="text"
+            id="fltBusca"
+            placeholder="Título, solicitante, categoria..."
+          />
+        </div>
+        <div class="form-field">
+          <label>&nbsp;</label>
+          <button
+            id="btnLimparFiltros"
+            class="btn-secondary"
+            style="width: 100%"
+          >
+            Limpar
+          </button>
+        </div>
+      </div>
+
       <table id="tabelaSolicitacoes" class="data-table">
         <thead>
           <tr>
             <th>ID</th>
             <th>Título</th>
+            <th>Data</th>
+            <th>Solicitante</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Quantidade</th>
             <th>Categoria</th>
             <th>Descrição</th>
             <th>Ações</th>
@@ -90,12 +181,17 @@
         </thead>
         <tbody></tbody>
       </table>
+      <div class="pagination" id="paginacaoSolicitacoes" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+        <button id="prevSolicitacoes" class="btn-secondary">Anterior</button>
+        <span id="infoSolicitacoes">Página 1 de 1</span>
+        <button id="nextSolicitacoes" class="btn-secondary">Próxima</button>
+      </div>
     </section>
 
     <script src="/js/gerenciar_solicitacoes.js"></script>
     <script src="/js/auth.js"></script>
     <footer class="rodape">
-      © 2023 ONG SEM FOME. Todos os direitos reservados.
+  © 2025 ONG SEM FOME. Todos os direitos reservados.
     </footer>
   </body>
 </html>

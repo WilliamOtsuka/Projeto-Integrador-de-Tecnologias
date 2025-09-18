@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Montar Cestas</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="pagina-gerenciar">
+    <header class="site-header">
+      <nav class="navbar">
+        <div class="navbar-item">
+          <div class="brand">
+            <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+          </div>
+        </div>
+        <div class="navbar-item">
+          <ul class="menu-principal">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="gerenciar_doadores.html">Doadores</a></li>
+            <li><a href="gerenciar_familias.html">Famílias</a></li>
+            <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
+            <li><a href="gerenciar_categorias.html">Categorias</a></li>
+            <li><a href="gerenciar_campanhas.html">Campanhas</a></li>
+            <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+            <li><a href="gerenciar_estoque.html">Estoque</a></li>
+          </ul>
+        </div>
+        <div class="navbar-item">
+          <div class="navbar-login">
+            <a href="login_page.html" class="btn-login" role="button">Login</a>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <h1 class="titulo-pagina">Montagem de Cestas</h1>
+
+    <section class="crud">
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Data</label>
+          <input type="date" id="mcData" />
+        </div>
+        <div class="form-field">
+          <label>Responsável</label>
+          <input type="text" id="mcResp" placeholder="Nome do responsável" />
+        </div>
+        <div class="form-field">
+          <label>Qtd cestas</label>
+          <input type="number" id="mcQtd" min="1" value="1" />
+        </div>
+        <div class="form-field" style="grid-column: 1 / -1;">
+          <label>Observações</label>
+          <textarea id="mcObs" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-top:10px; grid-template-columns: 2fr 1fr;">
+        <div class="form-field">
+          <label>Adicionar item do estoque (quantidade por cesta)</label>
+          <div style="display:flex; gap:8px; align-items:end;">
+            <select id="mcItem"></select>
+            <input id="mcQtdItem" type="number" min="1" placeholder="Qtd por cesta" style="max-width:140px" />
+            <button class="btn-primary" id="btnAddItem">Adicionar</button>
+          </div>
+          <small id="mcSaldoInfo" style="color:#555"></small>
+        </div>
+      </div>
+
+      <h3>Itens selecionados</h3>
+      <table class="data-table" id="mcItensTable">
+        <thead>
+          <tr>
+            <th>Categoria</th>
+            <th>Unidade</th>
+            <th>Qtd por cesta</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="form-actions">
+        <button class="btn-primary" id="btnSalvarMontagem">Salvar Montagem</button>
+      </div>
+    </section>
+
+    <script src="/js/montar_cestas.js"></script>
+    <script src="/js/auth.js"></script>
+  </body>
+  <footer class="rodape">© 2025 ONG SEM FOME. Todos os direitos reservados.</footer>
+</html>
