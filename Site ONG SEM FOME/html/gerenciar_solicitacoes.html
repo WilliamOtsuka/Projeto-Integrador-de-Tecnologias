@@ -41,7 +41,7 @@
     </p>
 
     <section class="crud-solicitacoes">
-      <div id="modalSolicitacao" class="modal" style="display: none">
+  <div id="modalSolicitacao" class="modal" style="display:none;">
         <div class="modal-conteudo form-adicionar">
           <span class="fechar" id="fecharModalSolicitacao">&times;</span>
           <h2 id="tituloModalSolicitacao">Adicionar Solicitação</h2>
@@ -95,7 +95,7 @@
                 placeholder="Ex.: 20kg de arroz, 15 kits de higiene"
               />
             </div>
-            <div class="form-field" style="grid-column: 1/-1">
+            <div class="form-field full-width-field">
               <label for="descricaoSolicitacao">Descrição:</label>
               <textarea id="descricaoSolicitacao" rows="3"></textarea>
             </div>
@@ -144,7 +144,7 @@
             <option value="urgente">Urgente</option>
           </select>
         </div>
-        <div class="form-field" style="flex: 1; min-width: 220px">
+  <div class="form-field flex-1-min-220">
           <label for="fltBusca">Buscar:</label>
           <input
             type="text"
@@ -156,8 +156,7 @@
           <label>&nbsp;</label>
           <button
             id="btnLimparFiltros"
-            class="btn-secondary"
-            style="width: 100%"
+            class="btn-secondary w-100"
           >
             Limpar
           </button>
@@ -181,7 +180,7 @@
         </thead>
         <tbody></tbody>
       </table>
-      <div class="pagination" id="paginacaoSolicitacoes" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+  <div class="pagination pagination-bar" id="paginacaoSolicitacoes">
         <button id="prevSolicitacoes" class="btn-secondary">Anterior</button>
         <span id="infoSolicitacoes">Página 1 de 1</span>
         <button id="nextSolicitacoes" class="btn-secondary">Próxima</button>

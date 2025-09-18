@@ -155,9 +155,12 @@ function updatePaginacaoCampanhasInfo() {
   if (next) next.disabled = pageCampanhas >= totalPages;
 }
 
+// Carrega campanhas do servidor
 async function loadCampanhas() {
   try {
-    const r = await fetch(`/api/campanhas?page=${pageCampanhas}&limit=${limitCampanhas}`);
+    const r = await fetch(
+      `/api/campanhas?page=${pageCampanhas}&limit=${limitCampanhas}`
+    );
     if (!r.ok) {
       if (r.status === 401) {
         alert("Sessão expirada. Faça login.");
@@ -167,8 +170,10 @@ async function loadCampanhas() {
       throw new Error("Falha ao carregar campanhas");
     }
     const payload = await r.json();
-    const data = Array.isArray(payload) ? payload : (payload.data || []);
-    totalCampanhas = (Array.isArray(payload) ? data.length : (payload.total ?? data.length)) || 0;
+    const data = Array.isArray(payload) ? payload : payload.data || [];
+    totalCampanhas =
+      (Array.isArray(payload) ? data.length : payload.total ?? data.length) ||
+      0;
     campanhas = data;
     renderTabelaCampanhas();
     updatePaginacaoCampanhasInfo();
@@ -182,11 +187,21 @@ async function loadCampanhas() {
 // Eventos de paginação
 const prevBtnCamp = document.getElementById("prevCampanhas");
 const nextBtnCamp = document.getElementById("nextCampanhas");
-if (prevBtnCamp) prevBtnCamp.addEventListener("click", async () => { if (pageCampanhas > 1) { pageCampanhas--; await loadCampanhas(); }});
-if (nextBtnCamp) nextBtnCamp.addEventListener("click", async () => {
-  const totalPages = Math.max(1, Math.ceil(totalCampanhas / limitCampanhas));
-  if (pageCampanhas < totalPages) { pageCampanhas++; await loadCampanhas(); }
-});
+if (prevBtnCamp)
+  prevBtnCamp.addEventListener("click", async () => {
+    if (pageCampanhas > 1) {
+      pageCampanhas--;
+      await loadCampanhas();
+    }
+  });
+if (nextBtnCamp)
+  nextBtnCamp.addEventListener("click", async () => {
+    const totalPages = Math.max(1, Math.ceil(totalCampanhas / limitCampanhas));
+    if (pageCampanhas < totalPages) {
+      pageCampanhas++;
+      await loadCampanhas();
+    }
+  });
 
 loadCampanhas();
 

@@ -143,6 +143,7 @@ function updatePaginacaoCategoriasInfo() {
   if (next) next.disabled = pageCategorias >= totalPages;
 }
 
+// Carrega categorias
 async function loadCategorias() {
   try {
     const r = await fetch(`/api/categorias?page=${pageCategorias}&limit=${limitCategorias}`);

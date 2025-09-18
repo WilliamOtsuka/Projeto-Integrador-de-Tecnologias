@@ -3,38 +3,7 @@ const router = express.Router();
 const pool = require('../config/db');
 const { requireAuth, asyncHandler } = require('../middleware/auth');
 
-async function ensureSolicitacoesSchema(conn) {
-  await conn.query(`CREATE TABLE IF NOT EXISTS solicitacoes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(160) NOT NULL,
-    categoria VARCHAR(120) NOT NULL,
-    descricao TEXT NULL,
-    data_solicitacao DATE NULL,
-    solicitante VARCHAR(120) NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'pendente',
-    prioridade VARCHAR(20) NOT NULL DEFAULT 'normal',
-    quantidade VARCHAR(120) NULL,
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-
-  const [cols] = await conn.execute(
-    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'solicitacoes'`
-  );
-  const have = new Set(cols.map(c => String(c.COLUMN_NAME).toLowerCase()));
-  const addIfMissing = async (name, def) => {
-    if (!have.has(name)) {
-      await conn.query(`ALTER TABLE solicitacoes ADD COLUMN ${def}`);
-    }
-  };
-  await addIfMissing('data_solicitacao', "data_solicitacao DATE NULL AFTER descricao");
-  await addIfMissing('solicitante', "solicitante VARCHAR(120) NULL AFTER data_solicitacao");
-  await addIfMissing('status', "status VARCHAR(20) NOT NULL DEFAULT 'pendente' AFTER solicitante");
-  await addIfMissing('prioridade', "prioridade VARCHAR(20) NOT NULL DEFAULT 'normal' AFTER status");
-  await addIfMissing('quantidade', "quantidade VARCHAR(120) NULL AFTER prioridade");
-}
-
 router.get('/', requireAuth, asyncHandler(async (req, res) => {
-  await ensureSolicitacoesSchema(pool);
   const page = Math.max(parseInt(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(parseInt(req.query.limit) || 30, 1), 200);
   const offset = (page - 1) * limit;
@@ -44,7 +13,6 @@ router.get('/', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 router.post('/', requireAuth, asyncHandler(async (req, res) => {
-  await ensureSolicitacoesSchema(pool);
   const { titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade } = req.body || {};
   const ds = data_solicitacao || null;
   const sol = solicitante || null;
@@ -59,7 +27,6 @@ router.post('/', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
-  await ensureSolicitacoesSchema(pool);
   const { id } = req.params; 
   const { titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade } = req.body || {};
   await pool.execute(
@@ -70,7 +37,6 @@ router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 router.delete('/:id', requireAuth, asyncHandler(async (req, res) => {
-  await ensureSolicitacoesSchema(pool);
   const { id } = req.params; await pool.execute('DELETE FROM solicitacoes WHERE id=?', [id]);
   res.status(204).end();
 }));

@@ -2,6 +2,9 @@ let entradas = [];
 let estoque = [];
 let estoqueFiltrado = [];
 let movimentos = [];
+// Referências modal edição (definidas após DOM)
+let modalEditarMov, fecharModalEditarMovBtn, formEditarMov;
+let cancelarEditarMovBtn;
 
 // Paginação (itens, detalhes, movimentações)
 let pageEstoque = 1;
@@ -287,32 +290,24 @@ function populateMovFilters() {
   fill('movFiltroCampanha', camps);
 }
 
-// CRUD helpers
+// Edita entrada
 async function editarEntrada(id) {
   const item = entradas.find(e => e.id === id);
   if (!item) return alert('Entrada não encontrada');
-  const data = prompt('Data (YYYY-MM-DD):', item.data);
-  if (!data) return;
-  const doador = prompt('Doador:', item.doador);
-  if (doador == null) return;
-  const categoria = prompt('Categoria:', item.categoria);
-  if (!categoria) return;
-  const quantidadeStr = prompt('Quantidade:', String(item.quantidade));
-  if (quantidadeStr == null) return;
-  const quantidade = Number(quantidadeStr);
-  if (!Number.isFinite(quantidade)) return alert('Quantidade inválida');
-  const unidade = prompt('Unidade:', item.unidade);
-  if (!unidade) return;
-  const campanha = prompt('Campanha (opcional):', item.campanha || '');
-  const obs = prompt('Observações (opcional):', item.obs || '');
-  const r = await fetch(`/api/entradas/${id}`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ data, doador, categoria, quantidade, unidade, campanha: campanha || null, obs: obs || null })
+  openEditarMovModal({
+    modo: 'entrada',
+    id: item.id,
+    data: item.data,
+    doador: item.doador,
+    categoria: item.categoria,
+    quantidade: item.quantidade,
+    unidade: item.unidade,
+    campanha: item.campanha,
+    obs: item.obs
   });
-  if (!r.ok) return alert('Falha ao atualizar entrada');
-  await reloadAfterChange();
 }
 
+// Exclui entrada
 async function excluirEntrada(id) {
   if (!confirm('Excluir esta entrada?')) return;
   const r = await fetch(`/api/entradas/${id}`, { method: 'DELETE' });
@@ -326,6 +321,7 @@ function parseSaidaIdFromObs(obs) {
   return m ? Number(m[1]) : null;
 }
 
+// Edita saída vinculada à entrada
 async function editarSaidaByEntradaId(entradaId) {
   const ent = entradas.find(e => e.id === entradaId);
   if (!ent) return alert('Movimentação não encontrada');
@@ -334,28 +330,18 @@ async function editarSaidaByEntradaId(entradaId) {
   const r = await fetch(`/api/saidas/${saidaId}`);
   if (!r.ok) return alert('Falha ao carregar saída');
   const s = await r.json();
-  const data = prompt('Data (YYYY-MM-DD):', s.data);
-  if (!data) return;
-  const familia_id_str = prompt('ID da família:', String(s.familia_id || ''));
-  const familia_id = Number(familia_id_str);
-  if (!Number.isInteger(familia_id)) return alert('Família inválida');
-  const responsavel = prompt('Responsável:', s.responsavel || '');
-  if (!responsavel) return;
-  const qtdStr = prompt('Quantidade de cestas:', String(s.qtd || ''));
-  const qtd = Number(qtdStr);
-  if (!Number.isInteger(qtd) || qtd <= 0) return alert('Quantidade inválida');
-  const obs = prompt('Observações (opcional):', s.obs || '');
-  const r2 = await fetch(`/api/saidas/${saidaId}`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ data, familia_id, responsavel, qtd, obs: obs || null })
+  openEditarMovModal({
+    modo: 'saida',
+    id: saidaId,
+    data: s.data,
+    familia_id: s.familia_id,
+    responsavel: s.responsavel,
+    qtd: s.qtd,
+    obs: s.obs
   });
-  if (!r2.ok) {
-    const msg = await r2.text();
-    return alert('Falha ao atualizar saída: ' + msg);
-  }
-  await reloadAfterChange();
 }
 
+// Exclui saída vinculada à entrada
 async function excluirSaidaByEntradaId(entradaId) {
   const ent = entradas.find(e => e.id === entradaId);
   if (!ent) return alert('Movimentação não encontrada');
@@ -367,6 +353,7 @@ async function excluirSaidaByEntradaId(entradaId) {
   await reloadAfterChange();
 }
 
+//  Recarrega entradas e reconstrói tudo após CRUD
 async function reloadAfterChange() {
   const r = await fetch('/api/entradas?limit=10000');
   if (!r.ok) return location.reload();
@@ -408,6 +395,7 @@ async function renderFiltros() {
   }
 }
 
+// Aplica filtros globais (categoria, busca)
 function applyFilters() {
   const cat = (document.getElementById("filtroCategoria")?.value || "").trim();
   const q = (document.getElementById("filtroBusca")?.value || "").trim().toLowerCase();
@@ -426,6 +414,7 @@ function applyFilters() {
   renderMovimentacoes();
 }
 
+// Renderiza tabela de estoque com paginação
 function renderTabelaEstoque() {
   const tbody = document.querySelector("#tabelaEstoque tbody");
   if (!tbody) return;
@@ -488,6 +477,7 @@ function abrirDetalhes(idx) {
   modal.classList.add("mostrar");
 }
 
+// Preenche filtros de detalhes (doador, campanha)
 function preencherFiltrosDetalhes(itens) {
   const donors = new Set();
   const camps = new Set();
@@ -510,6 +500,7 @@ function preencherFiltrosDetalhes(itens) {
   fill('detCampanha', camps);
 }
 
+// Renderiza detalhes filtrados com paginação
 function renderDetalhesFiltrados() {
   const modal = document.getElementById('modalDetalhesEstoque');
   const idx = Number(modal.dataset.idx || -1);
@@ -569,6 +560,7 @@ function renderDetalhesFiltrados() {
   });
 }
 
+// Fecha modal detalhes
 function fecharDetalhes() {
   const modal = document.getElementById("modalDetalhesEstoque");
   modal.classList.remove("mostrar");
@@ -615,14 +607,14 @@ const movCamp = document.getElementById('movFiltroCampanha');
 const movTipo = document.getElementById('movFiltroTipo');
 const movClear = document.getElementById('movBtnLimpar');
 const movPerPage = document.getElementById('movPerPage');
-// Pagination controls
+
 const prevEstoqueBtn = document.getElementById('prevEstoque');
 const nextEstoqueBtn = document.getElementById('nextEstoque');
 const prevDetalhesBtn = document.getElementById('prevDetalhes');
 const nextDetalhesBtn = document.getElementById('nextDetalhes');
 const prevMovBtn = document.getElementById('prevMov');
 const nextMovBtn = document.getElementById('nextMov');
-// Details modal filter elements
+
 const detDe = document.getElementById('detDataDe');
 const detAte = document.getElementById('detDataAte');
 const detDoador = document.getElementById('detDoador');
@@ -647,7 +639,7 @@ if (movClear) movClear.addEventListener('click', () => {
   pageMov = 1;
   renderMovimentacoes();
 });
-// Mov per-page selector
+
 if (movPerPage) movPerPage.addEventListener('change', () => {
   const v = Number(movPerPage.value);
   if (Number.isInteger(v) && v > 0) {
@@ -656,7 +648,7 @@ if (movPerPage) movPerPage.addEventListener('change', () => {
     renderMovimentacoes();
   }
 });
-// Details modal filters listeners
+
 if (detDe) detDe.addEventListener('change', () => { pageDetalhes = 1; renderDetalhesFiltrados(); });
 if (detAte) detAte.addEventListener('change', () => { pageDetalhes = 1; renderDetalhesFiltrados(); });
 if (detDoador) detDoador.addEventListener('change', () => { pageDetalhes = 1; renderDetalhesFiltrados(); });
@@ -686,7 +678,132 @@ window.onclick = function (event) {
   if (event.target == document.getElementById("modalDetalhesEstoque")) {
     fecharDetalhes();
   }
+  if (event.target === modalEditarMov) {
+    fecharEditarMovModal();
+  }
 };
 
 // Inicializa
 loadEntradasForEstoque();
+
+// ------- Modal Edição Movimentação -------
+document.addEventListener('DOMContentLoaded', () => {
+  modalEditarMov = document.getElementById('modalEditarMov');
+  fecharModalEditarMovBtn = document.getElementById('fecharModalEditarMov');
+  formEditarMov = document.getElementById('formEditarMov');
+  cancelarEditarMovBtn = document.getElementById('cancelarEditarMov');
+  if (fecharModalEditarMovBtn) fecharModalEditarMovBtn.addEventListener('click', fecharEditarMovModal);
+  if (cancelarEditarMovBtn) cancelarEditarMovBtn.addEventListener('click', fecharEditarMovModal);
+  if (formEditarMov) formEditarMov.addEventListener('submit', onSubmitEditarMov);
+});
+
+// Modal editar movimentação
+function openEditarMovModal(data) {
+  if (!modalEditarMov) return;
+  modalEditarMov.style.display = 'block';
+  void modalEditarMov.offsetWidth;
+  modalEditarMov.classList.add('mostrar');
+  const titulo = document.getElementById('tituloModalEditarMov');
+  const isEntrada = data.modo === 'entrada';
+  const isSaida = data.modo === 'saida';
+  if (titulo) titulo.textContent = isEntrada ? 'Editar Entrada' : 'Editar Saída';
+  // Campos
+  setValue('editMovId', data.id);
+  setValue('editMovTipo', data.modo);
+  // Formatar data para yyyy-MM-dd (input date)
+  const rawData = data.data || '';
+  let dateForInput = '';
+  if (rawData) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(rawData)) {
+      dateForInput = rawData; 
+    } else {
+      const d = new Date(rawData);
+      if (!isNaN(d.getTime())) {
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        dateForInput = `${d.getFullYear()}-${mm}-${dd}`;
+      }
+    }
+  }
+  setValue('editData', dateForInput);
+  setValue('editDoador', data.doador || '');
+  setValue('editCategoria', data.categoria || (isSaida ? 'Cesta Básica' : ''));
+  setValue('editQuantidade', isEntrada ? data.quantidade : data.qtd);
+  setValue('editUnidade', data.unidade || (isSaida ? 'cx' : ''));
+  setValue('editCampanha', data.campanha || '');
+  setValue('editObs', data.obs || '');
+  setValue('editFamiliaId', data.familia_id || '');
+  setValue('editResponsavel', data.responsavel || '');
+  // Mostrar / ocultar grupos
+  toggleDisplay('grpEditDoador', isEntrada);
+  toggleDisplay('grpEditFamilia', isSaida);
+  toggleDisplay('grpEditResponsavel', isSaida);
+}
+
+function fecharEditarMovModal() {
+  if (!modalEditarMov) return;
+  modalEditarMov.classList.remove('mostrar');
+  modalEditarMov.classList.add('saindo');
+  const done = () => {
+    modalEditarMov.style.display = 'none';
+    modalEditarMov.classList.remove('saindo');
+  };
+  setTimeout(done, 200);
+}
+
+function setValue(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val == null ? '' : val;
+}
+function toggleDisplay(id, show) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = show ? '' : 'none';
+}
+
+// Envio do formulário de edição
+async function onSubmitEditarMov(e) {
+  e.preventDefault();
+  // Confirmação antes de prosseguir com alteração
+  if (!confirm('Deseja salvar as alterações desta movimentação?')) {
+    return; // usuário cancelou
+  }
+  const modo = document.getElementById('editMovTipo')?.value;
+  const id = Number(document.getElementById('editMovId')?.value);
+
+  const data = document.getElementById('editData')?.value; 
+  const obs = document.getElementById('editObs')?.value || null;
+  if (modo === 'entrada') {
+    const doador = document.getElementById('editDoador')?.value;
+    const categoria = document.getElementById('editCategoria')?.value;
+    const quantidade = Number(document.getElementById('editQuantidade')?.value);
+    const unidade = document.getElementById('editUnidade')?.value;
+    const campanha = document.getElementById('editCampanha')?.value || null;
+    if (!data || !doador || !categoria || !unidade || !Number.isFinite(quantidade)) {
+      return alert('Preencha os campos obrigatórios');
+    }
+    const r = await fetch(`/api/entradas/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data, doador, categoria, quantidade, unidade, campanha, obs })
+    });
+    if (!r.ok) return alert('Falha ao atualizar entrada');
+  } else if (modo === 'saida') {
+    const familia_id = Number(document.getElementById('editFamiliaId')?.value);
+    const responsavel = document.getElementById('editResponsavel')?.value;
+    const qtd = Number(document.getElementById('editQuantidade')?.value);
+    if (!data || !Number.isInteger(familia_id) || !responsavel || !Number.isInteger(qtd) || qtd <= 0) {
+      return alert('Preencha os campos válidos para saída');
+    }
+    const r = await fetch(`/api/saidas/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data, familia_id, responsavel, qtd, obs })
+    });
+    if (!r.ok) {
+      const msg = await r.text();
+      return alert('Falha ao atualizar saída: ' + msg);
+    }
+  } else {
+    return alert('Modo inválido');
+  }
+  fecharEditarMovModal();
+  await reloadAfterChange();
+}

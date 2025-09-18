@@ -59,6 +59,11 @@ CREATE TABLE IF NOT EXISTS solicitacoes (
   titulo VARCHAR(160) NOT NULL,
   categoria VARCHAR(120) NOT NULL,
   descricao TEXT NULL,
+  data_solicitacao DATE NULL,
+  solicitante VARCHAR(120) NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pendente',
+  prioridade VARCHAR(20) NOT NULL DEFAULT 'normal',
+  quantidade VARCHAR(120) NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -127,11 +132,11 @@ SELECT * FROM (
 WHERE NOT EXISTS (SELECT 1 FROM campanhas);
 
 -- Solicitações
-INSERT INTO solicitacoes (titulo, categoria, descricao)
+INSERT INTO solicitacoes (titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade)
 SELECT * FROM (
-  SELECT 'Cesta básica para família Silva', 'Alimentos', 'Necessidade de cesta básica para família cadastrada.'
-  UNION ALL SELECT 'Leite em pó', 'Alimentos', 'Demanda de leite em pó para crianças.'
-  UNION ALL SELECT 'Kit higiene', 'Higiene', 'Solicitação de itens de higiene pessoal.'
+  SELECT 'Cesta básica para família Silva', 'Alimentos', 'Necessidade de cesta básica para família cadastrada.', CURDATE(), 'Assistente Social', 'pendente', 'alta', '1 cesta'
+  UNION ALL SELECT 'Leite em pó', 'Alimentos', 'Demanda de leite em pó para crianças.', CURDATE(), 'Posto de Saúde', 'pendente', 'normal', '15 latas'
+  UNION ALL SELECT 'Kit higiene', 'Higiene', 'Solicitação de itens de higiene pessoal.', CURDATE(), 'Centro Comunitário', 'atendida', 'baixa', '10 kits'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM solicitacoes);
 
@@ -139,7 +144,7 @@ WHERE NOT EXISTS (SELECT 1 FROM solicitacoes);
 INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs)
 SELECT * FROM (
   SELECT CURDATE(), 'Maria Silva', 'Arroz', 10, 'kg', 'Doação de Alimentos', 'Doação inicial'
-  UNION ALL SELECT CURDATE(), 'Empresa Solidária LTDA', 'Feijão', 200, 'kg', 'Doação de Alimentos', 'Lote corporativo'
+  UNION ALL SELECT CURDATE(), 'Empresa Solidária LTDA', 'Feijão', 20, 'kg', 'Doação de Alimentos', 'Lote corporativo'
   UNION ALL SELECT CURDATE(), 'João Pereira', 'Leite', 30, 'L', 'Natal Solidário', 'Leite longa vida'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM entradas);
@@ -162,3 +167,15 @@ CREATE TABLE IF NOT EXISTS montagens_itens (
   quantidade INT NOT NULL,
   FOREIGN KEY (montagem_id) REFERENCES montagens(id) ON DELETE CASCADE
 );
+
+-- Saídas (distribuição de cestas) - utilizada por rota /api/saidas
+CREATE TABLE IF NOT EXISTS saidas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  data DATE NOT NULL,
+  familia_id INT NULL,
+  responsavel VARCHAR(120) NULL,
+  qtd INT NULL,
+  obs TEXT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_saidas_familia FOREIGN KEY (familia_id) REFERENCES familias(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

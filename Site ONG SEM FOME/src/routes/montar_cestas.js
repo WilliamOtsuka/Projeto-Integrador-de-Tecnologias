@@ -3,144 +3,6 @@ const router = express.Router();
 const pool = require("../config/db");
 const { requireAuth, asyncHandler } = require("../middleware/auth");
 
-async function ensureMontagensSchema(conn) {
-  await conn.query(`CREATE TABLE IF NOT EXISTS montagens (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    data DATE NOT NULL,
-    responsavel VARCHAR(120) NOT NULL,
-    qtd_cestas INT NOT NULL,
-    obs TEXT NULL,
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-
-  const [cols] = await conn.execute(
-    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'montagens'`
-  );
-  const have = new Set(cols.map((c) => String(c.COLUMN_NAME).toLowerCase()));
-  // Coluna legada de versões antigas: "kit_id" não é mais utilizada
-  if (have.has("kit_id")) {
-    try {
-      // Remover FKs que usam kit_id
-      const [fkRows] = await conn.execute(
-        `SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
-         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'montagens' AND COLUMN_NAME = 'kit_id' AND REFERENCED_TABLE_NAME IS NOT NULL`
-      );
-      for (const fk of fkRows) {
-        const name = fk.CONSTRAINT_NAME;
-        try {
-          await conn.query(`ALTER TABLE montagens DROP FOREIGN KEY \`${name}\``);
-        } catch (e) {
-          // ignore
-        }
-      }
-      // Remover índices em kit_id (se houver)
-      const [idxRows] = await conn.execute(
-        `SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS 
-         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'montagens' AND COLUMN_NAME = 'kit_id' AND INDEX_NAME <> 'PRIMARY'`
-      );
-      for (const idx of idxRows) {
-        const idxName = idx.INDEX_NAME;
-        try {
-          await conn.query(`ALTER TABLE montagens DROP INDEX \`${idxName}\``);
-        } catch (e) {
-          // ignore
-        }
-      }
-      // Tentar remover a coluna por completo
-      await conn.query(`ALTER TABLE montagens DROP COLUMN kit_id`);
-      have.delete("kit_id");
-    } catch (e) {
-      try {
-        await conn.query(
-          `ALTER TABLE montagens MODIFY COLUMN kit_id INT NULL DEFAULT NULL`
-        );
-      } catch (e2) {
-        // Fallback: ignorar se não for possível alterar. Inserções não usam kit_id.
-      }
-    }
-  }
-  if (!have.has("responsavel")) {
-    await conn.query(
-      `ALTER TABLE montagens ADD COLUMN responsavel VARCHAR(120) NOT NULL DEFAULT '' AFTER data`
-    );
-  }
-  if (!have.has("qtd_cestas")) {
-    if (have.has("qtd")) {
-      await conn.query(
-        `ALTER TABLE montagens CHANGE COLUMN qtd qtd_cestas INT NOT NULL`
-      );
-      have.add("qtd_cestas");
-    } else if (have.has("quantidade")) {
-      // Renomear coluna legada 'quantidade' usada anteriormente
-      try {
-        await conn.query(
-          `ALTER TABLE montagens CHANGE COLUMN quantidade qtd_cestas INT NOT NULL`
-        );
-        have.add("qtd_cestas");
-        have.delete("quantidade");
-      } catch (e) {
-        // Se não for possível renomear, ao menos evitar erro de NOT NULL
-        try {
-          await conn.query(
-            `ALTER TABLE montagens MODIFY COLUMN quantidade INT NULL DEFAULT NULL`
-          );
-        } catch (e2) {}
-        // Criar a coluna correta
-        await conn.query(
-          `ALTER TABLE montagens ADD COLUMN qtd_cestas INT NOT NULL DEFAULT 0 AFTER responsavel`
-        );
-        have.add("qtd_cestas");
-      }
-    } else {
-      await conn.query(
-        `ALTER TABLE montagens ADD COLUMN qtd_cestas INT NOT NULL DEFAULT 0 AFTER responsavel`
-      );
-      have.add("qtd_cestas");
-    }
-  } else {
-    // Se 'quantidade' existir além de 'qtd_cestas', torná-la opcional para evitar validações NOT NULL
-    if (have.has("quantidade")) {
-      try {
-        await conn.query(
-          `ALTER TABLE montagens MODIFY COLUMN quantidade INT NULL DEFAULT NULL`
-        );
-      } catch (e) {}
-    }
-  }
-  if (!have.has("obs")) {
-    await conn.query(`ALTER TABLE montagens ADD COLUMN obs TEXT NULL AFTER qtd_cestas`);
-  }
-
-  await conn.query(`CREATE TABLE IF NOT EXISTS montagens_itens (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    montagem_id INT NOT NULL,
-    categoria VARCHAR(120) NOT NULL,
-    unidade VARCHAR(16) NOT NULL,
-    quantidade INT NOT NULL,
-    FOREIGN KEY (montagem_id) REFERENCES montagens(id) ON DELETE CASCADE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-
-  const [miCols] = await conn.execute(
-    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'montagens_itens'`
-  );
-  const miHave = new Set(miCols.map((c) => String(c.COLUMN_NAME).toLowerCase()));
-  if (!miHave.has("categoria")) {
-    await conn.query(
-      `ALTER TABLE montagens_itens ADD COLUMN categoria VARCHAR(120) NULL`
-    );
-  }
-  if (!miHave.has("unidade")) {
-    await conn.query(
-      `ALTER TABLE montagens_itens ADD COLUMN unidade VARCHAR(16) NULL`
-    );
-  }
-  if (!miHave.has("quantidade")) {
-    await conn.query(
-      `ALTER TABLE montagens_itens ADD COLUMN quantidade INT NULL`
-    );
-  }
-}
-
 router.post(
   "/",
   requireAuth,
@@ -185,7 +47,6 @@ router.post(
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
-      await ensureMontagensSchema(conn);
 
       // Verifica saldo atual por (categoria, unidade)
       const [entradas] = await conn.execute(
@@ -293,7 +154,7 @@ router.post(
           "MONTAGEM",
           "Cesta Básica",
           qtd,
-          "cesta",
+          "cx",
           null,
           `Produção montagem #${montagemId}`,
         ]

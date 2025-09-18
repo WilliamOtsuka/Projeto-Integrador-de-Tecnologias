@@ -40,7 +40,7 @@
     </p>
     <section class="crud-familias">
       <!-- Modal de Cadastro/Edição -->
-      <div id="modalFamilia" class="modal" style="display: none">
+  <div id="modalFamilia" class="modal" style="display:none;">
         <div class="modal-conteudo form-adicionar">
           <span class="fechar" id="fecharModalBtn">&times;</span>
           <h2 id="tituloModal">Adicionar Família</h2>
@@ -73,7 +73,7 @@
                 maxlength="9"
                 required
               />
-              <small id="cepFamiliaStatus" style="color: #666"></small>
+              <small id="cepFamiliaStatus" class="text-gray-666"></small>
             </div>
             <div class="form-field">
               <label for="logradouroFamilia">Rua</label>
@@ -159,7 +159,7 @@
           <!-- Linhas de famílias serão inseridas aqui via JS -->
         </tbody>
       </table>
-      <div class="pagination" id="paginacaoFamilias" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+  <div class="pagination pagination-bar" id="paginacaoFamilias">
         <button id="prevFamilias" class="btn-secondary">Anterior</button>
         <span id="infoFamilias">Página 1 de 1</span>
         <button id="nextFamilias" class="btn-secondary">Próxima</button>

@@ -3,56 +3,10 @@ const router = express.Router();
 const pool = require("../config/db");
 const { requireAuth, asyncHandler } = require("../middleware/auth");
 
-async function ensureSaidasSchema(conn) {
-  await conn.query(`CREATE TABLE IF NOT EXISTS saidas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    data DATE NOT NULL,
-    familia_id INT NULL,
-    responsavel VARCHAR(120) NULL,
-    qtd INT NULL,
-    obs TEXT NULL,
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-
-  const [cols] = await conn.execute(
-    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'saidas'`
-  );
-  const have = new Set(cols.map((c) => c.COLUMN_NAME.toLowerCase()));
-  if (have.has("familia")) {
-    await conn.query(
-      `ALTER TABLE saidas MODIFY COLUMN familia VARCHAR(255) NULL DEFAULT NULL`
-    );
-  }
-  if (have.has("quantidade_cestas")) {
-    await conn.query(
-      `ALTER TABLE saidas MODIFY COLUMN quantidade_cestas INT NULL DEFAULT NULL`
-    );
-  }
-  if (!have.has("familia_id")) {
-    await conn.query(
-      `ALTER TABLE saidas ADD COLUMN familia_id INT NULL AFTER data`
-    );
-  }
-  if (!have.has("responsavel")) {
-    await conn.query(
-      `ALTER TABLE saidas ADD COLUMN responsavel VARCHAR(120) NULL AFTER familia_id`
-    );
-  }
-  if (!have.has("qtd")) {
-    await conn.query(
-      `ALTER TABLE saidas ADD COLUMN qtd INT NULL AFTER responsavel`
-    );
-  }
-  if (!have.has("obs")) {
-    await conn.query(`ALTER TABLE saidas ADD COLUMN obs TEXT NULL AFTER qtd`);
-  }
-}
-
 router.get(
   "/",
   requireAuth,
   asyncHandler(async (req, res) => {
-    await ensureSaidasSchema(pool);
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 30, 1), 200);
     const offset = (page - 1) * limit;
@@ -74,7 +28,6 @@ router.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    await ensureSaidasSchema(pool);
     const [rows] = await pool.execute(
       `
     SELECT s.*, f.nome AS familia_nome
@@ -108,7 +61,6 @@ router.post(
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
-      await ensureSaidasSchema(conn);
 
       const [saldoRows] = await conn.execute(
         "SELECT COALESCE(SUM(quantidade),0) AS saldo FROM entradas WHERE TRIM(categoria) COLLATE utf8mb4_unicode_ci = 'Cesta Básica'"
@@ -206,7 +158,6 @@ router.put(
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
-      await ensureSaidasSchema(conn);
 
       // Atualiza saída
       const [upd] = await conn.execute(
@@ -256,7 +207,6 @@ router.delete(
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
-      await ensureSaidasSchema(conn);
 
       // Obter dados para montar o padrão da OBS e remover a saída
       const [rows] = await conn.execute("SELECT * FROM saidas WHERE id=?", [

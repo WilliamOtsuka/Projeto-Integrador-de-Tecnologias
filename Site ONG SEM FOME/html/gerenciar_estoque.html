@@ -53,7 +53,7 @@
 				</aside>
 
 				<div class="estoque-conteudo">
-					<div class="filtros" style="display:flex; gap:.8rem; align-items:end; flex-wrap:wrap; margin: 0 0 1rem 0;">
+					<div class="filtros flex-filtros">
 				<div class="form-field">
 					<label for="filtroCategoria">Categoria:</label>
 					<select id="filtroCategoria">
@@ -84,7 +84,7 @@
 				</tbody>
 			</table>
 
-			<div class="pagination" id="paginacaoEstoque" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+			<div class="pagination pagination-bar" id="paginacaoEstoque">
 				<button id="prevEstoque" class="btn-secondary">Anterior</button>
 				<span id="infoEstoque">Página 1 de 1</span>
 				<button id="nextEstoque" class="btn-secondary">Próxima</button>
@@ -93,9 +93,10 @@
 			<!-- Modal Detalhes -->
 			<div id="modalDetalhesEstoque" class="modal" style="display:none;">
 				<div class="modal-conteudo" style="max-width: 900px;">
+
 					<span class="fechar" id="fecharModalDetalhes">&times;</span>
 					<h2 id="tituloModalDetalhes">Detalhes do Estoque</h2>
-					<div class="filtros" id="detFiltros" style="display:flex; gap:.8rem; align-items:end; flex-wrap:wrap; margin: 0 0 1rem 0;">
+					<div class="filtros flex-filtros" id="detFiltros">
 						<div class="form-field">
 							<label for="detDataDe">Data início:</label>
 							<input type="date" id="detDataDe" />
@@ -124,11 +125,11 @@
 								<option value="Saída">Saída</option>
 							</select>
 						</div>
-						<div class="form-field" style="flex:1 1 200px;">
+						<div class="form-field flex-grow-200">
 							<label for="detBusca">Busca:</label>
 							<input type="text" id="detBusca" placeholder="Filtrar por doador, campanha ou observações" />
 						</div>
-						<div class="form-actions" style="margin-left:auto;">
+						<div class="form-actions flex-end-auto">
 							<button id="detBtnLimpar" class="btn-secondary">Limpar filtros</button>
 						</div>
 					</div>
@@ -145,7 +146,7 @@
 						</thead>
 						<tbody></tbody>
 					</table>
-					<div class="pagination" id="paginacaoDetalhes" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+					<div class="pagination pagination-bar" id="paginacaoDetalhes">
 						<button id="prevDetalhes" class="btn-secondary">Anterior</button>
 						<span id="infoDetalhes">Página 1 de 1</span>
 						<button id="nextDetalhes" class="btn-secondary">Próxima</button>
@@ -153,11 +154,11 @@
 				</div>
 			</div>
 
-			<h2 style="margin-top:2rem;">Movimentações</h2>
-			<p class="descricao-pagina" style="margin-top:.2rem;">
+			<h2 class="mt-2rem">Movimentações</h2>
+			<p class="descricao-pagina mt-02rem">
 				Lista cronológica de entradas e saídas, com saldo por categoria/unidade.
 			</p>
-			<div class="filtros" id="movFiltros" style="display:flex; gap:.8rem; align-items:end; flex-wrap:wrap; margin: 0 0 1rem 0;">
+			<div class="filtros flex-filtros" id="movFiltros">
 				<div class="form-field">
 					<label for="movFiltroCategoria">Categoria:</label>
 					<select id="movFiltroCategoria">
@@ -184,7 +185,7 @@
 						<option value="Saída">Saída</option>
 					</select>
 				</div>
-				<div class="form-actions" style="margin-left:auto;">
+				<div class="form-actions flex-end-auto">
 					<button id="movBtnLimpar" class="btn-secondary">Limpar filtros</button>
 				</div>
 			</div>
@@ -206,7 +207,7 @@
 				<tbody>
 				</tbody>
 			</table>
-			<div class="pagination" id="paginacaoMov" style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+			<div class="pagination pagination-bar" id="paginacaoMov">
 				<label for="movPerPage">Por página:</label>
 				<select id="movPerPage" class="form-select">
 					<option value="10">10</option>
@@ -216,6 +217,58 @@
 				<button id="prevMov" class="btn-secondary">Anterior</button>
 				<span id="infoMov">Página 1 de 1</span>
 				<button id="nextMov" class="btn-secondary">Próxima</button>
+			</div>
+
+			<!-- Modal Edição Movimentação -->
+			<div id="modalEditarMov" class="modal" style="display:none;">
+				<div class="modal-conteudo" style="max-width:600px;">
+					<span class="fechar" id="fecharModalEditarMov">&times;</span>
+					<h2 id="tituloModalEditarMov">Editar Movimentação</h2>
+					<form id="formEditarMov" class="form-grid form-grid-responsive">
+						<input type="hidden" id="editMovId" />
+						<input type="hidden" id="editMovTipo" />
+						<div class="form-field">
+							<label for="editData">Data:</label>
+							<input type="date" id="editData" required readonly title="A data não pode ser alterada" />
+						</div>
+						<div class="form-field" id="grpEditDoador">
+							<label for="editDoador">Doador:</label>
+							<input type="text" id="editDoador" />
+						</div>
+						<div class="form-field hidden" id="grpEditFamilia">
+							<label for="editFamiliaId">Família (ID):</label>
+							<input type="number" id="editFamiliaId" min="1" />
+						</div>
+						<div class="form-field hidden" id="grpEditResponsavel">
+							<label for="editResponsavel">Responsável:</label>
+							<input type="text" id="editResponsavel" />
+						</div>
+						<div class="form-field">
+							<label for="editCategoria">Categoria:</label>
+							<input type="text" id="editCategoria" required />
+						</div>
+						<div class="form-field">
+							<label for="editQuantidade">Quantidade:</label>
+							<input type="number" step="1" id="editQuantidade" required />
+						</div>
+						<div class="form-field">
+							<label for="editUnidade">Unidade:</label>
+							<input type="text" id="editUnidade" required />
+						</div>
+						<div class="form-field">
+							<label for="editCampanha">Campanha:</label>
+							<input type="text" id="editCampanha" />
+						</div>
+						<div class="form-field full-width-field">
+							<label for="editObs">Observações:</label>
+							<textarea id="editObs" rows="2"></textarea>
+						</div>
+						<div class="form-actions full-width-field" style="display:flex; gap:.6rem; justify-content:flex-end;">
+							<button type="button" id="cancelarEditarMov" class="btn-secondary">Cancelar</button>
+							<button type="submit" class="btn-primary">Salvar</button>
+						</div>
+					</form>
+				</div>
 			</div>
 			</div>
 			</div>

@@ -1,13 +1,14 @@
+// carrega colaboradores para o select
 async function carregarColaboradores() {
   try {
-    const r = await fetch("/api/colaboradores?limit=1000");
+    const r = await fetch("/api/colaboradores?limit=1000"); // carregar todos os colaboradores
     if (!r.ok) return;
     const payload = await r.json();
-    const list = Array.isArray(payload) ? payload : (payload.data || []);
+    const list = Array.isArray(payload) ? payload : payload.data || [];
     const sel = document.getElementById("saResponsavel");
     if (!sel) return;
     sel.innerHTML = "";
-    // Placeholder
+
     const placeholder = document.createElement("option");
     placeholder.value = "";
     placeholder.textContent = "Selecione o colaborador";
@@ -25,11 +26,12 @@ async function carregarColaboradores() {
   }
 }
 
+// carrega famílias para o select
 async function carregarFamilias() {
   try {
-    const r = await fetch("/api/familias?limit=1000");
-    const payload = r.ok ? await r.json() : [];
-    const familias = Array.isArray(payload) ? payload : (payload.data || []);
+    const r = await fetch("/api/familias?limit=1000"); // carregar todas as famílias
+    const payload = r.ok ? await r.json() : []; //
+    const familias = Array.isArray(payload) ? payload : payload.data || [];
     const sel = document.getElementById("saFamilia");
     sel.innerHTML = "";
     const placeholder = document.createElement("option");
@@ -49,6 +51,7 @@ async function carregarFamilias() {
   }
 }
 
+// carrega e exibe saldo de cestas
 async function carregarSaldoCestas() {
   try {
     const r = await fetch("/api/estoque/saldo-cestas");
@@ -65,7 +68,7 @@ async function carregarSaldoCestas() {
 let pageSaidas = 1;
 const limitSaidas = 30;
 let totalSaidas = 0;
-
+// atualiza info da paginação
 function updatePaginacaoSaidasInfo() {
   const info = document.getElementById("infoSaidas");
   if (!info) return;
@@ -77,20 +80,34 @@ function updatePaginacaoSaidasInfo() {
   if (next) next.disabled = pageSaidas >= totalPages;
 }
 
+// carrega e exibe saídas recentes
 async function carregarSaidasRecentes() {
   try {
-    const r = await fetch(`/api/saidas?page=${pageSaidas}&limit=${limitSaidas}`);
+    const r = await fetch(
+      `/api/saidas?page=${pageSaidas}&limit=${limitSaidas}`
+    );
     if (!r.ok) return;
     const payload = await r.json();
-    const rows = Array.isArray(payload) ? payload : (payload.data || []);
-    totalSaidas = (Array.isArray(payload) ? rows.length : (payload.total ?? rows.length)) || 0;
+    const rows = Array.isArray(payload) ? payload : payload.data || [];
+    totalSaidas =
+      (Array.isArray(payload) ? rows.length : payload.total ?? rows.length) ||
+      0;
     const tbody = document.querySelector("#tabSaidas tbody");
     tbody.innerHTML = "";
     rows.forEach((s) => {
       const tr = document.createElement("tr");
       const d = s.data ? new Date(s.data) : null;
-      const dstr = d && !Number.isNaN(d.getTime()) ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}` : '';
-      tr.innerHTML = `<td>${s.id}</td><td>${dstr}</td><td>${s.familia_nome || ""}</td><td>${s.qtd}</td><td>${s.responsavel || ""}</td><td>${s.obs || ""}</td>`;
+      const dstr =
+        d && !Number.isNaN(d.getTime())
+          ? `${String(d.getDate()).padStart(2, "0")}/${String(
+              d.getMonth() + 1
+            ).padStart(2, "0")}/${String(d.getFullYear()).slice(-2)}`
+          : "";
+      tr.innerHTML = `<td>${s.id}</td><td>${dstr}</td><td>${
+        s.familia_nome || ""
+      }</td><td>${s.qtd}</td><td>${s.responsavel || ""}</td><td>${
+        s.obs || ""
+      }</td>`;
       tbody.appendChild(tr);
     });
     updatePaginacaoSaidasInfo();
@@ -99,6 +116,7 @@ async function carregarSaidasRecentes() {
   }
 }
 
+// registra nova saída
 async function registrarSaida() {
   const data = document.getElementById("saData").value;
   const familia_id =
@@ -127,6 +145,7 @@ async function registrarSaida() {
   }
 }
 
+// Inicialização
 (function init() {
   document.getElementById("saData").valueAsDate = new Date();
   document
@@ -138,9 +157,19 @@ async function registrarSaida() {
   carregarSaidasRecentes();
   const prev = document.getElementById("prevSaidas");
   const next = document.getElementById("nextSaidas");
-  if (prev) prev.addEventListener("click", async () => { if (pageSaidas > 1) { pageSaidas--; await carregarSaidasRecentes(); }});
-  if (next) next.addEventListener("click", async () => {
-    const totalPages = Math.max(1, Math.ceil(totalSaidas / limitSaidas));
-    if (pageSaidas < totalPages) { pageSaidas++; await carregarSaidasRecentes(); }
-  });
+  if (prev)
+    prev.addEventListener("click", async () => {
+      if (pageSaidas > 1) {
+        pageSaidas--;
+        await carregarSaidasRecentes();
+      }
+    });
+  if (next)
+    next.addEventListener("click", async () => {
+      const totalPages = Math.max(1, Math.ceil(totalSaidas / limitSaidas));
+      if (pageSaidas < totalPages) {
+        pageSaidas++;
+        await carregarSaidasRecentes();
+      }
+    });
 })();

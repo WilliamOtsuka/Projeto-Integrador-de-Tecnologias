@@ -49,21 +49,27 @@
           <label>Qtd cestas</label>
           <input type="number" id="mcQtd" min="1" value="1" />
         </div>
-        <div class="form-field" style="grid-column: 1 / -1;">
+        <div class="form-field full-width-field">
           <label>Observações</label>
           <textarea id="mcObs" rows="2"></textarea>
         </div>
       </div>
 
-      <div class="form-grid" style="margin-top:10px; grid-template-columns: 2fr 1fr;">
+      <div class="form-grid grid-2fr-1fr mt-1rem">
         <div class="form-field">
           <label>Adicionar item do estoque (quantidade por cesta)</label>
-          <div style="display:flex; gap:8px; align-items:end;">
+          <div class="inline-flex-row">
             <select id="mcItem"></select>
-            <input id="mcQtdItem" type="number" min="1" placeholder="Qtd por cesta" style="max-width:140px" />
+            <input
+              id="mcQtdItem"
+              type="number"
+              min="1"
+              placeholder="Qtd por cesta"
+              class="maxw-140"
+            />
             <button class="btn-primary" id="btnAddItem">Adicionar</button>
           </div>
-          <small id="mcSaldoInfo" style="color:#555"></small>
+          <small id="mcSaldoInfo" class="text-muted"></small>
         </div>
       </div>
 
@@ -81,12 +87,16 @@
       </table>
 
       <div class="form-actions">
-        <button class="btn-primary" id="btnSalvarMontagem">Salvar Montagem</button>
+        <button class="btn-primary" id="btnSalvarMontagem">
+          Salvar Montagem
+        </button>
       </div>
     </section>
 
     <script src="/js/montar_cestas.js"></script>
     <script src="/js/auth.js"></script>
   </body>
-  <footer class="rodape">© 2025 ONG SEM FOME. Todos os direitos reservados.</footer>
+  <footer class="rodape">
+    © 2025 ONG SEM FOME. Todos os direitos reservados.
+  </footer>
 </html>
