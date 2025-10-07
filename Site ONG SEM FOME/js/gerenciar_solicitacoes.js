@@ -3,6 +3,7 @@ let pageSolic = 1;
 const limitSolic = 30;
 let totalSolic = 0;
 let filtros = { de: '', ate: '', status: '', prioridade: '', busca: '' };
+let categoriasCarregadas = false;
 
 function formatDateDDMMYY(iso) {
   if (!iso) return '';
@@ -12,6 +13,39 @@ function formatDateDDMMYY(iso) {
   const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
   const yy = String(d.getUTCFullYear()).slice(-2);
   return `${dd}/${mm}/${yy}`;
+}
+
+// Helpers de normalização para preencher campos
+function toDateInputValue(v) {
+  if (!v) return '';
+  // Já no formato correto
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(v))) return String(v);
+  const d = new Date(v);
+  if (isNaN(d)) return '';
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function setSelectValue(selectId, value) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const target = (value ?? '').toString().trim().toLowerCase();
+  for (const opt of sel.options) {
+    if (opt.value.toLowerCase() === target) {
+      sel.value = opt.value;
+      return;
+    }
+  }
+  // Se não encontrou e for unidade, adiciona opção dinâmica para exibir o valor do banco
+  if ((selectId === 'unidadeSolicitacao' || selectId === 'categoriaSolicitacao') && target) {
+    const o = document.createElement('option');
+    o.value = target;
+    o.textContent = target;
+    sel.appendChild(o);
+    sel.value = target;
+  }
 }
 
 function aplicaFiltros(lista) {
@@ -58,15 +92,17 @@ function renderTabelaSolicitacoes() {
     tr.innerHTML = `
       <td>${s.id}</td>
       <td>${s.titulo}</td>
-      <td>${formatDateDDMMYY(s.data_solicitacao)}</td>
-      <td>${s.solicitante || ''}</td>
-      <td>${s.status || 'pendente'}</td>
-      <td>${s.prioridade ? `<span class="badge ${String(s.prioridade).toLowerCase()==='urgente' ? 'badge-prioridade--urgente' : 'badge-prioridade--normal'}">${s.prioridade}</span>` : ''}</td>
-      <td>${s.quantidade || ''}</td>
-      <td>${s.categoria}</td>
-      <td>${s.descricao}</td>
-      <td>
-        <button class="btn-edit" onclick="editarSolicitacao(${s.id})">Editar</button>
+  <td>${formatDateDDMMYY(s.data_solicitacao)}</td>
+  <td>${s.solicitante || ''}</td>
+  <td>${s.status || 'pendente'}</td>
+  <td>${s.prioridade ? `<span class="badge ${String(s.prioridade).toLowerCase()==='urgente' ? 'badge-prioridade--urgente' : 'badge-prioridade--normal'}">${s.prioridade}</span>` : ''}</td>
+  <td>${(s.quantidade ?? '')}</td>
+  <td>${s.unidade || ''}</td>
+  <td>${s.categoria}</td>
+  <td>${s.descricao}</td>
+  <td>${formatDateDDMMYY(s.atualizacao)}</td>
+  <td>
+  <button class="btn-edit" onclick="editarSolicitacao(${s.id})">Editar</button>
         <button class="btn-delete" onclick="excluirSolicitacao(${s.id})">Excluir</button>
       </td>`;
     tbody.appendChild(tr);
@@ -87,12 +123,25 @@ function abrirModalSolicitacao(editar = false, item = {}) {
     : "Adicionar Solicitação";
   document.getElementById("solicitacaoId").value = item.id || "";
   document.getElementById("tituloSolicitacao").value = item.titulo || "";
-  document.getElementById("dataSolicitacao").value = item.data_solicitacao || "";
-  document.getElementById("categoriaSolicitacao").value = item.categoria || "";
+  // mantém a data ISO diretamente, sem conversões, para preservar o valor
+  document.getElementById("dataSolicitacao").value = toDateInputValue(item.data_solicitacao);
+  // Aguarda categorias carregarem para não perder o valor
+  const aplicaCategoria = () => setSelectValue("categoriaSolicitacao", item.categoria || "");
+  if (!categoriasCarregadas) {
+    const sel = document.getElementById("categoriaSolicitacao");
+    if (sel) {
+      categoriasSelect(sel).then(aplicaCategoria).catch(() => aplicaCategoria());
+    } else {
+      aplicaCategoria();
+    }
+  } else {
+    aplicaCategoria();
+  }
   document.getElementById("solicitanteSolicitacao").value = item.solicitante || "";
-  document.getElementById("statusSolicitacao").value = item.status || "pendente";
-  document.getElementById("prioridadeSolicitacao").value = item.prioridade || "normal";
-  document.getElementById("quantidadeSolicitacao").value = item.quantidade || "";
+  setSelectValue("statusSolicitacao", (item.status || 'pendente'));
+  setSelectValue("prioridadeSolicitacao", (item.prioridade || 'normal'));
+  document.getElementById("quantidadeValor").value = (item.quantidade ?? "");
+  setSelectValue("unidadeSolicitacao", (item.unidade || ""));
   document.getElementById("descricaoSolicitacao").value = item.descricao || "";
 }
 
@@ -146,7 +195,8 @@ document.getElementById("formSolicitacao").onsubmit = function (e) {
   const solicitante = document.getElementById("solicitanteSolicitacao").value;
   const status = document.getElementById("statusSolicitacao").value;
   const prioridade = document.getElementById("prioridadeSolicitacao").value;
-  const quantidade = document.getElementById("quantidadeSolicitacao").value;
+  const quantidade = (document.getElementById("quantidadeValor").value || '').trim();
+  const unidade = document.getElementById("unidadeSolicitacao").value || '';
   const descricao = document.getElementById("descricaoSolicitacao").value;
   const tituloOk = (titulo || "").trim().length >= 2;
   const categoriaOk = (categoria || "").trim().length >= 2;
@@ -169,13 +219,13 @@ document.getElementById("formSolicitacao").onsubmit = function (e) {
         await fetch(`/api/solicitacoes/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade }),
+          body: JSON.stringify({ titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade: quantidade ? Number(quantidade) : null, unidade })
         });
       } else {
         await fetch("/api/solicitacoes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade }),
+          body: JSON.stringify({ titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade: quantidade ? Number(quantidade) : null, unidade })
         });
       }
       fecharModalSolicitacao();
@@ -286,6 +336,8 @@ async function categoriasSelect(selectEl) {
         opt.textContent = c.nome;
         selectEl.appendChild(opt);
       });
+    categoriasCarregadas = true;
+    return cats;
   } catch (err) {
     console.error(err);
   }

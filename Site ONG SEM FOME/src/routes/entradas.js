@@ -13,15 +13,41 @@ router.get('/', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 router.post('/', requireAuth, asyncHandler(async (req, res) => {
-  const { data, doador, categoria, quantidade, unidade, campanha, obs } = req.body;
-  const [r] = await pool.execute('INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs) VALUES (?,?,?,?,?,?,?)', [data, doador, categoria, quantidade, unidade, campanha || null, obs || null]);
-  res.status(201).json({ id: r.insertId, data, doador, categoria, quantidade, unidade, campanha, obs });
+  const { data, doador, categoria, quantidade, unidade, campanha, obs, tipo, fornecedor, forma_pagamento, solicitacao_id } = req.body;
+  const t = (tipo === 'compra') ? 'compra' : 'doacao';
+  const [r] = await pool.execute(
+    'INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs, tipo, fornecedor, forma_pagamento, solicitacao_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+    [data, doador, categoria, quantidade, unidade, campanha || null, obs || null, t, fornecedor || null, forma_pagamento || null, solicitacao_id || null]
+  );
+  if (solicitacao_id) {
+    try {
+      await pool.execute('UPDATE solicitacoes SET status=? WHERE id=?', ['atendida', solicitacao_id]);
+    } catch (e) {
+      // loga mas não bloqueia a criação da entrada
+      // eslint-disable-next-line no-console
+      console.error('Falha ao atualizar status da solicitação', e.message);
+    }
+  }
+  res.status(201).json({ id: r.insertId, data, doador, categoria, quantidade, unidade, campanha, obs, tipo: t, fornecedor, forma_pagamento, solicitacao_id });
 }));
 
 router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
-  const { id } = req.params; const { data, doador, categoria, quantidade, unidade, campanha, obs } = req.body;
-  await pool.execute('UPDATE entradas SET data=?, doador=?, categoria=?, quantidade=?, unidade=?, campanha=?, obs=? WHERE id=?', [data, doador, categoria, quantidade, unidade, campanha || null, obs || null, id]);
-  res.json({ id: Number(id), data, doador, categoria, quantidade, unidade, campanha, obs });
+  const { id } = req.params;
+  const { data, doador, categoria, quantidade, unidade, campanha, obs, tipo, fornecedor, forma_pagamento, solicitacao_id } = req.body;
+  const t = (tipo === 'compra') ? 'compra' : 'doacao';
+  await pool.execute(
+    'UPDATE entradas SET data=?, doador=?, categoria=?, quantidade=?, unidade=?, campanha=?, obs=?, tipo=?, fornecedor=?, forma_pagamento=?, solicitacao_id=? WHERE id=?',
+    [data, doador, categoria, quantidade, unidade, campanha || null, obs || null, t, fornecedor || null, forma_pagamento || null, solicitacao_id || null, id]
+  );
+  if (solicitacao_id) {
+    try {
+      await pool.execute('UPDATE solicitacoes SET status=? WHERE id=?', ['atendida', solicitacao_id]);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Falha ao atualizar status da solicitação', e.message);
+    }
+  }
+  res.json({ id: Number(id), data, doador, categoria, quantidade, unidade, campanha, obs, tipo: t, fornecedor, forma_pagamento, solicitacao_id });
 }));
 
 router.delete('/:id', requireAuth, asyncHandler(async (req, res) => {

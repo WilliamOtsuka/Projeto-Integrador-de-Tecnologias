@@ -3,7 +3,7 @@ let pageEntradas = 1;
 const limitEntradas = 30;
 let totalEntradas = 0;
 
-// Validação/máscara (unidade, quantidade, datas, etc.)
+// Utilidades e validações
 const onlyDigits = (v) => (v || "").replace(/\D/g, "");
 const unidadesValidas = new Set([
   "un",
@@ -15,31 +15,23 @@ const unidadesValidas = new Set([
   "pct",
   "sac",
   "kit",
+  "lata",
 ]);
-
-function normalizaUnidade(v) {
-  return (v || "").trim().toLowerCase();
-}
-
-function validaUnidade(v) {
-  return unidadesValidas.has(normalizaUnidade(v));
-}
-
-function validaQuantidade(v) {
+const normalizaUnidade = (v) => (v || "").trim().toLowerCase();
+const validaUnidade = (v) => unidadesValidas.has(normalizaUnidade(v));
+const validaQuantidade = (v) => {
   const n = Number(v);
 
   return Number.isInteger(n) && n >= 1;
-}
-
-function todayYYYYMMDD() {
+};
+const todayYYYYMMDD = () => {
   const d = new Date();
   const mm = (d.getMonth() + 1).toString().padStart(2, "0");
   const dd = d.getDate().toString().padStart(2, "0");
 
   return `${d.getFullYear()}-${mm}-${dd}`;
-}
-
-function validaData(dStr) {
+};
+const validaData = (dStr) => {
   if (!dStr) return false;
   const hoje = new Date(todayYYYYMMDD());
   const dt = new Date(dStr);
@@ -47,20 +39,16 @@ function validaData(dStr) {
   if (Number.isNaN(dt.getTime())) return false;
 
   return dt <= hoje;
-}
-
-function validaTextoMin(v, n) {
-  return (v || "").trim().length >= n;
-}
-
-function formatDateDDMMYY(dStr) {
+};
+const validaTextoMin = (v, n) => (v || "").trim().length >= n;
+const formatDateDDMMYY = (dStr) => {
   const d = new Date(dStr);
   if (Number.isNaN(d.getTime())) return "-";
   const yy = String(d.getFullYear()).slice(-2);
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${dd}/${mm}/${yy}`;
-}
+};
 
 // Renderiza a tabela
 function renderTabelaEntradas() {
@@ -74,12 +62,14 @@ function renderTabelaEntradas() {
       tr.innerHTML = `
             <td>${e.id}</td>
             <td>${formatDateDDMMYY(e.data)}</td>
-            <td>${e.doador}</td>
+            <td>${e.tipo || 'doacao'}</td>
+            <td>${e.doador || '-'}</td>
+            <td>${e.fornecedor || '-'}</td>
             <td>${e.categoria}</td>
             <td>${e.quantidade}</td>
             <td>${e.unidade}</td>
-            <td>${e.campanha || "-"}</td>
-            <td>${e.obs || "-"}</td>`;
+            <td>${e.campanha || '-'}</td>
+            <td>${e.obs || '-'}</td>`;
       tbody.appendChild(tr);
     });
 }
@@ -98,26 +88,31 @@ function abrirModalEntrada(editar = false, item = {}) {
     : "Adicionar Entrada";
   document.getElementById("entradaId").value = item.id || "";
   document.getElementById("dataEntrada").value = item.data || "";
+  document.getElementById("tipoEntrada").value = item.tipo || "doacao";
   document.getElementById("doadorEntrada").value = item.doador || "";
   document.getElementById("categoriaEntrada").value = item.categoria || "";
   document.getElementById("quantidadeEntrada").value = item.quantidade || "";
   document.getElementById("unidadeEntrada").value = item.unidade || "";
   document.getElementById("campanhaEntrada").value = item.campanha || "";
   document.getElementById("obsEntrada").value = item.obs || "";
+  document.getElementById("fornecedorEntrada").value = item.fornecedor || "";
+  document.getElementById("formaPagamentoEntrada").value = item.forma_pagamento || "";
+  document.getElementById("solicitacaoRefEntrada").value = item.solicitacao_id || "";
 
-  // Limpar mensagens de validade anteriores
+  toggleCamposPorTipo(document.getElementById("tipoEntrada").value);
+
+  // Limpar mensagens de validação anteriores
   [
     "dataEntrada",
     "doadorEntrada",
     "categoriaEntrada",
     "quantidadeEntrada",
     "unidadeEntrada",
+    "fornecedorEntrada",
+    "formaPagamentoEntrada",
   ].forEach((id) => {
     const el = document.getElementById(id);
-
-    if (el) {
-      el.setCustomValidity("");
-    }
+    if (el) el.setCustomValidity("");
   });
 }
 
@@ -132,7 +127,6 @@ function fecharModalEntrada() {
   const done = () => {
     modal.style.display = "none";
     modal.classList.remove("saindo");
-
     if (content) content.removeEventListener("transitionend", onEnd);
   };
   const onEnd = (e) => {
@@ -147,98 +141,137 @@ function fecharModalEntrada() {
 }
 
 // Abrir/fechar modal
-document.getElementById("btnAdicionarEntrada").onclick = () =>
-  abrirModalEntrada();
+const btnAddEntrada = document.getElementById("btnAdicionarEntrada");
+if (btnAddEntrada) btnAddEntrada.onclick = () => abrirModalEntrada();
 
 document.getElementById("fecharModalEntrada").onclick = fecharModalEntrada;
-
 document.getElementById("fecharModalEntradaBtn").onclick = fecharModalEntrada;
 
 // Fecha o modal ao clicar fora do conteúdo
-window.onclick = function (event) {
-  if (event.target == document.getElementById("modalEntrada"))
-    fecharModalEntrada();
-};
+document.addEventListener('click', (event) => {
+  const modal = document.getElementById("modalEntrada");
+  if (event.target === modal) fecharModalEntrada();
+});
 
-// Valida campos e cria/atualiza
-document.getElementById("formEntrada").onsubmit = function (e) {
+function toggleCamposPorTipo(tipo) {
+  const isCompra = tipo === 'compra';
+  const camposCompra = document.getElementById('camposCompra');
+  const campoDoador = document.getElementById('campoDoador');
+  if (camposCompra) camposCompra.style.display = isCompra ? '' : 'none';
+  if (campoDoador) campoDoador.style.display = isCompra ? 'none' : '';
+  // Requireds
+  const doadorEl = document.getElementById('doadorEntrada');
+  const fornEl = document.getElementById('fornecedorEntrada');
+  const formaEl = document.getElementById('formaPagamentoEntrada');
+  if (doadorEl) doadorEl.required = !isCompra;
+  if (fornEl) fornEl.required = isCompra;
+  if (formaEl) formaEl.required = isCompra;
+}
+
+const tipoEntradaEl = document.getElementById('tipoEntrada');
+if (tipoEntradaEl) {
+  tipoEntradaEl.addEventListener('change', (e) => toggleCamposPorTipo(e.target.value));
+}
+
+async function loadSolicitacoesAprovadas(selectEl) {
+  if (!selectEl) return;
+  try {
+    const r = await fetch('/api/solicitacoes?limit=1000');
+    if (!r.ok) throw new Error('Falha ao carregar solicitações');
+    const payload = await r.json();
+    const lista = Array.isArray(payload) ? payload : (payload.data || []);
+    const aprovadas = lista.filter(s => String(s.status || '').toLowerCase() === 'aprovado');
+    selectEl.innerHTML = '<option value="">Não vincular</option>';
+    aprovadas.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = `#${s.id} - ${s.titulo} (${s.quantidade || ''} ${s.unidade || ''})`;
+      selectEl.appendChild(opt);
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// Submit do formulário
+const formEntrada = document.getElementById("formEntrada");
+formEntrada.onsubmit = function (e) {
   e.preventDefault();
 
   const id = document.getElementById("entradaId").value;
   const data = document.getElementById("dataEntrada").value;
+  const tipo = document.getElementById("tipoEntrada").value;
   const doador = document.getElementById("doadorEntrada").value;
   const categoria = document.getElementById("categoriaEntrada").value;
   const quantidadeStr = document.getElementById("quantidadeEntrada").value;
   const unidadeRaw = document.getElementById("unidadeEntrada").value;
   const campanha = document.getElementById("campanhaEntrada").value;
   const obs = document.getElementById("obsEntrada").value;
+  const fornecedor = document.getElementById("fornecedorEntrada").value;
+  const forma_pagamento = document.getElementById("formaPagamentoEntrada").value;
+  const solicitacao_id = document.getElementById("solicitacaoRefEntrada").value || null;
 
   // Validações
   const dataOk = validaData(data);
-  const doadorOk = validaTextoMin(doador, 2);
+  const doadorOk = tipo === 'doacao' ? validaTextoMin(doador, 2) : true;
   const categoriaOk = validaTextoMin(categoria, 2);
   const qtdOk = validaQuantidade(quantidadeStr);
   const unidadeOk = validaUnidade(unidadeRaw);
+  const fornecedorOk = tipo === 'compra' ? validaTextoMin(fornecedor, 2) : true;
+  const formaOk = tipo === 'compra' ? validaTextoMin(forma_pagamento, 2) : true;
 
   const dataEl = document.getElementById("dataEntrada");
   const doadorEl = document.getElementById("doadorEntrada");
   const categoriaEl = document.getElementById("categoriaEntrada");
   const quantidadeEl = document.getElementById("quantidadeEntrada");
   const unidadeEl = document.getElementById("unidadeEntrada");
+  const fornecedorEl = document.getElementById("fornecedorEntrada");
+  const formaEl = document.getElementById("formaPagamentoEntrada");
 
-  dataEl.setCustomValidity(
-    dataOk ? "" : "Informe uma data válida (não futura)"
-  );
+  dataEl.setCustomValidity(dataOk ? "" : "Informe uma data válida (não futura)");
   doadorEl.setCustomValidity(doadorOk ? "" : "Informe o nome do doador");
   categoriaEl.setCustomValidity(categoriaOk ? "" : "Informe a categoria");
-  quantidadeEl.setCustomValidity(
-    qtdOk ? "" : "Quantidade deve ser inteiro >= 1"
-  );
+  quantidadeEl.setCustomValidity(qtdOk ? "" : "Quantidade deve ser inteiro >= 1");
   unidadeEl.setCustomValidity(
-    unidadeOk
-      ? ""
-      : "Unidade inválida. Use: un, kg, g, l, ml, cx, pct, sac, kit"
+    unidadeOk ? "" : "Unidade inválida. Use: un, kg, g, l, ml, cx, pct, sac, kit, lata"
   );
+  if (fornecedorEl) fornecedorEl.setCustomValidity(fornecedorOk ? '' : 'Informe o fornecedor');
+  if (formaEl) formaEl.setCustomValidity(formaOk ? '' : 'Selecione a forma de pagamento');
 
-  if (!(dataOk && doadorOk && categoriaOk && qtdOk && unidadeOk)) {
-    document.getElementById("formEntrada").reportValidity();
+  if (!(dataOk && doadorOk && categoriaOk && qtdOk && unidadeOk && fornecedorOk && formaOk)) {
+    formEntrada.reportValidity();
     return;
   }
 
   const quantidade = parseInt(quantidadeStr, 10);
   const unidade = normalizaUnidade(unidadeRaw);
+
   (async () => {
     try {
-      // Se há ID, atualiza; senão, cria
+      const payload = {
+        data,
+        tipo,
+        doador,
+        categoria,
+        quantidade,
+        unidade,
+        campanha,
+        obs,
+        fornecedor,
+        forma_pagamento,
+        solicitacao_id: solicitacao_id ? Number(solicitacao_id) : null,
+      };
       if (id) {
         await fetch(`/api/entradas/${id}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            data,
-            doador,
-            categoria,
-            quantidade,
-            unidade,
-            campanha,
-            obs,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
       } else {
         await fetch("/api/entradas", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            data,
-            doador,
-            categoria,
-            quantidade,
-            unidade,
-            campanha,
-            obs,
-          }),
+          body: JSON.stringify(payload),
         });
       }
       fecharModalEntrada();
@@ -250,27 +283,20 @@ document.getElementById("formEntrada").onsubmit = function (e) {
   })();
 };
 
+// Listeners de validação
 const dataEntradaEl = document.getElementById("dataEntrada");
-
 if (dataEntradaEl) {
   dataEntradaEl.addEventListener("change", (e) => {
-    e.target.setCustomValidity(
-      validaData(e.target.value) ? "" : "Informe uma data válida (não futura)"
-    );
+    e.target.setCustomValidity(validaData(e.target.value) ? "" : "Informe uma data válida (não futura)");
   });
 }
 const doadorEntradaEl = document.getElementById("doadorEntrada");
-
 if (doadorEntradaEl) {
   doadorEntradaEl.addEventListener("input", (e) => {
-    e.target.setCustomValidity(
-      validaTextoMin(e.target.value, 2) ? "" : "Informe o nome do doador"
-    );
+    e.target.setCustomValidity(validaTextoMin(e.target.value, 2) ? "" : "Informe o nome do doador");
   });
 }
 const categoriaEntradaEl = document.getElementById("categoriaEntrada");
-
-// Carrega categorias e preenche o <select>
 async function categoriasSelect(selectEl) {
   try {
     const r = await fetch(`/api/categorias?limit=1000`);
@@ -291,24 +317,18 @@ async function categoriasSelect(selectEl) {
     console.error(err);
   }
 }
-
 if (categoriaEntradaEl) {
   categoriasSelect(categoriaEntradaEl);
   categoriaEntradaEl.addEventListener("change", (e) => {
-    e.target.setCustomValidity(
-      validaTextoMin(e.target.value, 2) ? "" : "Informe a categoria"
-    );
+    e.target.setCustomValidity(validaTextoMin(e.target.value, 2) ? "" : "Informe a categoria");
   });
 }
 const quantidadeEntradaEl = document.getElementById("quantidadeEntrada");
-
 if (quantidadeEntradaEl) {
   quantidadeEntradaEl.addEventListener("input", (e) => {
     const d = onlyDigits(e.target.value).replace(/^0+/, "");
     e.target.value = d;
-    e.target.setCustomValidity(
-      validaQuantidade(e.target.value) ? "" : "Quantidade deve ser inteiro >= 1"
-    );
+    e.target.setCustomValidity(validaQuantidade(e.target.value) ? "" : "Quantidade deve ser inteiro >= 1");
   });
 }
 const unidadeEntradaEl = document.getElementById("unidadeEntrada");
@@ -316,13 +336,12 @@ if (unidadeEntradaEl) {
   unidadeEntradaEl.addEventListener("input", (e) => {
     e.target.value = normalizaUnidade(e.target.value);
     e.target.setCustomValidity(
-      validaUnidade(e.target.value)
-        ? ""
-        : "Unidade inválida. Use: un, kg, g, l, ml, cx, pct, sac, kit"
+      validaUnidade(e.target.value) ? "" : "Unidade inválida. Use: un, kg, g, l, ml, cx, pct, sac, kit, lata"
     );
   });
 }
 
+// Paginação e carga
 function updatePaginacaoEntradasInfo() {
   const info = document.getElementById("infoEntradas");
   if (!info) return;
@@ -357,7 +376,6 @@ async function loadEntradas() {
   }
 }
 
-// Eventos de paginação
 const prevBtnE = document.getElementById("prevEntradas");
 const nextBtnE = document.getElementById("nextEntradas");
 if (prevBtnE) prevBtnE.addEventListener("click", async () => { if (pageEntradas > 1) { pageEntradas--; await loadEntradas(); }});
@@ -366,4 +384,8 @@ if (nextBtnE) nextBtnE.addEventListener("click", async () => {
   if (pageEntradas < totalPages) { pageEntradas++; await loadEntradas(); }
 });
 
+// Inicialização
+toggleCamposPorTipo(document.getElementById('tipoEntrada')?.value || 'doacao');
+const solicitacaoRefEl = document.getElementById('solicitacaoRefEntrada');
+if (solicitacaoRefEl) { loadSolicitacoesAprovadas(solicitacaoRefEl); }
 loadEntradas();

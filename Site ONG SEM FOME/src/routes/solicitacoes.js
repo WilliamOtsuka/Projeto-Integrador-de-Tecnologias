@@ -13,27 +13,34 @@ router.get('/', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 router.post('/', requireAuth, asyncHandler(async (req, res) => {
-  const { titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade } = req.body || {};
+  const { titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade, unidade } = req.body || {};
   const ds = data_solicitacao || null;
   const sol = solicitante || null;
   const st = status || 'pendente';
   const pr = prioridade || 'normal';
-  const q = quantidade || null;
+  const q = (quantidade === 0 || quantidade) ? Number(quantidade) : null;
+  const un = unidade || null;
   const [r] = await pool.execute(
-    'INSERT INTO solicitacoes (titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade) VALUES (?,?,?,?,?,?,?,?)',
-    [titulo, categoria, descricao || null, ds, sol, st, pr, q]
+    'INSERT INTO solicitacoes (titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade, unidade) VALUES (?,?,?,?,?,?,?,?,?)',
+    [titulo, categoria, descricao || null, ds, sol, st, pr, q, un]
   );
-  res.status(201).json({ id: r.insertId, titulo, categoria, descricao, data_solicitacao: ds, solicitante: sol, status: st, prioridade: pr, quantidade: q });
+  res.status(201).json({ id: r.insertId, titulo, categoria, descricao, data_solicitacao: ds, solicitante: sol, status: st, prioridade: pr, quantidade: q, unidade: un });
 }));
 
 router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
   const { id } = req.params; 
-  const { titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade } = req.body || {};
+  const { titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade, unidade } = req.body || {};
+  const ds = data_solicitacao || null;
+  const sol = solicitante || null;
+  const st = status || 'pendente';
+  const pr = prioridade || 'normal';
+  const q = (quantidade === 0 || quantidade) ? Number(quantidade) : null;
+  const un = unidade || null;
   await pool.execute(
-    'UPDATE solicitacoes SET titulo=?, categoria=?, descricao=?, data_solicitacao=?, solicitante=?, status=?, prioridade=?, quantidade=? WHERE id=?',
-    [titulo, categoria, descricao || null, data_solicitacao || null, solicitante || null, status || 'pendente', prioridade || 'normal', quantidade || null, id]
+    'UPDATE solicitacoes SET titulo=?, categoria=?, descricao=?, data_solicitacao=?, solicitante=?, status=?, prioridade=?, quantidade=?, unidade=? WHERE id=?',
+    [titulo, categoria, descricao || null, ds, sol, st, pr, q, un, id]
   );
-  res.json({ id: Number(id), titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade });
+  res.json({ id: Number(id), titulo, categoria, descricao, data_solicitacao: ds, solicitante: sol, status: st, prioridade: pr, quantidade: q, unidade: un });
 }));
 
 router.delete('/:id', requireAuth, asyncHandler(async (req, res) => {

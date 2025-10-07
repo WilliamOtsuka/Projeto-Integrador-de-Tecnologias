@@ -833,6 +833,10 @@ p.info-destaque {
     background: rgba(0, 0, 0, 0.04);
 }
 
+.estoque-container {
+    margin-left: 8%;
+}
+
 .estoque-layout {
     display: grid;
     grid-template-columns: 240px 1fr;

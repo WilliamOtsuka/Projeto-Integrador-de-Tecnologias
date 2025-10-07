@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>Registrar Entrada de Doação</title>
+  <title>Registrar Entrada de Itens</title>
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body class="pagina-gerenciar">
@@ -33,10 +33,8 @@
       </nav>
     </header>
 
-    <h1 class="titulo-pagina">Registrar Entrada de Doação</h1>
-    <p class="descricao-pagina">
-      Cadastre e gerencie as entradas de doações recebidas.
-    </p>
+    <h1 class="titulo-pagina">Registrar Entrada de Itens</h1>
+    <p class="descricao-pagina">Cadastre entradas recebidas por doação ou compra. O estoque será atualizado automaticamente.</p>
 
     <section class="crud-entradas">
   <div id="modalEntrada" class="modal" style="display:none;">
@@ -52,13 +50,16 @@
             </div>
 
             <div class="form-field">
+              <label for="tipoEntrada">Tipo de entrada</label>
+              <select id="tipoEntrada" required>
+                <option value="doacao">Doação</option>
+                <option value="compra">Compra</option>
+              </select>
+            </div>
+
+            <div class="form-field" id="campoDoador">
               <label for="doadorEntrada">Doador:</label>
-              <input
-                type="text"
-                id="doadorEntrada"
-                placeholder="Nome do doador"
-                required
-              />
+              <input type="text" id="doadorEntrada" placeholder="Nome do doador" />
             </div>
 
             <div class="form-field">
@@ -79,26 +80,45 @@
               />
             </div>
 
+            <div id="camposCompra" class="form-grid" style="display:none;">
+              <div class="form-field">
+                <label for="fornecedorEntrada">Fornecedor (compra):</label>
+                <input type="text" id="fornecedorEntrada" placeholder="Razão/Nome do fornecedor" />
+              </div>
+              <div class="form-field">
+                <label for="formaPagamentoEntrada">Forma de pagamento</label>
+                <select id="formaPagamentoEntrada">
+                  <option value="">Selecione...</option>
+                  <option value="pix">Pix</option>
+                  <option value="boleto">Boleto</option>
+                  <option value="cartao">Cartão</option>
+                  <option value="transferencia">Transferência</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-field full-width-field">
+              <label for="solicitacaoRefEntrada">Referenciar solicitação aprovada (opcional)</label>
+              <select id="solicitacaoRefEntrada">
+                <option value="">Não vincular</option>
+              </select>
+            </div>
+
             <div class="form-field">
               <label for="unidadeEntrada">Unidade:</label>
-              <input
-                type="text"
-                id="unidadeEntrada"
-                placeholder="Ex.: un, kg, cx"
-                list="listaUnidades"
-                required
-              />
-              <datalist id="listaUnidades">
-                <option value="un"></option>
-                <option value="kg"></option>
-                <option value="g"></option>
-                <option value="l"></option>
-                <option value="ml"></option>
-                <option value="cx"></option>
-                <option value="pct"></option>
-                <option value="sac"></option>
-                <option value="kit"></option>
-              </datalist>
+              <select id="unidadeEntrada" required>
+                <option value="" disabled selected>Selecione...</option>
+                <option value="un">un</option>
+                <option value="kg">kg</option>
+                <option value="g">g</option>
+                <option value="l">l</option>
+                <option value="ml">ml</option>
+                <option value="cx">cx</option>
+                <option value="pct">pct</option>
+                <option value="sac">sac</option>
+                <option value="kit">kit</option>
+                <option value="lata">lata</option>
+              </select>
             </div>
 
             <div class="form-field">
@@ -141,7 +161,9 @@
           <tr>
             <th>ID</th>
             <th>Data</th>
+            <th>Tipo</th>
             <th>Doador</th>
+            <th>Fornecedor</th>
             <th>Categoria</th>
             <th>Qtd</th>
             <th>Unidade</th>

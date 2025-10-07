@@ -38,7 +38,7 @@
 			Visão geral do estoque consolidado por categoria e unidade, calculado a partir das entradas registradas.
 		</p>
 
-		<section class="crud-estoque">
+		<section class="estoque-container">
 			<div class="estoque-layout">
 				<aside class="estoque-sidebar">
 					<nav class="estoque-menu">
@@ -137,7 +137,7 @@
 						<thead>
 							<tr>
 								<th>Data</th>
-								<th>Doador</th>
+									<th>Origem</th>
 								<th>Quantidade</th>
 								<th>Unidade</th>
 								<th>Campanha</th>
@@ -253,7 +253,19 @@
 						</div>
 						<div class="form-field">
 							<label for="editUnidade">Unidade:</label>
-							<input type="text" id="editUnidade" required />
+							<select id="editUnidade" required>
+								<option value="">Selecione...</option>
+								<option value="un">un</option>
+								<option value="kg">kg</option>
+								<option value="g">g</option>
+								<option value="l">l</option>
+								<option value="ml">ml</option>
+								<option value="cx">cx</option>
+								<option value="pct">pct</option>
+								<option value="sac">sac</option>
+								<option value="kit">kit</option>
+								<option value="lata">lata</option>
+							</select>
 						</div>
 						<div class="form-field">
 							<label for="editCampanha">Campanha:</label>

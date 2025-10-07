@@ -7,8 +7,7 @@ CREATE TABLE IF NOT EXISTS doadores (
   nome VARCHAR(120) NOT NULL,
   email VARCHAR(160) NOT NULL,
   telefone VARCHAR(32) NOT NULL,
-  documento VARCHAR(32) NOT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  documento VARCHAR(32) NOT NULL
 );
 
 -- Famílias
@@ -23,8 +22,7 @@ CREATE TABLE IF NOT EXISTS familias (
   complemento VARCHAR(80) NULL,
   bairro VARCHAR(120) NOT NULL,
   cidade VARCHAR(120) NOT NULL,
-  uf CHAR(2) NOT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  uf CHAR(2) NOT NULL
 );
 
 -- Colaboradores
@@ -33,15 +31,13 @@ CREATE TABLE IF NOT EXISTS colaboradores (
   nome VARCHAR(120) NOT NULL,
   email VARCHAR(160) NOT NULL,
   telefone VARCHAR(32) NOT NULL,
-  cargo VARCHAR(120) NOT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  cargo VARCHAR(120) NOT NULL
 );
 
 -- Categorias
 CREATE TABLE IF NOT EXISTS categorias (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(120) NOT NULL UNIQUE,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  nome VARCHAR(120) NOT NULL UNIQUE
 );
 
 -- Campanhas
@@ -49,8 +45,7 @@ CREATE TABLE IF NOT EXISTS campanhas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(120) NOT NULL,
   meta VARCHAR(80) NOT NULL,
-  descricao TEXT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  descricao TEXT NULL
 );
 
 -- Solicitações
@@ -63,8 +58,9 @@ CREATE TABLE IF NOT EXISTS solicitacoes (
   solicitante VARCHAR(120) NULL,
   status VARCHAR(20) NOT NULL DEFAULT 'pendente',
   prioridade VARCHAR(20) NOT NULL DEFAULT 'normal',
-  quantidade VARCHAR(120) NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  quantidade DECIMAL(10,2) NULL,
+  unidade VARCHAR(16) NULL,
+  atualizacao TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Entradas
@@ -77,7 +73,10 @@ CREATE TABLE IF NOT EXISTS entradas (
   unidade VARCHAR(16) NOT NULL,
   campanha VARCHAR(120) NULL,
   obs TEXT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  tipo VARCHAR(16) NOT NULL DEFAULT 'doacao',
+  fornecedor VARCHAR(120) NULL,
+  forma_pagamento VARCHAR(32) NULL,
+  solicitacao_id INT NULL
 );
 
 -- ------------------------------------------------------------
@@ -132,11 +131,11 @@ SELECT * FROM (
 WHERE NOT EXISTS (SELECT 1 FROM campanhas);
 
 -- Solicitações
-INSERT INTO solicitacoes (titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade)
+INSERT INTO solicitacoes (titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade, unidade)
 SELECT * FROM (
-  SELECT 'Cesta básica para família Silva', 'Alimentos', 'Necessidade de cesta básica para família cadastrada.', CURDATE(), 'Assistente Social', 'pendente', 'alta', '1 cesta'
-  UNION ALL SELECT 'Leite em pó', 'Alimentos', 'Demanda de leite em pó para crianças.', CURDATE(), 'Posto de Saúde', 'pendente', 'normal', '15 latas'
-  UNION ALL SELECT 'Kit higiene', 'Higiene', 'Solicitação de itens de higiene pessoal.', CURDATE(), 'Centro Comunitário', 'atendida', 'baixa', '10 kits'
+  SELECT 'Cesta básica para família Silva', 'Alimentos', 'Necessidade de cesta básica para família cadastrada.', CURDATE(), 'Assistente Social', 'pendente', 'alta', 1, 'cesta'
+  UNION ALL SELECT 'Leite em pó', 'Alimentos', 'Demanda de leite em pó para crianças.', CURDATE(), 'Posto de Saúde', 'pendente', 'normal', 15, 'lata'
+  UNION ALL SELECT 'Kit higiene', 'Higiene', 'Solicitação de itens de higiene pessoal.', CURDATE(), 'Centro Comunitário', 'atendida', 'baixa', 10, 'kit'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM solicitacoes);
 
@@ -155,8 +154,7 @@ CREATE TABLE IF NOT EXISTS montagens (
   data DATE NOT NULL,
   responsavel VARCHAR(120) NOT NULL,
   qtd_cestas INT NOT NULL,
-  obs TEXT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  obs TEXT NULL
 );
 
 CREATE TABLE IF NOT EXISTS montagens_itens (
@@ -176,6 +174,5 @@ CREATE TABLE IF NOT EXISTS saidas (
   responsavel VARCHAR(120) NULL,
   qtd INT NULL,
   obs TEXT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_saidas_familia FOREIGN KEY (familia_id) REFERENCES familias(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

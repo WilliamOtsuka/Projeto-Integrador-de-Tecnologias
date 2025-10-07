@@ -116,6 +116,8 @@ function buildEstoque(list) {
       unidade: e.unidade,
       campanha: e.campanha,
       obs: e.obs,
+      tipo: (e.tipo || 'doacao'),
+      fornecedor: e.fornecedor || null,
     });
     map.set(key, atual);
   });
@@ -180,6 +182,8 @@ function buildMovimentos(list) {
       obs: e.obs || '-',
       saldo: novo,
       criado_em: e.criado_em || null,
+      entrada_tipo: (e.tipo || 'doacao'),
+      fornecedor: e.fornecedor || null,
     };
   });
 }
@@ -227,6 +231,15 @@ function renderMovimentacoes() {
   pageItems.forEach((m) => {
     const tr = document.createElement('tr');
     const canEditEntrada = m.doador !== 'SAIDA' && m.doador !== 'MONTAGEM';
+    const origem = (function(){
+      const t = String(m.entrada_tipo || '').toLowerCase();
+      if (t === 'compra') {
+        const forn = m.fornecedor ? ` (${m.fornecedor})` : '';
+        return `Compra${forn}`;
+      }
+      const donor = (m.doador && m.doador !== '-') ? ` (${m.doador})` : '';
+      return `Doação${donor}`;
+    })();
     const isSaida = m.doador === 'SAIDA' || (m.obs || '').startsWith('Saída #');
     const isMontagem = m.doador === 'MONTAGEM' || (m.obs || '').includes('montagem #');
     const acoes = isMontagem ? '' : isSaida ? `
@@ -246,7 +259,7 @@ function renderMovimentacoes() {
       <td>${m.categoria}</td>
       <td>${m.unidade}</td>
       <td style="color:${m.quantidade < 0 ? '#b00020' : '#0a7'};">${m.quantidade}</td>
-      <td>${m.doador}</td>
+      <td>${isSaida ? m.doador : origem}</td>
       <td>${m.campanha}</td>
       <td>${m.obs}</td>
       <td>${m.saldo}</td>
@@ -548,9 +561,17 @@ function renderDetalhesFiltrados() {
   }
   pageItems.forEach((e) => {
     const tr = document.createElement('tr');
+    const origem = (function(){
+      const t = String(e.tipo || '').toLowerCase();
+      if (t === 'compra') {
+        const forn = e.fornecedor ? ` (${e.fornecedor})` : '';
+        return `Compra${forn}`;
+      }
+      return 'Doação';
+    })();
     tr.innerHTML = `
       <td>${formatDate(e.data)}</td>
-      <td>${e.doador || '-'}</td>
+      <td>${origem}</td>
       <td>${e.quantidade}</td>
       <td>${(e.unidade || '').toLowerCase()}</td>
       <td>${e.campanha || '-'}</td>
@@ -729,7 +750,21 @@ function openEditarMovModal(data) {
   setValue('editDoador', data.doador || '');
   setValue('editCategoria', data.categoria || (isSaida ? 'Cesta Básica' : ''));
   setValue('editQuantidade', isEntrada ? data.quantidade : data.qtd);
-  setValue('editUnidade', data.unidade || (isSaida ? 'cx' : ''));
+  // Preenche unidade no <select>; se não existir, adiciona opção temporária
+  (function() {
+    const sel = document.getElementById('editUnidade');
+    if (!sel) return setValue('editUnidade', data.unidade || (isSaida ? 'cx' : ''));
+    const target = String(data.unidade || (isSaida ? 'cx' : '') || '').toLowerCase();
+    if (!target) { sel.value = ''; return; }
+    let found = false;
+    for (const opt of sel.options) {
+      if (String(opt.value).toLowerCase() === target) { sel.value = opt.value; found = true; break; }
+    }
+    if (!found) {
+      const o = document.createElement('option');
+      o.value = target; o.textContent = target; sel.appendChild(o); sel.value = target;
+    }
+  })();
   setValue('editCampanha', data.campanha || '');
   setValue('editObs', data.obs || '');
   setValue('editFamiliaId', data.familia_id || '');
@@ -776,7 +811,7 @@ async function onSubmitEditarMov(e) {
     const doador = document.getElementById('editDoador')?.value;
     const categoria = document.getElementById('editCategoria')?.value;
     const quantidade = Number(document.getElementById('editQuantidade')?.value);
-    const unidade = document.getElementById('editUnidade')?.value;
+  const unidade = (document.getElementById('editUnidade')?.value || '').toLowerCase();
     const campanha = document.getElementById('editCampanha')?.value || null;
     if (!data || !doador || !categoria || !unidade || !Number.isFinite(quantidade)) {
       return alert('Preencha os campos obrigatórios');
