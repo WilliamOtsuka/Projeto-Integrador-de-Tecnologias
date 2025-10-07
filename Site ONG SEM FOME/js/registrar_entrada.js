@@ -180,7 +180,7 @@ async function loadSolicitacoesAprovadas(selectEl) {
     if (!r.ok) throw new Error('Falha ao carregar solicitações');
     const payload = await r.json();
     const lista = Array.isArray(payload) ? payload : (payload.data || []);
-    const aprovadas = lista.filter(s => String(s.status || '').toLowerCase() === 'aprovado');
+    const aprovadas = lista.filter(s => String(s.status || '').toLowerCase() === 'aprovado' || String(s.status || '').toLowerCase() === 'em compra');
     selectEl.innerHTML = '<option value="">Não vincular</option>';
     aprovadas.forEach(s => {
       const opt = document.createElement('option');

@@ -1,5 +1,6 @@
 let estoque = [];
 let itensSelecionados = [];
+let solicitacoesCesta = [];
 
 async function carregarEstoque() {
   const r = await fetch("/api/entradas?limit=10000");
@@ -36,6 +37,31 @@ async function carregarEstoque() {
     return true;
   });
   popularSeletorItens();
+}
+
+async function carregarSolicitacoesCestaBasica() {
+  try {
+    const r = await fetch('/api/solicitacoes?limit=1000');
+    if (!r.ok) return;
+    const payload = await r.json();
+    const lista = Array.isArray(payload) ? payload : (payload.data || []);
+    solicitacoesCesta = lista.filter(s =>
+      (String(s.status || '').toLowerCase() === 'aprovado' || String(s.status || '').toLowerCase() === 'em compra') &&
+      String(s.categoria || '') === 'Cesta Básica'
+    );
+    const sel = document.getElementById('mcSolicitacao');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Não vincular</option>';
+    solicitacoesCesta.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      const qtdTxt = (s.quantidade != null ? ` - ${s.quantidade} ${s.unidade || ''}` : '');
+      opt.textContent = `#${s.id} - ${s.titulo || 'Cesta Básica'}${qtdTxt}`;
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    console.error('Falha ao carregar solicitações de Cesta Básica', e);
+  }
 }
 
 function popularSeletorItens() {
@@ -114,7 +140,8 @@ document
     const responsavel = document.getElementById("mcResp").value.trim();
     const qtd_cestas =
       parseInt(document.getElementById("mcQtd").value, 10) || 0;
-    const obs = document.getElementById("mcObs").value;
+  const obs = document.getElementById("mcObs").value;
+  const solicitacao_id = document.getElementById('mcSolicitacao')?.value || null;
     if (
       !data ||
       !responsavel ||
@@ -167,6 +194,7 @@ document
           qtd_cestas,
           obs,
           itens: itensSelecionados,
+          solicitacao_id: solicitacao_id ? Number(solicitacao_id) : null,
         }),
       });
       if (!r.ok) {
@@ -183,7 +211,7 @@ document
     }
   });
 
-carregarEstoque().catch((err) => {
+Promise.all([carregarEstoque(), carregarSolicitacoesCestaBasica()]).catch((err) => {
   console.error(err);
   if (err?.message?.includes("401")) {
     alert("Sessão expirada. Faça login.");

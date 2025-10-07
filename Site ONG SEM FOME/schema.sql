@@ -135,7 +135,7 @@ INSERT INTO solicitacoes (titulo, categoria, descricao, data_solicitacao, solici
 SELECT * FROM (
   SELECT 'Cesta básica para família Silva', 'Alimentos', 'Necessidade de cesta básica para família cadastrada.', CURDATE(), 'Assistente Social', 'pendente', 'alta', 1, 'cesta'
   UNION ALL SELECT 'Leite em pó', 'Alimentos', 'Demanda de leite em pó para crianças.', CURDATE(), 'Posto de Saúde', 'pendente', 'normal', 15, 'lata'
-  UNION ALL SELECT 'Kit higiene', 'Higiene', 'Solicitação de itens de higiene pessoal.', CURDATE(), 'Centro Comunitário', 'atendida', 'baixa', 10, 'kit'
+  UNION ALL SELECT 'Kit higiene', 'Higiene', 'Solicitação de itens de higiene pessoal.', CURDATE(), 'Centro Comunitário', 'atendido', 'baixa', 10, 'kit'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM solicitacoes);
 

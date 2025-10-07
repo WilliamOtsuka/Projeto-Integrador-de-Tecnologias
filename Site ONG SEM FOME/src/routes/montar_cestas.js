@@ -7,7 +7,7 @@ router.post(
   "/",
   requireAuth,
   asyncHandler(async (req, res) => {
-    const { data, responsavel, qtd_cestas, obs, itens } = req.body;
+    const { data, responsavel, qtd_cestas, obs, itens, solicitacao_id } = req.body;
     if (!Array.isArray(itens) || itens.length === 0) {
       return res.status(400).json({ error: "Itens obrigatórios" });
     }
@@ -47,6 +47,27 @@ router.post(
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
+
+      // Se houver solicitação vinculada, validar que é de 'Cesta Básica'
+      let solicitacaoIdNum = null;
+      if (solicitacao_id != null && solicitacao_id !== '') {
+        const sId = Number(solicitacao_id);
+        if (!Number.isInteger(sId) || sId <= 0) {
+          await conn.rollback();
+          return res.status(400).json({ error: 'solicitacao_id inválido' });
+        }
+        const [[sRow]] = await conn.execute('SELECT id, categoria FROM solicitacoes WHERE id=?', [sId]);
+        if (!sRow) {
+          await conn.rollback();
+          return res.status(404).json({ error: 'Solicitação não encontrada' });
+        }
+        const cat = String(sRow.categoria || '').trim().toLowerCase();
+        if (cat !== 'cesta básica') {
+          await conn.rollback();
+          return res.status(400).json({ error: 'Apenas solicitações de Cesta Básica podem ser vinculadas à montagem' });
+        }
+        solicitacaoIdNum = sId;
+      }
 
       // Verifica saldo atual por (categoria, unidade)
       const [entradas] = await conn.execute(
@@ -146,24 +167,53 @@ router.post(
           ]
         );
       }
-      // 2) Entrada das cestas produzidas
-      await conn.execute(
-        "INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs) VALUES (?,?,?,?,?,?,?)",
-        [
-          data,
-          "MONTAGEM",
-          "Cesta Básica",
-          qtd,
-          "cx",
-          null,
-          `Produção montagem #${montagemId}`,
-        ]
-      );
+      // 2) Entrada das cestas produzidas (opcionalmente vinculada à solicitação)
+      if (solicitacaoIdNum) {
+        await conn.execute(
+          "INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs, solicitacao_id) VALUES (?,?,?,?,?,?,?,?)",
+          [
+            data,
+            "MONTAGEM",
+            "Cesta Básica",
+            qtd,
+            "cx",
+            null,
+            `Produção montagem #${montagemId}`,
+            solicitacaoIdNum,
+          ]
+        );
+      } else {
+        await conn.execute(
+          "INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs) VALUES (?,?,?,?,?,?,?)",
+          [
+            data,
+            "MONTAGEM",
+            "Cesta Básica",
+            qtd,
+            "cx",
+            null,
+            `Produção montagem #${montagemId}`,
+          ]
+        );
+      }
+
+      // Recalcula status da solicitação vinculada (se houver)
+      if (solicitacaoIdNum) {
+        const [[s]] = await conn.execute('SELECT quantidade FROM solicitacoes WHERE id=?', [solicitacaoIdNum]);
+        const reqQtd = Number(s?.quantidade || 0);
+        const [[tot]] = await conn.execute('SELECT COALESCE(SUM(quantidade),0) AS total FROM entradas WHERE solicitacao_id=?', [solicitacaoIdNum]);
+        const recebido = Number(tot.total || 0);
+        let novoStatus;
+        if (reqQtd > 0 && recebido >= reqQtd) novoStatus = 'atendido';
+        else if (recebido > 0) novoStatus = 'em compra';
+        else novoStatus = 'aprovado';
+        await conn.execute('UPDATE solicitacoes SET status=? WHERE id=?', [novoStatus, solicitacaoIdNum]);
+      }
 
       await conn.commit();
       res
         .status(201)
-        .json({ id: montagemId, data, responsavel, qtd_cestas: qtd, obs });
+        .json({ id: montagemId, data, responsavel, qtd_cestas: qtd, obs, solicitacao_id: solicitacaoIdNum });
     } catch (err) {
       await conn.rollback();
       throw err;

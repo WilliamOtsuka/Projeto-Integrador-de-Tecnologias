@@ -99,7 +99,7 @@ function renderTabelaSolicitacoes() {
   <td>${(s.quantidade ?? '')}</td>
   <td>${s.unidade || ''}</td>
   <td>${s.categoria}</td>
-  <td>${s.descricao}</td>
+  <td>${s.descricao || '-'}</td>
   <td>${formatDateDDMMYY(s.atualizacao)}</td>
   <td>
   <button class="btn-edit" onclick="editarSolicitacao(${s.id})">Editar</button>
