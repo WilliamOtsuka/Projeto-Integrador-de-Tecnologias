@@ -16,15 +16,11 @@
         <div class="navbar-item">
           <ul class="menu-principal">
             <li><a href="index.html">Home</a></li>
-            <li class="ativo">
-              <a href="cadastro_doador.html">Cadastrar Doador</a>
-            </li>
-            <li><a href="gerenciar_doadores.html">Doadores</a></li>
-            <li><a href="gerenciar_familias.html">Famílias</a></li>
-            <li><a href="gerenciar_colaboradores.html">Colaboradores</a></li>
-            <li><a href="gerenciar_categorias.html">Categorias</a></li>
-            <li><a href="gerenciar_campanhas.html">Campanhas</a></li>
-            <li><a href="gerenciar_solicitacoes.html">Solicitações</a></li>
+            <li><a href="index.html#sobre">Sobre</a></li>
+            <li><a href="index.html#ajudar">Como Ajudar</a></li>
+            <li><a href="index.html#transparencia">Transparência</a></li>
+            <li><a href="index.html#contato">Contato</a></li>
+            <li><a href="cadastro_doador.html">Doe</a></li>
           </ul>
         </div>
         <div class="navbar-item">
@@ -92,12 +88,7 @@
             class="full-width-field justify-end"
           >
             <button type="submit" class="btn-primary">Salvar Cadastro</button>
-            <a
-              href="index.html"
-              class="btn-secondary"
-              class="no-underline"
-              >Cancelar</a
-            >
+            <button class="btn-secondary" type="button" id="btnCancelar">Cancelar</button>
           </div>
         </form>
       </section>
@@ -107,5 +98,6 @@
       © 2025 SEM FOME. Todos os direitos reservados.
     </footer>
     <script src="/js/cadastro_doador.js" defer></script>
+    <script src="/js/auth.js"></script>
   </body>
 </html>

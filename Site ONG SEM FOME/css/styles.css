@@ -85,6 +85,25 @@ nav.navbar {
     background: rgba(0, 0, 0, 0.08);
 }
 
+.dropdown-adm {
+    color: #fff;
+    border: none;
+    padding: 0.5em 1.5em;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    font-size: 1.08em;
+    height: 70%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    position: relative;
+}
+
+.dropdown-adm:hover {
+    color: #2e8b57;
+}
 
 .btn-login {
     background: #2e8b57;
@@ -701,6 +720,7 @@ p.info-destaque {
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.95rem;
+    margin: 6px;
 }
 
 .btn-primary:hover {
@@ -718,6 +738,7 @@ p.info-destaque {
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.95rem;
+    margin: 6px;
 }
 
 .btn-secondary:hover {
@@ -812,6 +833,13 @@ p.info-destaque {
     max-width: 360px;
     margin-left: auto;
     margin-right: auto;
+}
+
+.login-cadastro {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 0.9rem;
+    color: #555;
 }
 
 .login-actions {
