@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <title>Login - ONG SEM FOME</title>
     <link rel="stylesheet" href="/css/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
   </head>
   <body class="pagina-login">
     <header class="site-header">
@@ -40,10 +44,20 @@
           </p>
           <form id="loginForm" class="login-form">
             <div class="login-fields">
-              <label for="username">Usuário</label>
-              <input type="text" id="username" name="username" required />
+              <label for="email">Usuário</label>
+              <input type="text" id="email" name="email" required />
               <label for="password">Senha</label>
-              <input type="password" id="password" name="password" required />
+              <div class="input-with-icon">
+                <input type="password" id="password" name="password" required />
+                <button
+                  type="button"
+                  id="togglePassword"
+                  class="icon-button"
+                  aria-label="Mostrar senha"
+                >
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
               <div class="login-actions">
                 <button type="submit" class="btn-primary btn-cadastro">
                   Entrar
@@ -57,7 +71,7 @@
     </main>
 
     <footer class="rodape">
-  © 2025 ONG SEM FOME. Todos os direitos reservados.
+      © 2025 ONG SEM FOME. Todos os direitos reservados.
     </footer>
 
     <script src="/js/login.js"></script>

@@ -3,16 +3,16 @@ USE `ong_sem_fome`;
 
 -- Doadores
 CREATE TABLE IF NOT EXISTS doadores (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_doador INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(120) NOT NULL,
-  email VARCHAR(160) NOT NULL,
+  email VARCHAR(160) NOT NULL UNIQUE,
   telefone VARCHAR(32) NOT NULL,
   documento VARCHAR(32) NOT NULL
 );
 
 -- Famílias
 CREATE TABLE IF NOT EXISTS familias (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_familia INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(120) NOT NULL,
   responsavel VARCHAR(120) NOT NULL,
   contato VARCHAR(32) NOT NULL,
@@ -27,22 +27,37 @@ CREATE TABLE IF NOT EXISTS familias (
 
 -- Colaboradores
 CREATE TABLE IF NOT EXISTS colaboradores (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_colaborador INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(120) NOT NULL,
-  email VARCHAR(160) NOT NULL,
+  email VARCHAR(160) NOT NULL UNIQUE,
   telefone VARCHAR(32) NOT NULL,
   cargo VARCHAR(120) NOT NULL
 );
 
 -- Categorias
 CREATE TABLE IF NOT EXISTS categorias (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_categoria INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(120) NOT NULL UNIQUE
 );
 
+-- Extensão: tipo da categoria (simples/composta)
+ALTER TABLE categorias
+  ADD COLUMN tipo VARCHAR(16) NOT NULL DEFAULT 'simples';
+
+-- Subitens de categorias compostas
+CREATE TABLE IF NOT EXISTS categorias_itens (
+  id_item INT AUTO_INCREMENT PRIMARY KEY,
+  categoria_id INT NOT NULL,
+  nome_item VARCHAR(120) NOT NULL,
+  UNIQUE KEY uq_categoria_item (categoria_id, nome_item),
+  CONSTRAINT fk_categorias_itens_categoria
+    FOREIGN KEY (categoria_id) REFERENCES categorias(id_categoria)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Campanhas
 CREATE TABLE IF NOT EXISTS campanhas (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_campanha INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(120) NOT NULL,
   meta VARCHAR(80) NOT NULL,
   descricao TEXT NULL
@@ -50,7 +65,7 @@ CREATE TABLE IF NOT EXISTS campanhas (
 
 -- Solicitações
 CREATE TABLE IF NOT EXISTS solicitacoes (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_solicitacao INT AUTO_INCREMENT PRIMARY KEY,
   titulo VARCHAR(160) NOT NULL,
   categoria VARCHAR(120) NOT NULL,
   descricao TEXT NULL,
@@ -65,7 +80,7 @@ CREATE TABLE IF NOT EXISTS solicitacoes (
 
 -- Entradas
 CREATE TABLE IF NOT EXISTS entradas (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_entrada INT AUTO_INCREMENT PRIMARY KEY,
   data DATE NOT NULL,
   doador VARCHAR(120) NOT NULL,
   categoria VARCHAR(120) NOT NULL,
@@ -78,6 +93,68 @@ CREATE TABLE IF NOT EXISTS entradas (
   forma_pagamento VARCHAR(32) NULL,
   solicitacao_id INT NULL
 );
+
+-- Usuários
+CREATE TABLE IF NOT EXISTS usuarios (
+  id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+  id_colaborador INT NOT NULL,
+  tipo VARCHAR(100) NOT NULL
+);
+
+-- Logins
+CREATE TABLE IF NOT EXISTS logins (
+  id_login INT AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT NOT NULL,
+  senha VARCHAR(100),
+  FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
+);
+
+-- Seed: Usuários
+INSERT INTO usuarios (id_colaborador, tipo)
+SELECT * FROM (
+  SELECT 1 AS id_colaborador, 'admin' AS tipo
+  UNION ALL SELECT 2, 'voluntario'
+  UNION ALL SELECT 3, 'colaborador'
+) AS tmp
+WHERE NOT EXISTS (SELECT 1 FROM usuarios);
+
+-- Seed: Logins
+INSERT INTO logins (id_usuario, senha)
+SELECT * FROM (
+  SELECT 1 AS id_usuario, 'admin123' AS senha
+  UNION ALL SELECT 2, 'voluntario123'
+  UNION ALL SELECT 3, 'colaborador123'
+) AS tmp
+WHERE NOT EXISTS (SELECT 1 FROM logins);
+
+-- Montagens (produção de cestas a partir do estoque)
+CREATE TABLE IF NOT EXISTS montagens (
+  id_montagem INT AUTO_INCREMENT PRIMARY KEY,
+  data DATE NOT NULL,
+  responsavel VARCHAR(120) NOT NULL,
+  qtd_cestas INT NOT NULL,
+  obs TEXT NULL
+);
+
+CREATE TABLE IF NOT EXISTS montagens_itens (
+  id_montagens_item INT AUTO_INCREMENT PRIMARY KEY,
+  montagem_id INT NOT NULL,
+  categoria VARCHAR(120) NOT NULL,
+  unidade VARCHAR(16) NOT NULL,
+  quantidade INT NOT NULL,
+  FOREIGN KEY (montagem_id) REFERENCES montagens(id_montagem) ON DELETE CASCADE
+);
+
+-- Saídas (distribuição de cestas)
+CREATE TABLE IF NOT EXISTS saidas (
+  id_saida INT AUTO_INCREMENT PRIMARY KEY,
+  data DATE NOT NULL,
+  familia_id INT NULL,
+  responsavel VARCHAR(120) NULL,
+  qtd INT NULL,
+  obs TEXT NULL,
+  CONSTRAINT fk_saidas_familia FOREIGN KEY (familia_id) REFERENCES familias(id_familia) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
 
@@ -147,32 +224,4 @@ SELECT * FROM (
   UNION ALL SELECT CURDATE(), 'João Pereira', 'Leite', 30, 'L', 'Natal Solidário', 'Leite longa vida'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM entradas);
-
--- Montagens (produção de cestas a partir do estoque)
-CREATE TABLE IF NOT EXISTS montagens (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  data DATE NOT NULL,
-  responsavel VARCHAR(120) NOT NULL,
-  qtd_cestas INT NOT NULL,
-  obs TEXT NULL
-);
-
-CREATE TABLE IF NOT EXISTS montagens_itens (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  montagem_id INT NOT NULL,
-  categoria VARCHAR(120) NOT NULL,
-  unidade VARCHAR(16) NOT NULL,
-  quantidade INT NOT NULL,
-  FOREIGN KEY (montagem_id) REFERENCES montagens(id) ON DELETE CASCADE
-);
-
--- Saídas (distribuição de cestas) - utilizada por rota /api/saidas
-CREATE TABLE IF NOT EXISTS saidas (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  data DATE NOT NULL,
-  familia_id INT NULL,
-  responsavel VARCHAR(120) NULL,
-  qtd INT NULL,
-  obs TEXT NULL,
-  CONSTRAINT fk_saidas_familia FOREIGN KEY (familia_id) REFERENCES familias(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ------------------------------------------------------------

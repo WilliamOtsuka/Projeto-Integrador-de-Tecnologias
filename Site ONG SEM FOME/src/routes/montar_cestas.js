@@ -56,7 +56,7 @@ router.post(
           await conn.rollback();
           return res.status(400).json({ error: 'solicitacao_id inválido' });
         }
-        const [[sRow]] = await conn.execute('SELECT id, categoria FROM solicitacoes WHERE id=?', [sId]);
+  const [[sRow]] = await conn.execute('SELECT id_solicitacao AS id, categoria FROM solicitacoes WHERE id_solicitacao=?', [sId]);
         if (!sRow) {
           await conn.rollback();
           return res.status(404).json({ error: 'Solicitação não encontrada' });
@@ -199,7 +199,7 @@ router.post(
 
       // Recalcula status da solicitação vinculada (se houver)
       if (solicitacaoIdNum) {
-        const [[s]] = await conn.execute('SELECT quantidade FROM solicitacoes WHERE id=?', [solicitacaoIdNum]);
+  const [[s]] = await conn.execute('SELECT quantidade FROM solicitacoes WHERE id_solicitacao=?', [solicitacaoIdNum]);
         const reqQtd = Number(s?.quantidade || 0);
         const [[tot]] = await conn.execute('SELECT COALESCE(SUM(quantidade),0) AS total FROM entradas WHERE solicitacao_id=?', [solicitacaoIdNum]);
         const recebido = Number(tot.total || 0);
@@ -207,7 +207,7 @@ router.post(
         if (reqQtd > 0 && recebido >= reqQtd) novoStatus = 'atendido';
         else if (recebido > 0) novoStatus = 'em compra';
         else novoStatus = 'aprovado';
-        await conn.execute('UPDATE solicitacoes SET status=? WHERE id=?', [novoStatus, solicitacaoIdNum]);
+  await conn.execute('UPDATE solicitacoes SET status=? WHERE id_solicitacao=?', [novoStatus, solicitacaoIdNum]);
       }
 
       await conn.commit();

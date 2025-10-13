@@ -1,3 +1,27 @@
+/* Input with icon (eye) */
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.input-with-icon input[type="password"],
+.input-with-icon input[type="text"] {
+    width: 100%;
+    padding-right: 2.25rem; /* space for eye button */
+}
+.input-with-icon .icon-button {
+    position: absolute;
+    right: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted, #666);
+    cursor: pointer;
+    padding: 0.25rem;
+}
+.input-with-icon .icon-button:focus {
+    outline: 2px solid var(--primary, #2e7d32);
+    outline-offset: 2px;
+}
 :root {
     --primary-color: #e78b00;
     --secondary-color: #389e66;
@@ -261,6 +285,31 @@ nav.navbar {
     font-size: 0.98em;
     color: #20603d;
     font-style: normal;
+}
+
+/* Badges de prioridade */
+.badge {
+    display: inline-block;
+    padding: 0.2em 0.6em;
+    border-radius: 999px;
+    font-size: 0.85em;
+    font-weight: bold;
+    line-height: 1.2;
+}
+.badge-prioridade--urgente {
+    color: #9b1c1c;
+    background: #fde2e2;
+    border: 1px solid #f8b4b4;
+}
+.badge-prioridade--normal {
+    color: #1f3c2e;
+    background: #d5f5e3;
+    border: 1px solid #abdfc7;
+}
+.badge-prioridade--baixa {
+    color: #444;
+    background: #eee;
+    border: 1px solid #ddd;
 }
 
 /* Reveal on scroll - global */
@@ -599,6 +648,20 @@ p.info-destaque {
     cursor: pointer;
 }
 
+.btn-link {
+    background: transparent;
+    color: var(--secondary-color);
+    border: none;
+    padding: 0;
+    font-size: 0.9em;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.btn-link:hover {
+    color: #2e8b57;
+}
+
 .table-actions .btn-edit {
     background: var(--secondary-color);
     color: #fff;
@@ -776,6 +839,18 @@ p.info-destaque {
 
 .btn-delete:hover {
     background: rgba(192, 57, 43, 0.06);
+}
+
+.btn-categoria {
+    background: transparent;
+    color: var(--secondary-color);
+    border: 1px solid rgba(56, 158, 102, 0.18);
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+.btn-categoria:hover {
+    background: rgba(56, 158, 102, 0.06);
 }
 
 @media (max-width: 900px) {

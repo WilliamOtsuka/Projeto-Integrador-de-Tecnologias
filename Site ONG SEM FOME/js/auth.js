@@ -1,24 +1,29 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const navbarLogin = document.querySelector('.navbar-login');
-  const menuPrincipal = document.querySelector('.menu-principal');
+  const navbarLogin = document.querySelector(".navbar-login");
+  const menuPrincipal = document.querySelector(".menu-principal");
   const ADMIN_PAGES = new Set([
-    'cadastro_doador.html',
-    'distribuir_cestas.html',
-    'gerenciar_campanhas.html',
-    'gerenciar_categorias.html',
-    'gerenciar_colaboradores.html',
-    'gerenciar_doadores.html',
-    'gerenciar_estoque.html',
-    'gerenciar_familias.html',
-    'gerenciar_solicitacoes.html',
+    "cadastro_doador.html",
+    "distribuir_cestas.html",
+    "gerenciar_campanhas.html",
+    "gerenciar_categorias.html",
+    "gerenciar_colaboradores.html",
+    "gerenciar_doadores.html",
+    "gerenciar_estoque.html",
+    "gerenciar_familias.html",
+    "gerenciar_solicitacoes.html",
+    "efetuar_doacao.html",
   ]);
 
   const currentPage = (() => {
-    try { return window.location.pathname.split('/').pop() || 'index.html'; } catch { return 'index.html'; }
+    try {
+      return window.location.pathname.split("/").pop() || "index.html";
+    } catch {
+      return "index.html";
+    }
   })();
 
-  (function injectAdminStyles(){
-    const id = 'admin-dropdown-styles';
+  (function injectAdminStyles() {
+    const id = "admin-dropdown-styles";
     if (document.getElementById(id)) return;
     const css = `
       .admin-menu { display:flex; align-items:center; gap:.4rem; position:relative; }
@@ -28,70 +33,131 @@ document.addEventListener("DOMContentLoaded", () => {
       .admin-menu .dropdown-menu a:hover { background:#f2f2f2; }
       .admin-menu .open { display:block; }
     `;
-    const style = document.createElement('style'); style.id = id; style.textContent = css; document.head.appendChild(style);
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = css;
+    document.head.appendChild(style);
   })();
 
   async function getSession() {
     try {
-      const resp = await fetch('/api/me');
+      const resp = await fetch("/api/me");
       if (!resp.ok) return { authenticated: false };
       return await resp.json();
-    } catch { return { authenticated: false }; }
+    } catch {
+      return { authenticated: false };
+    }
   }
 
   function isAdminUser(me) {
-    return Boolean(me?.authenticated && me.user && String(me.user.name).toLowerCase() === 'admin');
+    return me?.authenticated && me.user?.tipo.toLowerCase() === "admin";
   }
 
-  async function ensureAdminIfNeeded() {
-    if (!ADMIN_PAGES.has(currentPage)) return; // página pública
-    const me = await getSession();
-    if (!isAdminUser(me)) {
-      // bloqueia acesso a páginas administrativas
-      window.location.href = 'login_page.html';
-    }
+  function isColaboradorUser(me) {
+    return me?.authenticated && me.user?.tipo.toLowerCase() === "colaborador";
   }
-  
-  function renderAdminDropdown() {
+
+  function isDoadorUser(me) {
+    return me?.authenticated && me.user?.tipo.toLowerCase() === "doador";
+  }
+
+  function renderMenu(me) {
     if (!navbarLogin) return;
-    const links = [
-      { href: 'gerenciar_estoque.html', label: 'Gerenciar Estoque' },
-      { href: 'gerenciar_solicitacoes.html', label: 'Solicitações' },
-      { href: 'gerenciar_doadores.html', label: 'Gerenciar Doadores' },
-      { href: 'gerenciar_familias.html', label: 'Gerenciar Famílias' },
-      { href: 'gerenciar_colaboradores.html', label: 'Gerenciar Colaboradores' },
-      { href: 'gerenciar_categorias.html', label: 'Gerenciar Categorias' },
-      { href: 'gerenciar_campanhas.html', label: 'Gerenciar Campanhas' },
-    ];
+    let links = [];
+
+    if (isAdminUser(me)) {
+      links = [
+        { href: "gerenciar_estoque.html", label: "Gerenciar Estoque" },
+        { href: "gerenciar_solicitacoes.html", label: "Solicitações" },
+        { href: "gerenciar_doadores.html", label: "Gerenciar Doadores" },
+        { href: "gerenciar_familias.html", label: "Gerenciar Famílias" },
+        {
+          href: "gerenciar_colaboradores.html",
+          label: "Gerenciar Colaboradores",
+        },
+        { href: "gerenciar_categorias.html", label: "Gerenciar Categorias" },
+        { href: "gerenciar_campanhas.html", label: "Gerenciar Campanhas" },
+      ];
+    } else if (isColaboradorUser(me)) {
+      links = [
+        { href: "gerenciar_estoque.html", label: "Gerenciar Estoque" },
+        { href: "gerenciar_solicitacoes.html", label: "Solicitações" },
+        { href: "gerenciar_doadores.html", label: "Gerenciar Doadores" },
+        { href: "gerenciar_familias.html", label: "Gerenciar Famílias" },
+        { href: "gerenciar_categorias.html", label: "Gerenciar Categorias" },
+        { href: "gerenciar_campanhas.html", label: "Gerenciar Campanhas" },
+      ];
+    } else if (isDoadorUser(me)) {
+      links = [{ href: "efetuar_doacao.html", label: "Efetuar doação" }];
+    }
     navbarLogin.innerHTML = `
       <div class="admin-menu">
         <div class="dropdown">
-          <a id="adminMenuBtn" class="dropdown-adm" role="button" title="Abrir menu">Olá, admin ▾</a>
+          <a id="adminMenuBtn" class="dropdown-adm" role="button" title="Abrir menu">Olá, ${
+            me.user?.tipo || "Usuário"
+          } ▾</a>
           <div id="adminDropdown" class="dropdown-menu">
-            ${links.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
+            ${links.map((l) => `<a href="${l.href}">${l.label}</a>`).join("")}
           </div>
         </div>
       </div>
         <a id="btnLogout" class="btn-login" role="button" title="Sair">Sair</a>
     `;
-    const btn = document.getElementById('btnLogout');
-    if (btn) btn.addEventListener('click', async () => { try { await fetch('/api/logout', { method:'POST' }); } finally { window.location.href = 'login_page.html'; } });
-    const menuBtn = document.getElementById('adminMenuBtn');
-    const dd = document.getElementById('adminDropdown');
+    const btn = document.getElementById("btnLogout");
+    if (btn)
+      btn.addEventListener("click", async () => {
+        try {
+          await fetch("/api/logout", { method: "POST" });
+        } finally {
+          window.location.href = "login_page.html";
+        }
+      });
+    const menuBtn = document.getElementById("adminMenuBtn");
+    const dd = document.getElementById("adminDropdown");
     if (menuBtn && dd) {
-      menuBtn.addEventListener('click', (e) => { e.preventDefault(); dd.classList.toggle('open'); });
-      document.addEventListener('click', (ev) => {
-        if (!dd.contains(ev.target) && ev.target !== menuBtn) dd.classList.remove('open');
+      menuBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        dd.classList.toggle("open");
+      });
+      document.addEventListener("click", (ev) => {
+        if (!dd.contains(ev.target) && ev.target !== menuBtn)
+          dd.classList.remove("open");
       });
     }
   }
 
   (async function init() {
-    await ensureAdminIfNeeded();
-    // Para todos: esconder o menu principal do topo (admin ficará no dropdown)
-    // Renderiza UI conforme sessão
     const me = await getSession();
-    if (isAdminUser(me)) renderAdminDropdown();
-    // Usuário comum verá apenas o cabeçalho genérico (sem menu principal)
+    if (!me.authenticated) {
+      // Página pública (ex.: index.html) não deve redirecionar nem alertar
+      if (ADMIN_PAGES.has(currentPage)) {
+        // Para páginas administrativas, exigir login
+        alert("Acesso negado. É necessário efetuar login.");
+        window.location.href = "login_page.html";
+      }
+      return;
+    }
+
+    // bloqueio especifico colaborador
+    if (
+      isColaboradorUser(me) &&
+      currentPage === "gerenciar_colaboradores.html"
+    ) {
+      alert(
+        "Acesso negado. Somente administradores podem gerenciar colaboradores."
+      );
+      window.location.href = "index.html";
+      return;
+    }
+    // bloqueio de acesso a páginas administrativas
+    if (
+      ADMIN_PAGES.has(currentPage) &&
+      !isAdminUser(me) &&
+      !isColaboradorUser(me)
+    ) {
+      window.location.href = "login_page.html";
+      return;
+    }
+    renderMenu(me);
   })();
 });

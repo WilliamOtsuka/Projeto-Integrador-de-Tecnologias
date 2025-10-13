@@ -13,8 +13,8 @@ router.get(
     const [rows] = await pool.query(
       `SELECT s.*, f.nome AS familia_nome
        FROM saidas s
-       LEFT JOIN familias f ON f.id = s.familia_id
-       ORDER BY s.id DESC
+       LEFT JOIN familias f ON f.id_familia = s.familia_id
+       ORDER BY s.id_saida DESC
        LIMIT ? OFFSET ?`,
       [limit, offset]
     );
@@ -32,8 +32,8 @@ router.get(
       `
     SELECT s.*, f.nome AS familia_nome
     FROM saidas s
-    LEFT JOIN familias f ON f.id = s.familia_id
-    WHERE s.id=?`,
+    LEFT JOIN familias f ON f.id_familia = s.familia_id
+    WHERE s.id_saida=?`,
       [id]
     );
     if (!rows.length)
@@ -92,7 +92,7 @@ router.post(
       const values = [data];
       if (needFamiliaText) {
         const [frows] = await conn.execute(
-          "SELECT nome FROM familias WHERE id=?",
+          "SELECT nome FROM familias WHERE id_familia=?",
           [familia_id]
         );
         const familiaNome = frows?.[0]?.nome || null;
@@ -109,21 +109,21 @@ router.post(
       const insertSql = `INSERT INTO saidas (${columns.join(
         ","
       )}) VALUES (${placeholders})`;
-      const [ins] = await conn.execute(insertSql, values);
-      const saidaId = ins.insertId;
+  const [ins] = await conn.execute(insertSql, values);
+  const saidaId = ins.insertId;
 
-      await conn.execute(
-        "INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs) VALUES (?,?,?,?,?,?,?)",
-        [
-          data,
-          "SAIDA",
-          "Cesta Básica",
-          -Math.abs(nQtd),
-          "cx",
-          null,
-          `Saída #${saidaId} - Família ${familia_id}${obs ? " - " + obs : ""}`,
-        ]
-      );
+        await conn.execute(
+          "INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs) VALUES (?,?,?,?,?,?,?)",
+          [
+            data,
+            "SAIDA",
+            "Cesta Básica",
+            -Math.abs(nQtd),
+            "cx",
+            null,
+            `Saída #${saidaId} - Família ${familia_id}${obs ? " - " + obs : ""}`,
+          ]
+        );
 
       await conn.commit();
       res
@@ -161,7 +161,7 @@ router.put(
 
       // Atualiza saída
       const [upd] = await conn.execute(
-        "UPDATE saidas SET data=?, familia_id=?, responsavel=?, qtd=?, obs=? WHERE id=?",
+        "UPDATE saidas SET data=?, familia_id=?, responsavel=?, qtd=?, obs=? WHERE id_saida=?",
         [data, familia_id, responsavel, nQtd, obs || null, id]
       );
       if (upd.affectedRows === 0) {
@@ -170,15 +170,15 @@ router.put(
       }
 
       // Atualiza entrada negativa correspondente
-      await conn.execute(
-        "UPDATE entradas SET data=?, quantidade=?, obs=? WHERE obs LIKE ?",
-        [
-          data,
-          -Math.abs(nQtd),
-          `Saída #${id} - Família ${familia_id}${obs ? " - " + obs : ""}`,
-          `Saída #${id}%`,
-        ]
-      );
+        await conn.execute(
+          "UPDATE entradas SET data=?, quantidade=?, obs=? WHERE obs LIKE ?",
+          [
+            data,
+            -Math.abs(nQtd),
+            `Saída #${id} - Família ${familia_id}${obs ? " - " + obs : ""}`,
+            `Saída #${id}%`,
+          ]
+        );
 
       await conn.commit();
       res.json({
@@ -209,7 +209,7 @@ router.delete(
       await conn.beginTransaction();
 
       // Obter dados para montar o padrão da OBS e remover a saída
-      const [rows] = await conn.execute("SELECT * FROM saidas WHERE id=?", [
+      const [rows] = await conn.execute("SELECT * FROM saidas WHERE id_saida=?", [
         id,
       ]);
       if (!rows.length) {
@@ -218,7 +218,7 @@ router.delete(
       }
       const saida = rows[0];
 
-      await conn.execute("DELETE FROM saidas WHERE id=?", [id]);
+      await conn.execute("DELETE FROM saidas WHERE id_saida=?", [id]);
       await conn.execute("DELETE FROM entradas WHERE obs LIKE ?", [
         `Saída #${id}%`,
       ]);

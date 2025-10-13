@@ -17,12 +17,36 @@ function renderTabelaColaboradores() {
       <td>${c.telefone}</td>
       <td>${c.cargo}</td>
       <td>
+        ${c.senha
+       ? `<span class="senha-mask" data-id="${c.id}" data-senha="${c.senha}" data-visible="false">${"\u2022".repeat(c.senha.length)}</span>
+         <button type="button" class="btn-link" onclick="toggleSenha(${c.id}, this)">Mostrar</button>`
+          : '-'}
+      </td>
+      <td>
         <button class="btn-edit" onclick="editarColaborador(${c.id})">Editar</button>
         <button class="btn-delete" onclick="excluirColaborador(${c.id})">Excluir</button>
       </td>`;
     tbody.appendChild(tr);
   });
 }
+
+// Alterna exibição de senha (mascarada/visível)
+window.toggleSenha = function (id, btnEl) {
+  const span = document.querySelector(`.senha-mask[data-id="${id}"]`);
+  if (!span) return;
+  const senha = span.getAttribute('data-senha') || '';
+  if (!senha) return;
+  const visible = span.getAttribute('data-visible') === 'true';
+  if (visible) {
+    span.textContent = '\u2022'.repeat(senha.length);
+    span.setAttribute('data-visible', 'false');
+    if (btnEl) btnEl.textContent = 'Mostrar';
+  } else {
+    span.textContent = senha;
+    span.setAttribute('data-visible', 'true');
+    if (btnEl) btnEl.textContent = 'Ocultar';
+  }
+};
 
 // Máscaras/validação
 const onlyDigits = (v) => (v || "").replace(/\D/g, "");
@@ -70,6 +94,9 @@ function abrirModalColaborador(editar = false, colab = {}) {
   document.getElementById("emailColaborador").value = colab.email || "";
   document.getElementById("telefoneColaborador").value = colab.telefone || "";
   document.getElementById("cargoColaborador").value = colab.cargo || "";
+  // Preenche a senha quando em modo edição (se existir)
+  const senhaEl = document.getElementById("senhaColaborador");
+  if (senhaEl) senhaEl.value = colab.senha || "";
 }
 
 // Fecha o modal (fade-out)
@@ -118,12 +145,12 @@ document.getElementById("formColaborador").onsubmit = function (e) {
   const email = document.getElementById("emailColaborador").value;
   const telefone = document.getElementById("telefoneColaborador").value;
   const cargo = document.getElementById("cargoColaborador").value;
-
+  const senha = document.getElementById("senhaColaborador").value.trim();
   const nomeOk = (nome || "").trim().length >= 2;
   const emailOk = emailRegex.test((email || "").trim());
   const telOk = validaTelefone(telefone);
   const cargoOk = (cargo || "").trim().length >= 2;
-
+  const senhaOk = senha.length >= 4;
   document
     .getElementById("nomeColaborador")
     .setCustomValidity(nomeOk ? "" : "Informe o nome");
@@ -136,29 +163,41 @@ document.getElementById("formColaborador").onsubmit = function (e) {
   document
     .getElementById("cargoColaborador")
     .setCustomValidity(cargoOk ? "" : "Informe o cargo");
-
-  if (!nomeOk || !emailOk || !telOk || !cargoOk) {
+  document
+    .getElementById("senhaColaborador")
+    .setCustomValidity(senhaOk ? "" : "A senha deve ter pelo menos 4 caracteres"); 
+  if (!nomeOk || !emailOk || !telOk || !cargoOk || !senhaOk) {
     document.getElementById("formColaborador").reportValidity();
     return;
   }
 
-  const payload = { nome, email, telefone, cargo };
+  const payload = { nome, email, telefone, cargo, senha };
   (async () => {
     try {
       // Se há ID, atualiza; senão, cria
-      if (id)
-        await fetch(`/api/colaboradores/${id}`, {
+      if (id){
+       const res = await fetch(`/api/colaboradores/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-      else
-        await fetch("/api/colaboradores", {
+        if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Erro ao salvar colaborador");
+        return;
+      }
+      }else{
+       const res =  await fetch("/api/colaboradores", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Erro ao salvar colaborador");
+        return;
+      }
+    }
       fecharModalColaborador();
       await loadColaboradores();
     } catch (err) {
@@ -286,3 +325,11 @@ if (cargoInput) {
     )
   );
 }
+
+const senhaInput = document.getElementById("senhaColaborador");
+
+senhaInput.addEventListener("input", () => {
+  const senha = senhaInput.value.trim();
+  const senhaOk = !senha || senha.length >= 4;
+  senhaInput.setCustomValidity(senhaOk ? "" : "A senha deve ter pelo menos 4 caracteres");
+});

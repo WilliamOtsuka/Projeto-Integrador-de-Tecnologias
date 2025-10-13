@@ -1,15 +1,54 @@
+const pool = require('../config/db.js')
 const express = require('express');
+const { asyncHandler } = require('../middleware/auth');
 const router = express.Router();
 
-// Login simples (somente demonstração)
-router.post('/login', (req, res) => {
-    const { username, password } = req.body || {};
-    if (username === 'admin' && password === '123') {
-        req.session.user = { name: username };
-        return res.json({ ok: true, user: req.session.user });
+router.post('/login', asyncHandler(async (req, res) => {
+    //login colaborador ou admin 
+    const { email, senha } = req.body;
+    const [colab] = await pool.query(
+        'SELECT id_colaborador FROM colaboradores WHERE email = ?', [email]);
+
+    if (colab.length) {
+        const colaborador = colab[0];
+        const [userRows] = await pool.query(
+        `SELECT u.id_usuario as usuario_id, u.tipo, l.senha
+           FROM usuarios u
+           JOIN logins l ON l.id_usuario = u.id_usuario
+        WHERE u.id_colaborador = ?`, [colaborador.id_colaborador]);
+
+        const user = userRows[0];
+        if (!user || user.senha !== senha)
+            return res.status(401).json({ message: 'Usuário ou senha incorretos' });
+        req.session.user = {
+            id: user.id_usuario,
+            nome: colaborador.nome,
+            tipo: user.tipo,
+        };
+        return res.json({ message: 'Login bem-sucedido' });
     }
-    return res.status(401).json({ ok: false, error: 'Credenciais inválidas' });
-});
+    //login doador
+    const [doadorRows] = await pool.query(
+        `SELECT u.id_usuario as usuario_id, u.tipo, l.senha, d.nome
+   FROM usuarios u
+   JOIN doadores d ON u.id_colaborador = d.id_doador
+   JOIN logins l ON l.id_usuario = u.id_usuario
+   WHERE d.email = ?`, [email]);
+
+    if (doadorRows.length) {
+        const doador = doadorRows[0];
+        if (!doador || doador.senha !== senha)
+            return res.status(401).json({ message: 'Usuário ou senha incorretos' });
+
+        req.session.user = {
+            id: doador.id_usuario,
+            nome: doador.nome,
+            tipo: 'doador',
+        };
+        return res.json({ message: 'Login bem-sucedido' });
+    }
+    return res.status(401).json({ message: 'Usuário não encontrado' });
+}));
 
 router.post('/logout', (req, res) => {
     req.session.destroy(() => res.json({ ok: true }));

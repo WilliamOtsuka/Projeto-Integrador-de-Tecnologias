@@ -7,7 +7,7 @@ router.get('/', requireAuth, asyncHandler(async (req, res) => {
   const page = Math.max(parseInt(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(parseInt(req.query.limit) || 30, 1), 200);
   const offset = (page - 1) * limit;
-  const [rows] = await pool.query('SELECT * FROM campanhas ORDER BY id DESC LIMIT ? OFFSET ?', [limit, offset]);
+  const [rows] = await pool.query('SELECT * FROM campanhas ORDER BY id_campanha DESC LIMIT ? OFFSET ?', [limit, offset]);
   const [[cnt]] = await pool.query('SELECT COUNT(*) AS total FROM campanhas');
   res.json({ data: rows, total: Number(cnt.total||0), page, limit });
 }));
@@ -20,12 +20,12 @@ router.post('/', requireAuth, asyncHandler(async (req, res) => {
 
 router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
   const { id } = req.params; const { nome, meta, descricao } = req.body;
-  await pool.execute('UPDATE campanhas SET nome=?, meta=?, descricao=? WHERE id=?', [nome, meta, descricao || null, id]);
+  await pool.execute('UPDATE campanhas SET nome=?, meta=?, descricao=? WHERE id_campanha=?', [nome, meta, descricao || null, id]);
   res.json({ id: Number(id), nome, meta, descricao });
 }));
 
 router.delete('/:id', requireAuth, asyncHandler(async (req, res) => {
-  const { id } = req.params; await pool.execute('DELETE FROM campanhas WHERE id=?', [id]);
+  const { id } = req.params; await pool.execute('DELETE FROM campanhas WHERE id_campanha=?', [id]);
   res.status(204).end();
 }));
 

@@ -95,7 +95,7 @@ function renderTabelaSolicitacoes() {
   <td>${formatDateDDMMYY(s.data_solicitacao)}</td>
   <td>${s.solicitante || ''}</td>
   <td>${s.status || 'pendente'}</td>
-  <td>${s.prioridade ? `<span class="badge ${String(s.prioridade).toLowerCase()==='urgente' ? 'badge-prioridade--urgente' : 'badge-prioridade--normal'}">${s.prioridade}</span>` : ''}</td>
+  <td>${s.prioridade ? (()=>{ const p=String(s.prioridade).toLowerCase(); const cls = p==='urgente' ? 'badge-prioridade--urgente' : (p==='baixa' ? 'badge-prioridade--baixa' : 'badge-prioridade--normal'); return `<span class="badge ${cls}">${s.prioridade}</span>`; })() : ''}</td>
   <td>${(s.quantidade ?? '')}</td>
   <td>${s.unidade || ''}</td>
   <td>${s.categoria}</td>

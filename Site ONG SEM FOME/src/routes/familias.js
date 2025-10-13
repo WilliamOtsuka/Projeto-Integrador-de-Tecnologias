@@ -11,7 +11,7 @@ router.get(
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 30, 1), 200);
     const offset = (page - 1) * limit;
     const [rows] = await pool.query(
-      "SELECT * FROM familias ORDER BY id DESC LIMIT ? OFFSET ?",
+      "SELECT id_familia AS id, nome, responsavel, contato, cep, logradouro, numero, complemento, bairro, cidade, uf FROM familias ORDER BY id_familia DESC LIMIT ? OFFSET ?",
       [limit, offset]
     );
     const [[cnt]] = await pool.query("SELECT COUNT(*) AS total FROM familias");
@@ -86,7 +86,7 @@ router.put(
       uf,
     } = req.body;
     await pool.execute(
-      "UPDATE familias SET nome=?, responsavel=?, contato=?, cep=?, logradouro=?, numero=?, complemento=?, bairro=?, cidade=?, uf=? WHERE id=?",
+      "UPDATE familias SET nome=?, responsavel=?, contato=?, cep=?, logradouro=?, numero=?, complemento=?, bairro=?, cidade=?, uf=? WHERE id_familia=?",
       [
         nome,
         responsavel,
@@ -121,8 +121,8 @@ router.delete(
   "/:id",
   requireAuth,
   asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    await pool.execute("DELETE FROM familias WHERE id=?", [id]);
+  const { id } = req.params;
+  await pool.execute("DELETE FROM familias WHERE id_familia=?", [id]);
     res.status(204).end();
   })
 );

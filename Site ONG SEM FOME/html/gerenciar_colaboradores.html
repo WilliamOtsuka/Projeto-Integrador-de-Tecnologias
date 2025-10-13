@@ -37,7 +37,7 @@
     </p>
 
     <section class="crud-colaboradores">
-  <div id="modalColaborador" class="modal" style="display:none;">
+      <div id="modalColaborador" class="modal" style="display: none">
         <div class="modal-conteudo form-adicionar">
           <span class="fechar" id="fecharModalColaborador">&times;</span>
           <h2 id="tituloModalColaborador">Adicionar Colaborador</h2>
@@ -58,6 +58,10 @@
             <div class="form-field">
               <label for="cargoColaborador">Cargo/Função:</label>
               <input type="text" id="cargoColaborador" required />
+            </div>
+            <div class="form-field">
+              <label for="senhaColaborador">Senha de acesso:</label>
+              <input type="password" id="senhaColaborador" required minlength="4" />
             </div>
             <div class="form-actions">
               <button type="submit" class="btn-primary">Salvar</button>
@@ -84,12 +88,13 @@
             <th>E-mail</th>
             <th>Telefone</th>
             <th>Cargo</th>
+            <th>Senha</th>
             <th>Ações</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
-  <div class="pagination pagination-bar" id="paginacaoColaboradores">
+      <div class="pagination pagination-bar" id="paginacaoColaboradores">
         <button id="prevColaboradores" class="btn-secondary">Anterior</button>
         <span id="infoColaboradores">Página 1 de 1</span>
         <button id="nextColaboradores" class="btn-secondary">Próxima</button>
@@ -99,7 +104,7 @@
     <script src="/js/gerenciar_colaboradores.js"></script>
     <script src="/js/auth.js"></script>
     <footer class="rodape">
-  © 2025 ONG SEM FOME. Todos os direitos reservados.
+      © 2025 ONG SEM FOME. Todos os direitos reservados.
     </footer>
   </body>
 </html>

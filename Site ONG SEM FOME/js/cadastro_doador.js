@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Submit
   const form = byId("formCadastroDoador");
   if (form) {
-    form.addEventListener("submit", function (e) {
+    form.addEventListener("submit", async function (e) {
       const checks = [];
       if (telInput) checks.push(validaTelefone(telInput.value));
       if (docInput) checks.push(validaCpfCnpj(docInput.value));
@@ -178,10 +178,35 @@ document.addEventListener("DOMContentLoaded", function () {
         form.reportValidity();
         return;
       }
-
       e.preventDefault();
-      alert("Cadastro enviado! Obrigado por se cadastrar como doador.");
-      form.reset();
-    });
+      const nome = nomeInput.value.trim()
+      const documento = docInput.value.trim()
+      const telefone = telInput.value.trim()
+      const email = emailInput.value.trim()
+      const senhaInput = document.getElementById("senha") 
+      const senha = senhaInput ? senhaInput.value.trim() : ""
+
+      const dados = { nome, documento, telefone, email, senha }
+
+      try {
+        const resp = await fetch("/api/cadastro_doador", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados),
+        })
+        const resultado = await resp.json()
+
+        if (!resp.ok) {
+          alert(resultado.error)
+          return
+        }
+
+        alert("Cadastro realizado com sucesso!")
+        form.reset()
+      } catch (err) {
+        console.error(err)
+        alert("Erro ao salvar cadastro do doador.")
+      }
+    })
   }
 });

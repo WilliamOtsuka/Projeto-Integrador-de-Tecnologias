@@ -11,9 +11,14 @@ function renderTabelaCategorias() {
   tbody.innerHTML = "";
   categorias.forEach((c) => {
     const tr = document.createElement("tr");
+    const tipo = (c.tipo || 'simples');
     tr.innerHTML = `
       <td>${c.id}</td>
       <td>${c.nome}</td>
+      <td>
+        ${tipo === 'composta' ? 'Composto' : 'Simples'}
+        ${tipo === 'composta' ? `<button class="btn-categoria" onclick="verSubitens(${c.id}, '${String(c.nome).replace(/'/g, "\'")}')">Subitens</button>` : ''}
+      </td>
       <td>
         <button class="btn-edit" onclick="editarCategoria(${c.id})">Editar</button>
         <button class="btn-delete" onclick="excluirCategoria(${c.id})">Excluir</button>
@@ -32,8 +37,21 @@ function abrirModalCategoria(editar = false, cat = {}) {
   document.getElementById("tituloModalCategoria").textContent = editar
     ? "Editar Categoria"
     : "Adicionar Categoria";
-  document.getElementById("categoriaId").value = cat.id || "";
-  document.getElementById("nomeCategoria").value = cat.nome || "";
+  const idEl = document.getElementById("categoriaId");
+  const nomeEl = document.getElementById("nomeCategoria");
+  const tipoEl = document.getElementById("tipoCategoria");
+  const wrap = document.getElementById("subitensWrapper");
+  const lista = document.getElementById("listaSubitens");
+  idEl.value = cat.id || "";
+  nomeEl.value = cat.nome || "";
+  tipoEl.value = (cat.tipo || 'simples');
+  if (lista) lista.innerHTML = '';
+  // Mostrar seção de subitens se composta
+  const isComp = tipoEl.value === 'composta';
+  wrap.style.display = isComp ? 'block' : 'none';
+  if (isComp && cat.id) {
+    carregarSubitens(cat.id);
+  }
 }
 
 // Fecha o modal (fade-out)
@@ -78,6 +96,7 @@ document.getElementById("formCategoria").onsubmit = function (e) {
 
   const id = document.getElementById("categoriaId").value;
   const nome = document.getElementById("nomeCategoria").value;
+  const tipo = document.getElementById("tipoCategoria").value;
   const nomeOk = (nome || "").trim().length >= 2;
 
   document.getElementById("nomeCategoria").setCustomValidity(nomeOk ? "" : "Informe o nome da categoria");
@@ -93,13 +112,13 @@ document.getElementById("formCategoria").onsubmit = function (e) {
         await fetch(`/api/categorias/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nome }),
+          body: JSON.stringify({ nome, tipo }),
         });
       else
         await fetch("/api/categorias", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nome }),
+          body: JSON.stringify({ nome, tipo }),
         });
       fecharModalCategoria();
       await loadCategorias();
@@ -165,6 +184,90 @@ async function loadCategorias() {
     console.error(err);
     alert("Erro ao carregar categorias");
   }
+}
+
+// Subitens handlers
+async function carregarSubitens(catId) {
+  try {
+    const r = await fetch(`/api/categorias/${catId}/itens`);
+    if (!r.ok) return;
+    const itens = await r.json();
+    const lista = document.getElementById('listaSubitens');
+    if (!lista) return;
+    lista.innerHTML = '';
+    itens.forEach(i => {
+      const li = document.createElement('li');
+      li.innerHTML = `${i.nome} <button class="btn-link" data-item="${i.id}">Remover</button>`;
+      lista.appendChild(li);
+    });
+    // bind removes
+    lista.querySelectorAll('button[data-item]')?.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const itemId = btn.getAttribute('data-item');
+        await fetch(`/api/categorias/${catId}/itens/${itemId}`, { method: 'DELETE' });
+        carregarSubitens(catId);
+      });
+    });
+  } catch (e) { console.error(e); }
+}
+
+// Visualização de subitens
+window.verSubitens = async function (id, nome) {
+  const modal = document.getElementById('modalSubitens');
+  const titulo = document.getElementById('tituloModalSubitens');
+  const ul = document.getElementById('listaSubitensView');
+  if (!modal || !ul) return;
+  ul.innerHTML = '';
+  titulo.textContent = `Subitens de ${nome}`;
+  modal.style.display = 'block';
+  void modal.offsetWidth; modal.classList.add('mostrar');
+  try {
+    const r = await fetch(`/api/categorias/${id}/itens`);
+    const itens = r.ok ? await r.json() : [];
+    if (!Array.isArray(itens) || itens.length === 0) {
+      ul.innerHTML = '<li>Nenhum subitem cadastrado.</li>';
+      return;
+    }
+    itens.forEach(i => {
+      const li = document.createElement('li');
+      li.textContent = i.nome;
+      ul.appendChild(li);
+    });
+  } catch (e) {
+    console.error(e);
+    ul.innerHTML = '<li>Falha ao carregar subitens</li>';
+  }
+};
+
+const fecharModalSubitens = document.getElementById('fecharModalSubitens');
+if (fecharModalSubitens) {
+  fecharModalSubitens.addEventListener('click', () => {
+    const modal = document.getElementById('modalSubitens');
+    modal.classList.remove('mostrar');
+    modal.style.display = 'none';
+  });
+}
+
+const tipoEl = document.getElementById('tipoCategoria');
+if (tipoEl) {
+  tipoEl.addEventListener('change', () => {
+    const wrap = document.getElementById('subitensWrapper');
+    wrap.style.display = (tipoEl.value === 'composta') ? 'block' : 'none';
+  });
+}
+
+const btnAddSub = document.getElementById('btnAddSubitem');
+if (btnAddSub) {
+  btnAddSub.addEventListener('click', async () => {
+    const id = document.getElementById('categoriaId').value;
+    const nome = (document.getElementById('novoSubitem').value || '').trim();
+    if (!id || !nome) return;
+    await fetch(`/api/categorias/${id}/itens`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome })
+    });
+    document.getElementById('novoSubitem').value = '';
+    carregarSubitens(id);
+  });
 }
 
 // Inicializa a página

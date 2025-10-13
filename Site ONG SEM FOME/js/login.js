@@ -6,8 +6,8 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     const formData = new FormData(form);
     const payload = {
-      username: formData.get("username"),
-      password: formData.get("password"),
+      email: formData.get("email"),
+      senha: formData.get("password"),
     };
     try {
       const resp = await fetch("/api/login", {
@@ -30,4 +30,27 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Erro de rede ao tentar logar.");
     }
   });
+
+  // Toggle password visibility
+  const pwd = document.getElementById('password');
+  const btn = document.getElementById('togglePassword');
+  if (pwd && btn) {
+    const icon = btn.querySelector('i');
+    const updateIcon = () => {
+      const visible = pwd.type === 'text';
+      if (icon) {
+        icon.classList.toggle('fa-eye', visible);
+        icon.classList.toggle('fa-eye-slash', !visible);
+      }
+      btn.setAttribute('aria-label', visible ? 'Ocultar senha' : 'Mostrar senha');
+    };
+
+    // Inicializa corretamente
+    updateIcon();
+
+    btn.addEventListener('click', () => {
+      pwd.type = pwd.type === 'password' ? 'text' : 'password';
+      updateIcon();
+    });
+  }
 });

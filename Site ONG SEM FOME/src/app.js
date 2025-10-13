@@ -30,6 +30,7 @@ app.get("/status", (req, res) =>
 
 // Routes
 app.use("/api", require("./routes/auth")); // /api/login, /api/logout, /api/me
+app.use("/api/cadastro", require("./routes/cadastro"));
 app.use("/api/doadores", require("./routes/doadores"));
 app.use("/api/familias", require("./routes/familias"));
 app.use("/api/colaboradores", require("./routes/colaboradores"));
@@ -40,12 +41,17 @@ app.use("/api/entradas", require("./routes/entradas"));
 app.use("/api/montagens/custom", require("./routes/montar_cestas"));
 app.use("/api/saidas", require("./routes/saidas"));
 app.use("/api/estoque", require("./routes/estoque.js"));
-
+app.use("/api/doacao", require("./routes/doacao"))
 // Error handler
 app.use((err, req, res, next) => {
   // eslint-disable-next-line no-console
   console.error("Erro na API:", err);
-  res.status(500).json({ error: "Erro interno do servidor" });
+  if (res.headersSent) {
+    return next(err);
+  }
+  const status = err.status && Number.isInteger(err.status) ? err.status : 500;
+  const message = err.message || "Erro interno do servidor";
+  res.status(status).json({ error: message });
 });
 
 module.exports = app;

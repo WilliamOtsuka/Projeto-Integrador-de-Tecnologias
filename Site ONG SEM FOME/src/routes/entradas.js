@@ -7,7 +7,7 @@ const { requireAuth, asyncHandler } = require('../middleware/auth');
 async function recomputeSolicitacaoStatus(solicitacaoId) {
   if (!solicitacaoId) return;
   // Busca quantidade solicitada
-  const [[s]] = await pool.query('SELECT quantidade, status FROM solicitacoes WHERE id=?', [solicitacaoId]);
+  const [[s]] = await pool.query('SELECT quantidade, status FROM solicitacoes WHERE id_solicitacao=?', [solicitacaoId]);
   if (!s) return;
   const reqQtd = Number(s.quantidade || 0);
   // Soma das entradas vinculadas
@@ -17,14 +17,14 @@ async function recomputeSolicitacaoStatus(solicitacaoId) {
   if (reqQtd > 0 && recebido >= reqQtd) novoStatus = 'atendido';
   else if (recebido > 0) novoStatus = 'em compra';
   else novoStatus = 'aprovado';
-  await pool.execute('UPDATE solicitacoes SET status=? WHERE id=?', [novoStatus, solicitacaoId]);
+  await pool.execute('UPDATE solicitacoes SET status=? WHERE id_solicitacao=?', [novoStatus, solicitacaoId]);
 }
 
 router.get('/', requireAuth, asyncHandler(async (req, res) => {
   const page = Math.max(parseInt(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(parseInt(req.query.limit) || 30, 1), 200);
   const offset = (page - 1) * limit;
-  const [rows] = await pool.query('SELECT * FROM entradas ORDER BY id DESC LIMIT ? OFFSET ?', [limit, offset]);
+  const [rows] = await pool.query('SELECT * FROM entradas ORDER BY id_entrada DESC LIMIT ? OFFSET ?', [limit, offset]);
   const [[cnt]] = await pool.query('SELECT COUNT(*) AS total FROM entradas');
   res.json({ data: rows, total: Number(cnt.total||0), page, limit });
 }));
@@ -48,10 +48,10 @@ router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
   const { data, doador, categoria, quantidade, unidade, campanha, obs, tipo, fornecedor, forma_pagamento, solicitacao_id } = req.body;
   const t = (tipo === 'compra') ? 'compra' : 'doacao';
   // Captura o vínculo anterior (se houver) para recomputar depois
-  const [[oldRow]] = await pool.query('SELECT solicitacao_id FROM entradas WHERE id=?', [id]);
+  const [[oldRow]] = await pool.query('SELECT solicitacao_id FROM entradas WHERE id_entrada=?', [id]);
   await pool.execute(
-    'UPDATE entradas SET data=?, doador=?, categoria=?, quantidade=?, unidade=?, campanha=?, obs=?, tipo=?, fornecedor=?, forma_pagamento=?, solicitacao_id=? WHERE id=?',
-    [data, doador, categoria, quantidade, unidade, campanha || null, obs || null, t, fornecedor || null, forma_pagamento || null, solicitacao_id || null, id]
+  'UPDATE entradas SET data=?, doador=?, categoria=?, quantidade=?, unidade=?, campanha=?, obs=?, tipo=?, fornecedor=?, forma_pagamento=?, solicitacao_id=? WHERE id_entrada=?',
+  [data, doador, categoria, quantidade, unidade, campanha || null, obs || null, t, fornecedor || null, forma_pagamento || null, solicitacao_id || null, id]
   );
   // Recalcula status para o antigo vínculo (se mudou) e para o novo
   try {
@@ -69,8 +69,8 @@ router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
 router.delete('/:id', requireAuth, asyncHandler(async (req, res) => {
   const { id } = req.params;
   // Captura o vínculo antes de deletar
-  const [[row]] = await pool.query('SELECT solicitacao_id FROM entradas WHERE id=?', [id]);
-  await pool.execute('DELETE FROM entradas WHERE id=?', [id]);
+  const [[row]] = await pool.query('SELECT solicitacao_id FROM entradas WHERE id_entrada=?', [id]);
+  await pool.execute('DELETE FROM entradas WHERE id_entrada=?', [id]);
   // Recalcula status da solicitação vinculada (se houver)
   const sId = row && row.solicitacao_id ? Number(row.solicitacao_id) : null;
   if (sId) {
