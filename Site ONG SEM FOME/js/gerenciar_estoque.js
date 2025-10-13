@@ -78,7 +78,23 @@ async function loadEntradasForEstoque() {
       throw new Error("Falha ao carregar entradas");
     }
   const payload = await r.json();
-  entradas = Array.isArray(payload) ? payload : (payload.data || []);
+  const raw = Array.isArray(payload) ? payload : (payload.data || []);
+  // Normaliza campos da API (snake_case) para camelCase usados na UI
+  entradas = raw.map((e) => ({
+    idEntrada: e.idEntrada ?? e.id_entrada ?? e.id,
+    data: e.data,
+    doador: e.doador,
+    categoria: e.categoria,
+    quantidade: Number(e.quantidade ?? 0),
+    unidade: String(e.unidade || '').toLowerCase(),
+    campanha: e.campanha ?? null,
+    obs: e.obs ?? null,
+    tipo: e.tipo || 'doacao',
+    fornecedor: e.fornecedor ?? null,
+    forma_pagamento: e.forma_pagamento ?? null,
+    solicitacao_id: e.solicitacao_id ?? null,
+    criado_em: e.criado_em ?? e.created_at ?? null,
+  }));
     buildEstoque(entradas);
     buildMovimentos(entradas);
     renderFiltros();
@@ -109,7 +125,7 @@ function buildEstoque(list) {
       atual.ultimaEntrada = e.data || null;
     }
     atual.itens.push({
-      id: e.id,
+      id: e.idEntrada,
       data: e.data,
       doador: e.doador,
       quantidade: qtd,
@@ -128,7 +144,7 @@ function buildEstoque(list) {
 // Constrói lista de movimentações cronológicas com saldo por (categoria, unidade)
 function buildMovimentos(list) {
   const sorted = list.slice().sort((a, b) => {
-    // order by date desc, then created_at desc, then id desc (newest first)
+    // Ordem decrescente por data, hora de criação, id (mais recente primeiro)
     const ad = (b.data || '').localeCompare(a.data || '');
     if (ad !== 0) return ad;
     const ta = parseDateTime(a.criado_em);
@@ -136,11 +152,9 @@ function buildMovimentos(list) {
     if (ta && tb && ta.getTime() !== tb.getTime()) return tb - ta;
     if (ta && !tb) return -1;
     if (!ta && tb) return 1;
-    return (b.id || 0) - (a.id || 0);
+    return (b.idEntrada || 0) - (a.idEntrada || 0);
   });
   const saldo = new Map();
-  // To compute running balance correctly per category/unidade we need chronological ascending per cat/unid;
-  // we'll compute saldo using an ascending copy for accuracy, then map saldo back to sorted order by matching key+id sequence.
   const asc = list.slice().sort((a, b) => {
     const ad = (a.data || '').localeCompare(b.data || '');
     if (ad !== 0) return ad;
@@ -149,7 +163,7 @@ function buildMovimentos(list) {
     if (ta && tb && ta.getTime() !== tb.getTime()) return ta - tb;
     if (ta && !tb) return -1;
     if (!ta && tb) return 1;
-    return (a.id || 0) - (b.id || 0);
+    return (a.idEntrada || 0) - (b.idEntrada || 0);
   });
   const saldoPorMov = new Map(); // key: `${cat}__${un}__${id}` -> saldo
   const running = new Map();
@@ -161,17 +175,17 @@ function buildMovimentos(list) {
     const qtd = Number(e.quantidade) || 0;
     const novo = prev + qtd;
     running.set(key, novo);
-    saldoPorMov.set(`${key}__${e.id}`, novo);
+    saldoPorMov.set(`${key}__${e.idEntrada}`, novo);
   });
   movimentos = sorted.map((e) => {
     const cat = String(e.categoria || '').trim();
     const un = String(e.unidade || '').trim().toLowerCase();
     const key = `${cat.toLowerCase()}__${un}`;
     const qtd = Number(e.quantidade) || 0;
-    const novo = saldoPorMov.get(`${key}__${e.id}`) ?? qtd; // fallback
+    const novo = saldoPorMov.get(`${key}__${e.idEntrada}`) ?? qtd;
     const tipo = qtd >= 0 ? 'Entrada' : 'Saída';
     return {
-      id: e.id,
+      id: e.idEntrada,
       data: e.data,
       tipo,
       categoria: cat,
@@ -305,11 +319,11 @@ function populateMovFilters() {
 
 // Edita entrada
 async function editarEntrada(id) {
-  const item = entradas.find(e => e.id === id);
+  const item = entradas.find(e => e.idEntrada === id);
   if (!item) return alert('Entrada não encontrada');
   openEditarMovModal({
     modo: 'entrada',
-    id: item.id,
+    id: item.idEntrada,
     data: item.data,
     doador: item.doador,
     categoria: item.categoria,
@@ -336,7 +350,7 @@ function parseSaidaIdFromObs(obs) {
 
 // Edita saída vinculada à entrada
 async function editarSaidaByEntradaId(entradaId) {
-  const ent = entradas.find(e => e.id === entradaId);
+  const ent = entradas.find(e => e.idEntrada === entradaId);
   if (!ent) return alert('Movimentação não encontrada');
   const saidaId = parseSaidaIdFromObs(ent.obs);
   if (!saidaId) return alert('Vínculo da saída não encontrado');
@@ -356,7 +370,7 @@ async function editarSaidaByEntradaId(entradaId) {
 
 // Exclui saída vinculada à entrada
 async function excluirSaidaByEntradaId(entradaId) {
-  const ent = entradas.find(e => e.id === entradaId);
+  const ent = entradas.find(e => e.idEntrada === entradaId);
   if (!ent) return alert('Movimentação não encontrada');
   const saidaId = parseSaidaIdFromObs(ent.obs);
   if (!saidaId) return alert('Vínculo da saída não encontrado');
@@ -371,7 +385,22 @@ async function reloadAfterChange() {
   const r = await fetch('/api/entradas?limit=10000');
   if (!r.ok) return location.reload();
   const payload = await r.json();
-  entradas = Array.isArray(payload) ? payload : (payload.data || []);
+  const raw = Array.isArray(payload) ? payload : (payload.data || []);
+  entradas = raw.map((e) => ({
+    idEntrada: e.idEntrada ?? e.id_entrada ?? e.id,
+    data: e.data,
+    doador: e.doador,
+    categoria: e.categoria,
+    quantidade: Number(e.quantidade ?? 0),
+    unidade: String(e.unidade || '').toLowerCase(),
+    campanha: e.campanha ?? null,
+    obs: e.obs ?? null,
+    tipo: e.tipo || 'doacao',
+    fornecedor: e.fornecedor ?? null,
+    forma_pagamento: e.forma_pagamento ?? null,
+    solicitacao_id: e.solicitacao_id ?? null,
+    criado_em: e.criado_em ?? e.created_at ?? null,
+  }));
   buildEstoque(entradas);
   buildMovimentos(entradas);
   applyFilters();
@@ -816,9 +845,15 @@ async function onSubmitEditarMov(e) {
     if (!data || !doador || !categoria || !unidade || !Number.isFinite(quantidade)) {
       return alert('Preencha os campos obrigatórios');
     }
+    // Preserva campos não editados na UI (tipo/fornecedor/forma_pagamento/solicitacao_id)
+    const original = entradas.find(e => e.idEntrada === id) || {};
+    const tipo = original.tipo || 'doacao';
+    const fornecedor = original.fornecedor ?? null;
+    const forma_pagamento = original.forma_pagamento ?? null;
+    const solicitacao_id = original.solicitacao_id ?? null;
     const r = await fetch(`/api/entradas/${id}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data, doador, categoria, quantidade, unidade, campanha, obs })
+      body: JSON.stringify({ data, doador, categoria, quantidade, unidade, campanha, obs, tipo, fornecedor, forma_pagamento, solicitacao_id })
     });
     if (!r.ok) return alert('Falha ao atualizar entrada');
   } else if (modo === 'saida') {

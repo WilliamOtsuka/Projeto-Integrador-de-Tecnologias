@@ -24,7 +24,10 @@ router.get('/', requireAuth, asyncHandler(async (req, res) => {
   const page = Math.max(parseInt(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(parseInt(req.query.limit) || 30, 1), 200);
   const offset = (page - 1) * limit;
-  const [rows] = await pool.query('SELECT * FROM entradas ORDER BY id_entrada DESC LIMIT ? OFFSET ?', [limit, offset]);
+  const [rows] = await pool.query(
+    'SELECT id_entrada, data, doador, categoria, quantidade, unidade, campanha, obs, tipo, fornecedor, forma_pagamento, solicitacao_id FROM entradas ORDER BY id_entrada DESC LIMIT ? OFFSET ?',
+    [limit, offset]
+  );
   const [[cnt]] = await pool.query('SELECT COUNT(*) AS total FROM entradas');
   res.json({ data: rows, total: Number(cnt.total||0), page, limit });
 }));
@@ -40,7 +43,7 @@ router.post('/', requireAuth, asyncHandler(async (req, res) => {
     try { await recomputeSolicitacaoStatus(solicitacao_id); }
     catch (e) { console.error('Falha ao recalcular status da solicitação', e.message); }
   }
-  res.status(201).json({ id: r.insertId, data, doador, categoria, quantidade, unidade, campanha, obs, tipo: t, fornecedor, forma_pagamento, solicitacao_id });
+  res.status(201).json({ id_entrada: r.insertId, data, doador, categoria, quantidade, unidade, campanha, obs, tipo: t, fornecedor, forma_pagamento, solicitacao_id });
 }));
 
 router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
@@ -63,7 +66,7 @@ router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
   } catch (e) {
     console.error('Falha ao recalcular status da solicitação (PUT)', e.message);
   }
-  res.json({ id: Number(id), data, doador, categoria, quantidade, unidade, campanha, obs, tipo: t, fornecedor, forma_pagamento, solicitacao_id });
+  res.json({ id_entrada: Number(id), data, doador, categoria, quantidade, unidade, campanha, obs, tipo: t, fornecedor, forma_pagamento, solicitacao_id });
 }));
 
 router.delete('/:id', requireAuth, asyncHandler(async (req, res) => {

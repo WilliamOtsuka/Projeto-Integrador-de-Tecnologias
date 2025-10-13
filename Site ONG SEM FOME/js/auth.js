@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="admin-menu">
         <div class="dropdown">
           <a id="adminMenuBtn" class="dropdown-adm" role="button" title="Abrir menu">Olá, ${
-            me.user?.tipo || "Usuário"
+            me.user?.nome || "Nome"
           } ▾</a>
           <div id="adminDropdown" class="dropdown-menu">
             ${links.map((l) => `<a href="${l.href}">${l.label}</a>`).join("")}

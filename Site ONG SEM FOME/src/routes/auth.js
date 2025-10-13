@@ -7,7 +7,7 @@ router.post('/login', asyncHandler(async (req, res) => {
     //login colaborador ou admin 
     const { email, senha } = req.body;
     const [colab] = await pool.query(
-        'SELECT id_colaborador FROM colaboradores WHERE email = ?', [email]);
+        'SELECT id_colaborador, nome FROM colaboradores WHERE email = ?', [email]);
 
     if (colab.length) {
         const colaborador = colab[0];
@@ -21,7 +21,7 @@ router.post('/login', asyncHandler(async (req, res) => {
         if (!user || user.senha !== senha)
             return res.status(401).json({ message: 'Usuário ou senha incorretos' });
         req.session.user = {
-            id: user.id_usuario,
+            id: user.usuario_id,
             nome: colaborador.nome,
             tipo: user.tipo,
         };
@@ -41,7 +41,7 @@ router.post('/login', asyncHandler(async (req, res) => {
             return res.status(401).json({ message: 'Usuário ou senha incorretos' });
 
         req.session.user = {
-            id: doador.id_usuario,
+            id: doador.usuario_id,
             nome: doador.nome,
             tipo: 'doador',
         };

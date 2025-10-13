@@ -40,10 +40,6 @@ CREATE TABLE IF NOT EXISTS categorias (
   nome VARCHAR(120) NOT NULL UNIQUE
 );
 
--- Extensão: tipo da categoria (simples/composta)
-ALTER TABLE categorias
-  ADD COLUMN tipo VARCHAR(16) NOT NULL DEFAULT 'simples';
-
 -- Subitens de categorias compostas
 CREATE TABLE IF NOT EXISTS categorias_itens (
   id_item INT AUTO_INCREMENT PRIMARY KEY,
