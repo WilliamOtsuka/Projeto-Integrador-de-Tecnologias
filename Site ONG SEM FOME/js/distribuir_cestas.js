@@ -103,7 +103,7 @@ async function carregarSaidasRecentes() {
               d.getMonth() + 1
             ).padStart(2, "0")}/${String(d.getFullYear()).slice(-2)}`
           : "";
-      tr.innerHTML = `<td>${s.id}</td><td>${dstr}</td><td>${
+      tr.innerHTML = `<td>${dstr}</td><td>${
         s.familia_nome || ""
       }</td><td>${s.qtd}</td><td>${s.responsavel || ""}</td><td>${
         s.obs || ""

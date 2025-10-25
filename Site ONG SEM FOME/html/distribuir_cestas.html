@@ -65,7 +65,7 @@
   <h2 class="mt-24px">Saídas recentes</h2>
       <table class="data-table" id="tabSaidas">
         <thead>
-          <tr><th>ID</th><th>Data</th><th>Família</th><th>Qtd</th><th>Responsável</th><th>Obs</th></tr>
+          <tr><th>Data</th><th>Família</th><th>Qtd</th><th>Responsável</th><th>Obs</th></tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -76,6 +76,9 @@
       </div>
     </section>
 
+  <button class="btn-secondary" style="margin-top:.6rem;" onclick="Report.openForTable({ tableSelector: '#tabSaidas', filename: 'saidas_cestas.csv' })">Gerar Relatório (Saídas)</button>
+
+  <script src="/js/report.js"></script>
   <script src="/js/distribuir_cestas.js"></script>
     <script src="/js/auth.js"></script>
     <footer class="rodape">© 2025 ONG SEM FOME. Todos os direitos reservados.</footer>

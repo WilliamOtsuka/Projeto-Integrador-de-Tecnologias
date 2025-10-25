@@ -1111,6 +1111,220 @@ p.info-destaque {
     align-items: center;
 }
 
+/* ===== Modal de Relatórios (Estilo Moderno e Suave) ===== */
+#reportModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  transition: opacity 0.25s ease;
+}
+
+#reportModal.mostrar {
+  display: flex;
+  opacity: 1;
+}
+
+#reportModal.saindo {
+  opacity: 0;
+}
+
+#reportModal .modal-conteudo {
+  background: #ffffff;
+  color: #333;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 12px;
+  padding: 1.6rem 1.8rem;
+  position: relative;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.18);
+  animation: modalFadeIn 0.3s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+@keyframes modalFadeIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+#repModalTitle {
+  margin: 0 0 1rem;
+  color: var(--primary-color, #004aad);
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding-bottom: 0.5rem;
+}
+
+#reportModal .fechar {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 1.3rem;
+  color: #666;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#reportModal .fechar:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--primary-color, #004aad);
+}
+
+#repColList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0.8rem;
+  border-radius: 8px;
+  background: #fafafa;
+  transition: border-color 0.2s ease;
+}
+
+#repColList:hover {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+#repColList .checkbox {
+  display: flex;
+  align-items: center;      
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: #333;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease, transform 0.1s ease;
+  line-height: 1.4;
+  gap: 0.6rem;               
+  min-height: 36px;
+}
+
+#repColList .checkbox:hover {
+  background: rgba(0, 0, 0, 0.03);
+  transform: translateX(2px);
+}
+
+#repColList .modal-label {
+    width: 100%;
+}
+
+
+#repColList input[type="checkbox"] {
+  accent-color: var(--secondary-color, #007bff);
+  transform: scale(1.1);
+  cursor: pointer;
+}
+
+#reportModal .form-actions {
+  margin-top: 1.2rem;
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+/* Dropdown (para opções CSV/XLS/XLSX/PDF) */
+.dropdown { position: relative; display: inline-block; }
+.dropdown .dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    min-width: 180px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    padding: 6px;
+    display: none;
+    z-index: 1300;
+}
+.dropdown .dropdown-menu[data-open="1"] { display: block; }
+.dropdown .dropdown-item {
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+.dropdown .dropdown-item:hover {
+    background: rgba(0,0,0,0.04);
+}
+
+#reportModal .form-actions .btn-primary,
+#reportModal .form-actions .btn-secondary {
+  min-width: 120px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.1s ease;
+}
+
+#reportModal .btn-primary {
+  background: var(--primary-color, #004aad);
+  color: #fff;
+}
+
+#reportModal .btn-primary:hover {
+  background: #003d8a;
+  transform: translateY(-1px);
+}
+
+#reportModal .btn-secondary {
+  background: #f2f2f2;
+  color: #333;
+}
+
+#reportModal .btn-secondary:hover {
+  background: #e5e5e5;
+  transform: translateY(-1px);
+}
+
+/* ===== Botão de Relatório (fora do modal) ===== */
+button.btn-secondary[onclick*="Report.openForTable"] {
+  margin-top: 0.8rem;
+  border-radius: 6px;
+  background: #f4f4f4;
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0.45rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+button.btn-secondary[onclick*="Report.openForTable"]:hover {
+  background: var(--primary-color, #004aad);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+
 /* === Utilitários (extraídos de estilos inline) === */
 .flex-filtros { display:flex; gap:.8rem; align-items:end; flex-wrap:wrap; margin:0 0 1rem 0; }
 .pagination-bar { margin-top:10px; display:flex; gap:8px; align-items:center; }

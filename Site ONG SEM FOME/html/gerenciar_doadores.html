@@ -83,6 +83,7 @@
       <button id="btnAdicionarDoador" class="btn-primary">
         Adicionar Doador
       </button>
+      <button class="btn-secondary" id="btnRelatorioDoadores" onclick="Report.openForTable({ tableSelector: '#tabelaDoadores', filename: 'doadores.csv' })">Gerar Relatório</button>
       <table id="tabelaDoadores" class="data-table">
         <thead>
           <tr>
@@ -105,7 +106,8 @@
       </div>
     </section>
 
-    <script src="/js/gerenciar_doadores.js"></script>
+  <script src="/js/report.js"></script>
+  <script src="/js/gerenciar_doadores.js"></script>
     <script src="/js/auth.js"></script>
     <footer class="rodape">
   © 2025 ONG SEM FOME. Todos os direitos reservados.

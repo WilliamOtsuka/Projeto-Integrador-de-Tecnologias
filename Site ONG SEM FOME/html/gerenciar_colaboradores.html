@@ -80,6 +80,7 @@
       <button id="btnAdicionarColaborador" class="btn-primary">
         Adicionar Colaborador
       </button>
+      <button class="btn-secondary" id="btnRelatorioColaboradores" onclick="Report.openForTable({ tableSelector: '#tabelaColaboradores', filename: 'colaboradores.csv' })">Gerar Relatório</button>
       <table id="tabelaColaboradores" class="data-table">
         <thead>
           <tr>
@@ -101,7 +102,8 @@
       </div>
     </section>
 
-    <script src="/js/gerenciar_colaboradores.js"></script>
+  <script src="/js/report.js"></script>
+  <script src="/js/gerenciar_colaboradores.js"></script>
     <script src="/js/auth.js"></script>
     <footer class="rodape">
       © 2025 ONG SEM FOME. Todos os direitos reservados.

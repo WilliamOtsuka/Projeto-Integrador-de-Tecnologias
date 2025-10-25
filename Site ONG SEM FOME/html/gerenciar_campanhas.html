@@ -76,6 +76,7 @@
       <button id="btnAdicionarCampanha" class="btn-primary">
         Adicionar Campanha
       </button>
+      <button class="btn-secondary" id="btnRelatorioCampanhas" onclick="Report.openForTable({ tableSelector: '#tabelaCampanhas', filename: 'campanhas.csv' })">Gerar Relatório</button>
       <table id="tabelaCampanhas" class="data-table">
         <thead>
           <tr>
@@ -95,7 +96,8 @@
       </div>
     </section>
 
-    <script src="/js/gerenciar_campanhas.js"></script>
+  <script src="/js/report.js"></script>
+  <script src="/js/gerenciar_campanhas.js"></script>
     <script src="/js/auth.js"></script>
     <footer class="rodape">
   © 2025 ONG SEM FOME. Todos os direitos reservados.

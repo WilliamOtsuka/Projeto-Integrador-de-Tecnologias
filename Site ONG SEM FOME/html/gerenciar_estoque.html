@@ -62,9 +62,9 @@
 					<label for="filtroBusca">Busca:</label>
 					<input type="text" id="filtroBusca" placeholder="Filtrar por categoria ou unidade" />
 				</div>
-				<!-- <div class="form-actions" style="margin-left:auto;">
-					<button id="btnExportCsv" class="btn-primary">Exportar CSV</button>
-				</div> -->
+						<div class="form-actions" style="margin-left:auto; display:flex; gap:.5rem;">
+							<button id="btnRelatorioEstoque" class="btn-secondary" onclick="Report.openForTable({ tableSelector: '#tabelaEstoque', filename: 'estoque.csv' })">Gerar Relatório (Estoque)</button>
+						</div>
 					</div>
 
 			<table id="tabelaEstoque" class="data-table">
@@ -183,8 +183,9 @@
 						<option value="Saída">Saída</option>
 					</select>
 				</div>
-				<div class="form-actions flex-end-auto">
+				<div class="form-actions flex-end-auto" style="display:flex; gap:.5rem; align-items:end;">
 					<button id="movBtnLimpar" class="btn-secondary">Limpar filtros</button>
+					<button id="btnRelatorioMovDoacoes" class="btn-secondary" onclick="Report.openForTable({ tableSelector: '#tabelaMovimentacoes', filename: 'movimentacoes_doacoes.csv', rowFilter: (tr)=>{ const tds = tr.querySelectorAll('td'); return (tds[1]?.textContent||'').trim() === 'Entrada'; } })">Relatório (Doações)</button>
 				</div>
 			</div>
 			<table id="tabelaMovimentacoes" class="data-table">
@@ -284,6 +285,7 @@
 			</div>
 		</section>
 
+		<script src="/js/report.js"></script>
 		<script src="/js/gerenciar_estoque.js"></script>
 		<script src="/js/auth.js"></script>
 		<footer class="rodape">
