@@ -11,7 +11,7 @@ function renderTabelaCategorias() {
   tbody.innerHTML = "";
   categorias.forEach((c) => {
     const tr = document.createElement("tr");
-    const tipo = (c.tipo || 'simples');
+    const tipo = String(c.tipo || 'simples').toLowerCase();
     tr.innerHTML = `
       <td>${c.id}</td>
       <td>${c.nome}</td>
@@ -44,7 +44,7 @@ function abrirModalCategoria(editar = false, cat = {}) {
   const lista = document.getElementById("listaSubitens");
   idEl.value = cat.id || "";
   nomeEl.value = cat.nome || "";
-  tipoEl.value = (cat.tipo || 'simples');
+  tipoEl.value = String(cat.tipo || 'simples').toLowerCase();
   if (lista) lista.innerHTML = '';
   // Mostrar seção de subitens se composta
   const isComp = tipoEl.value === 'composta';

@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS colaboradores (
 -- Categorias
 CREATE TABLE IF NOT EXISTS categorias (
   id_categoria INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(120) NOT NULL UNIQUE
+  nome VARCHAR(120) NOT NULL UNIQUE,
+  tipo VARCHAR(32) NOT NULL
 );
 
 -- Subitens de categorias compostas
@@ -155,15 +156,16 @@ CREATE TABLE IF NOT EXISTS saidas (
 -- ------------------------------------------------------------
 
 -- Categorias
-INSERT IGNORE INTO categorias (nome) VALUES
-  ('Arroz'),
-  ('Feijão'),
-  ('Macarrão'),
-  ('Leite'),
-  ('Enlatados'),
-  ('Higiene'),
-  ('Limpeza'),
-  ('Cesta Básica');
+INSERT IGNORE INTO categorias (nome, tipo) 
+SELECT * FROM (
+  SELECT 'Alimentos' AS nome, 'composta' AS tipo
+  UNION ALL SELECT 'Higiene', 'composta'
+  UNION ALL SELECT 'Limpeza', 'composta'
+  UNION ALL SELECT 'Enlatados', 'composta'
+  UNION ALL SELECT 'Leite', 'simples'
+  UNION ALL SELECT 'Cesta Básica', 'simples'
+) AS tmp
+WHERE NOT EXISTS (SELECT 1 FROM categorias);
 
 -- Doadores
 INSERT INTO doadores (nome, email, telefone, documento)
@@ -220,4 +222,16 @@ SELECT * FROM (
   UNION ALL SELECT CURDATE(), 'João Pereira', 'Leite', 30, 'L', 'Natal Solidário', 'Leite longa vida'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM entradas);
+
+-- Itens de categorias
+INSERT INTO categorias_itens (categoria_id, nome_item)
+SELECT * FROM (
+  SELECT (SELECT id_categoria FROM categorias WHERE nome='Alimentos') AS categoria_id, 'Arroz' AS nome_item
+  UNION ALL SELECT (SELECT id_categoria FROM categorias WHERE nome='Alimentos'), 'Feijão'
+  UNION ALL SELECT (SELECT id_categoria FROM categorias WHERE nome='Higiene'), 'Sabonete'
+  UNION ALL SELECT (SELECT id_categoria FROM categorias WHERE nome='Higiene'), 'Shampoo'
+  UNION ALL SELECT (SELECT id_categoria FROM categorias WHERE nome='Limpeza'), 'Detergente'
+  UNION ALL SELECT (SELECT id_categoria FROM categorias WHERE nome='Limpeza'), 'Água Sanitária'
+) AS tmp
+WHERE NOT EXISTS (SELECT 1 FROM categorias_itens);
 -- ------------------------------------------------------------

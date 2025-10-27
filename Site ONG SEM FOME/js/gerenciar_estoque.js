@@ -79,7 +79,7 @@ async function loadEntradasForEstoque() {
     }
   const payload = await r.json();
   const raw = Array.isArray(payload) ? payload : (payload.data || []);
-  // Normaliza campos da API (snake_case) para camelCase usados na UI
+
   entradas = raw.map((e) => ({
     idEntrada: e.idEntrada ?? e.id_entrada ?? e.id,
     data: e.data,
@@ -210,19 +210,36 @@ function renderMovimentacoes() {
   const und = (document.getElementById('movFiltroUnidade')?.value || '').trim().toLowerCase();
   const camp = (document.getElementById('movFiltroCampanha')?.value || '').trim();
   const tipo = (document.getElementById('movFiltroTipo')?.value || '').trim();
+  const de = (document.getElementById('movDataDe')?.value || '').trim();
+  const ate = (document.getElementById('movDataAte')?.value || '').trim();
+  const order = (document.getElementById('movOrder')?.value || 'desc').trim();
   const q = (document.getElementById('filtroBusca')?.value || '').trim().toLowerCase();
   const list = movimentos.filter((m) => {
     const matchCat = !cat || m.categoria === cat;
     const matchUnd = !und || m.unidade === und;
     const matchCamp = !camp || (m.campanha || '-') === camp;
     const matchTipo = !tipo || m.tipo === tipo;
+    const matchDe = !de || (m.data && m.data >= de);
+    const matchAte = !ate || (m.data && m.data <= ate);
     const matchBusca = !q ||
       m.categoria.toLowerCase().includes(q) ||
       m.unidade.toLowerCase().includes(q) ||
       (m.obs || '').toLowerCase().includes(q) ||
       (m.doador || '').toLowerCase().includes(q) ||
       (m.campanha || '').toLowerCase().includes(q);
-    return matchCat && matchUnd && matchCamp && matchTipo && matchBusca;
+    return matchCat && matchUnd && matchCamp && matchTipo && matchDe && matchAte && matchBusca;
+  });
+  // Ordenação por data, criado_em e id conforme seleção
+  list.sort((a, b) => {
+    const ad = (a.data || '').localeCompare(b.data || '');
+    if (ad !== 0) return order === 'asc' ? ad : -ad;
+    const ta = parseDateTime(a.criado_em);
+    const tb = parseDateTime(b.criado_em);
+    if (ta && tb && ta.getTime() !== tb.getTime()) return order === 'asc' ? (ta - tb) : (tb - ta);
+    if (ta && !tb) return order === 'asc' ? -1 : 1;
+    if (!ta && tb) return order === 'asc' ? 1 : -1;
+    const idDiff = (a.id || 0) - (b.id || 0);
+    return order === 'asc' ? idDiff : -idDiff;
   });
   // Atualiza paginação (mov)
   totalMovPages = Math.max(1, Math.ceil(list.length / limitMov));
@@ -657,6 +674,9 @@ const movCamp = document.getElementById('movFiltroCampanha');
 const movTipo = document.getElementById('movFiltroTipo');
 const movClear = document.getElementById('movBtnLimpar');
 const movPerPage = document.getElementById('movPerPage');
+const movDe = document.getElementById('movDataDe');
+const movAte = document.getElementById('movDataAte');
+const movOrder = document.getElementById('movOrder');
 
 const prevEstoqueBtn = document.getElementById('prevEstoque');
 const nextEstoqueBtn = document.getElementById('nextEstoque');
@@ -681,11 +701,17 @@ if (movCat) movCat.addEventListener('change', () => { pageMov = 1; renderMovimen
 if (movUnd) movUnd.addEventListener('change', () => { pageMov = 1; renderMovimentacoes(); });
 if (movCamp) movCamp.addEventListener('change', () => { pageMov = 1; renderMovimentacoes(); });
 if (movTipo) movTipo.addEventListener('change', () => { pageMov = 1; renderMovimentacoes(); });
+if (movDe) movDe.addEventListener('change', () => { pageMov = 1; renderMovimentacoes(); });
+if (movAte) movAte.addEventListener('change', () => { pageMov = 1; renderMovimentacoes(); });
+if (movOrder) movOrder.addEventListener('change', () => { pageMov = 1; renderMovimentacoes(); });
 if (movClear) movClear.addEventListener('click', () => {
   if (movCat) movCat.value = '';
   if (movUnd) movUnd.value = '';
   if (movCamp) movCamp.value = '';
   if (movTipo) movTipo.value = '';
+  if (movDe) movDe.value = '';
+  if (movAte) movAte.value = '';
+  if (movOrder) movOrder.value = 'desc';
   pageMov = 1;
   renderMovimentacoes();
 });
@@ -777,7 +803,18 @@ function openEditarMovModal(data) {
   }
   setValue('editData', dateForInput);
   setValue('editDoador', data.doador || '');
-  setValue('editCategoria', data.categoria || (isSaida ? 'Cesta Básica' : ''));
+  // Carregar categorias no select e preparar subitens
+  (async () => {
+    try {
+      const sel = document.getElementById('editCategoria');
+      if (sel) {
+        await editCategoriasSelect(sel, data.categoria || (isSaida ? 'Cesta Básica' : ''));
+        sel.onchange = () => aoTrocarEditCategoria();
+        // Subitem começa oculto
+        ocultarEditSubitem();
+      }
+    } catch (e) { console.error(e); }
+  })();
   setValue('editQuantidade', isEntrada ? data.quantidade : data.qtd);
   // Preenche unidade no <select>; se não existir, adiciona opção temporária
   (function() {
@@ -838,11 +875,19 @@ async function onSubmitEditarMov(e) {
   const obs = document.getElementById('editObs')?.value || null;
   if (modo === 'entrada') {
     const doador = document.getElementById('editDoador')?.value;
-    const categoria = document.getElementById('editCategoria')?.value;
+    const selCat = document.getElementById('editCategoria');
+    const catOpt = selCat?.querySelector('option:checked');
+    const catTipo = catOpt?.dataset?.tipo || 'simples';
     const quantidade = Number(document.getElementById('editQuantidade')?.value);
   const unidade = (document.getElementById('editUnidade')?.value || '').toLowerCase();
     const campanha = document.getElementById('editCampanha')?.value || null;
-    if (!data || !doador || !categoria || !unidade || !Number.isFinite(quantidade)) {
+    let categoriaNome = '';
+    if (catTipo === 'compra' || catTipo === 'simples') {
+      categoriaNome = catOpt?.dataset?.nome || '';
+    } else if (catTipo === 'composta') {
+      categoriaNome = document.getElementById('editItemCategoria')?.value || '';
+    }
+    if (!data || !doador || !categoriaNome || !unidade || !Number.isFinite(quantidade)) {
       return alert('Preencha os campos obrigatórios');
     }
     // Preserva campos não editados na UI (tipo/fornecedor/forma_pagamento/solicitacao_id)
@@ -853,7 +898,7 @@ async function onSubmitEditarMov(e) {
     const solicitacao_id = original.solicitacao_id ?? null;
     const r = await fetch(`/api/entradas/${id}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data, doador, categoria, quantidade, unidade, campanha, obs, tipo, fornecedor, forma_pagamento, solicitacao_id })
+      body: JSON.stringify({ data, doador, categoria: categoriaNome, quantidade, unidade, campanha, obs, tipo, fornecedor, forma_pagamento, solicitacao_id })
     });
     if (!r.ok) return alert('Falha ao atualizar entrada');
   } else if (modo === 'saida') {
@@ -876,4 +921,85 @@ async function onSubmitEditarMov(e) {
   }
   fecharEditarMovModal();
   await reloadAfterChange();
+}
+
+// ------- Categoria/Itens no modal de edição (Entrada) -------
+async function editCategoriasSelect(selectEl, currentCategoriaNome){
+  try {
+    const r = await fetch(`/api/categorias?limit=1000`);
+    if (!r.ok) throw new Error('Falha ao carregar categorias');
+    const payload = await r.json();
+    const cats = Array.isArray(payload) ? payload : (payload.data || []);
+    selectEl.innerHTML = '<option value="">Selecione...</option>';
+    cats.slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(c => {
+      const id = String(c.id ?? c.id_categoria ?? '');
+      const nome = c.nome;
+      const tipo = String(c.tipo || 'simples').toLowerCase();
+      const opt = document.createElement('option');
+      opt.value = id || nome;
+      opt.textContent = nome;
+      opt.dataset.nome = nome;
+      opt.dataset.tipo = tipo;
+      selectEl.appendChild(opt);
+    });
+    // Adiciona opção dinâmica com o valor atual, se houver e não existir match direto
+    if (currentCategoriaNome) {
+      let matched = false;
+      for (const o of selectEl.options) {
+        if (String(o.dataset?.nome || '').toLowerCase() === String(currentCategoriaNome).toLowerCase()) { matched = true; selectEl.value = o.value; break; }
+      }
+      if (!matched) {
+        const o = document.createElement('option');
+        o.value = `__current__${currentCategoriaNome}`;
+        o.textContent = currentCategoriaNome;
+        o.dataset.nome = currentCategoriaNome;
+        o.dataset.tipo = 'simples';
+        selectEl.appendChild(o);
+        selectEl.value = o.value;
+      }
+    }
+  } catch (e) { console.error(e); }
+}
+
+function ocultarEditSubitem(){
+  const grp = document.getElementById('grpEditItemCategoria');
+  const sel = document.getElementById('editItemCategoria');
+  if (grp) grp.classList.add('hidden');
+  if (sel) {
+    sel.required = false;
+    sel.innerHTML = '<option value="">Selecione o item</option>';
+  }
+}
+
+async function carregarEditSubitens(categoriaId){
+  const sel = document.getElementById('editItemCategoria');
+  if (!sel || !categoriaId) return;
+  try {
+    sel.innerHTML = '<option value="">Carregando...</option>';
+    const r = await fetch(`/api/categorias/${categoriaId}/itens`);
+    const itens = r.ok ? await r.json() : [];
+    sel.innerHTML = '<option value="">Selecione o item</option>';
+    itens.forEach(it => {
+      const o = document.createElement('option');
+      o.value = it.nome;
+      o.textContent = it.nome;
+      sel.appendChild(o);
+    });
+  } catch (e) { console.error(e); }
+}
+
+function aoTrocarEditCategoria(){
+  const sel = document.getElementById('editCategoria');
+  const opt = sel?.querySelector('option:checked');
+  const tipo = opt?.dataset?.tipo || 'simples';
+  const idVal = opt?.value || '';
+  if (tipo === 'composta'){
+    const grp = document.getElementById('grpEditItemCategoria');
+    const itemSel = document.getElementById('editItemCategoria');
+    if (grp) grp.classList.remove('hidden');
+    if (itemSel) itemSel.required = true;
+    carregarEditSubitens(idVal);
+  } else {
+    ocultarEditSubitem();
+  }
 }

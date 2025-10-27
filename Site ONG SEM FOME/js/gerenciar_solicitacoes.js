@@ -4,6 +4,8 @@ const limitSolic = 30;
 let totalSolic = 0;
 let filtros = { de: '', ate: '', status: '', prioridade: '', busca: '' };
 let categoriasCarregadas = false;
+// Cache de categorias (id -> { id, nome, tipo })
+const cacheCategorias = new Map();
 
 function formatDateDDMMYY(iso) {
   if (!iso) return '';
@@ -39,7 +41,7 @@ function setSelectValue(selectId, value) {
     }
   }
   // Se não encontrou e for unidade, adiciona opção dinâmica para exibir o valor do banco
-  if ((selectId === 'unidadeSolicitacao' || selectId === 'categoriaSolicitacao') && target) {
+  if ((selectId === 'unidadeSolicitacao') && target) {
     const o = document.createElement('option');
     o.value = target;
     o.textContent = target;
@@ -71,7 +73,7 @@ function aplicaFiltros(lista) {
     if (prioridade && String(s.prioridade||'').toLowerCase() !== prioridade) return false;
     // Busca
     if (busca) {
-      const blob = `${s.titulo||''} ${s.solicitante||''} ${s.categoria||''} ${s.descricao||''}`.toLowerCase();
+  const blob = `${s.titulo||''} ${s.solicitante||''} ${s.item||''} ${s.descricao||''}`.toLowerCase();
       if (!blob.includes(busca)) return false;
     }
     return true;
@@ -143,6 +145,8 @@ function abrirModalSolicitacao(editar = false, item = {}) {
   document.getElementById("quantidadeValor").value = (item.quantidade ?? "");
   setSelectValue("unidadeSolicitacao", (item.unidade || ""));
   document.getElementById("descricaoSolicitacao").value = item.descricao || "";
+  // Reinicia subitem sempre oculto ao abrir
+  if (typeof ocultarSubitem === 'function') ocultarSubitem();
 }
 
 // Fecha o modal (fade-out)
@@ -191,7 +195,8 @@ document.getElementById("formSolicitacao").onsubmit = function (e) {
   const id = document.getElementById("solicitacaoId").value;
   const titulo = document.getElementById("tituloSolicitacao").value;
   const data_solicitacao = document.getElementById("dataSolicitacao").value;
-  const categoria = document.getElementById("categoriaSolicitacao").value;
+  const categoriaOpt = document.querySelector('#categoriaSolicitacao option:checked');
+  const categoriaTipo = categoriaOpt?.dataset?.tipo || 'simples';
   const solicitante = document.getElementById("solicitanteSolicitacao").value;
   const status = document.getElementById("statusSolicitacao").value;
   const prioridade = document.getElementById("prioridadeSolicitacao").value;
@@ -199,7 +204,8 @@ document.getElementById("formSolicitacao").onsubmit = function (e) {
   const unidade = document.getElementById("unidadeSolicitacao").value || '';
   const descricao = document.getElementById("descricaoSolicitacao").value;
   const tituloOk = (titulo || "").trim().length >= 2;
-  const categoriaOk = (categoria || "").trim().length >= 2;
+  const categoriaOk = !!(categoriaOpt && (categoriaOpt.value || '').trim().length >= 1);
+  const itemOk = (categoriaTipo === 'composta') ? ((document.getElementById('itemSolicitacao')?.value || '').trim().length >= 1) : true;
 
   document
     .getElementById("tituloSolicitacao")
@@ -207,25 +213,30 @@ document.getElementById("formSolicitacao").onsubmit = function (e) {
   document
     .getElementById("categoriaSolicitacao")
     .setCustomValidity(categoriaOk ? "" : "Informe a categoria");
+  const itemEl = document.getElementById('itemSolicitacao');
+  if (itemEl) itemEl.setCustomValidity(itemOk ? '' : 'Selecione o item');
 
-  if (!tituloOk || !categoriaOk) {
+  if (!tituloOk || !categoriaOk || !itemOk) {
     document.getElementById("formSolicitacao").reportValidity();
     return;
   }
   (async () => {
     try {
+      const itemNome = (categoriaTipo === 'composta')
+        ? (document.getElementById('itemSolicitacao')?.value || '')
+        : (categoriaOpt?.dataset?.nome || '');
       // Se há ID, atualiza; senão, cria
       if (id) {
         await fetch(`/api/solicitacoes/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade: quantidade ? Number(quantidade) : null, unidade })
+          body: JSON.stringify({ titulo, item: itemNome, descricao, data_solicitacao, solicitante, status, prioridade, quantidade: quantidade ? Number(quantidade) : null, unidade })
         });
       } else {
         await fetch("/api/solicitacoes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ titulo, categoria, descricao, data_solicitacao, solicitante, status, prioridade, quantidade: quantidade ? Number(quantidade) : null, unidade })
+          body: JSON.stringify({ titulo, item: itemNome, descricao, data_solicitacao, solicitante, status, prioridade, quantidade: quantidade ? Number(quantidade) : null, unidade })
         });
       }
       fecharModalSolicitacao();
@@ -326,14 +337,21 @@ async function categoriasSelect(selectEl) {
     if (!r.ok) throw new Error("Falha ao carregar categorias");
     const payload = await r.json();
     const cats = Array.isArray(payload) ? payload : (payload.data || []);
+    cacheCategorias.clear();
     selectEl.innerHTML = '<option value="" disabled selected>Selecione uma categoria</option>';
     cats
       .slice()
       .sort((a, b) => a.nome.localeCompare(b.nome))
       .forEach((c) => {
+        const id = String(c.id ?? c.id_categoria ?? '');
+        const nome = c.nome;
+        const tipo = String(c.tipo || 'simples').toLowerCase();
+        if (id) cacheCategorias.set(id, { id, nome, tipo });
         const opt = document.createElement("option");
-        opt.value = c.nome;
-        opt.textContent = c.nome;
+        opt.value = id || nome; // preferir id para buscar subitens
+        opt.textContent = nome;
+        opt.dataset.nome = nome;
+        opt.dataset.tipo = tipo;
         selectEl.appendChild(opt);
       });
     categoriasCarregadas = true;
@@ -345,11 +363,52 @@ async function categoriasSelect(selectEl) {
 
 if (categoriaInput) {
   categoriasSelect(categoriaInput);
-  categoriaInput.addEventListener("change", (e) =>
+  categoriaInput.addEventListener("change", (e) => {
     e.target.setCustomValidity(
-      (e.target.value || "").trim().length >= 2 ? "" : "Informe a categoria"
-    )
-  );
+      (e.target.value || "").trim().length >= 1 ? "" : "Informe a categoria"
+    );
+    if (typeof aoTrocarCategoria === 'function') aoTrocarCategoria();
+  });
+}
+
+// Subitens: UI e carregamento
+const campoItemCategoria = document.getElementById('campoItemCategoria');
+const itemSolicitacaoEl = document.getElementById('itemSolicitacao');
+function ocultarSubitem(){
+  if (campoItemCategoria) campoItemCategoria.style.display = 'none';
+  if (itemSolicitacaoEl){
+    itemSolicitacaoEl.required = false;
+    itemSolicitacaoEl.innerHTML = '<option value="" disabled selected>Selecione o item</option>';
+  }
+}
+
+async function carregarSubitens(categoriaId){
+  if (!itemSolicitacaoEl || !categoriaId) return;
+  try {
+    itemSolicitacaoEl.innerHTML = '<option value="" disabled selected>Carregando...</option>';
+    const r = await fetch(`/api/categorias/${categoriaId}/itens`);
+    const itens = r.ok ? await r.json() : [];
+    itemSolicitacaoEl.innerHTML = '<option value="" disabled selected>Selecione o item</option>';
+    itens.forEach(it => {
+      const opt = document.createElement('option');
+      opt.value = it.nome;
+      opt.textContent = it.nome;
+      itemSolicitacaoEl.appendChild(opt);
+    });
+  } catch (err) { console.error(err); }
+}
+
+function aoTrocarCategoria(){
+  const opt = document.querySelector('#categoriaSolicitacao option:checked');
+  const tipo = opt?.dataset?.tipo || 'simples';
+  const idVal = opt?.value || '';
+  if (tipo === 'composta'){
+    if (campoItemCategoria) campoItemCategoria.style.display = '';
+    if (itemSolicitacaoEl) itemSolicitacaoEl.required = true;
+    carregarSubitens(idVal);
+  } else {
+    ocultarSubitem();
+  }
 }
 
 // Filtros

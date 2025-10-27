@@ -1,208 +1,202 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Gerenciar Solicitações Internas de Compra</title>
-    <link rel="stylesheet" href="/css/styles.css" />
-  </head>
-  <body class="pagina-gerenciar">
-    <header class="site-header">
-      <nav class="navbar">
-        <div class="navbar-item">
-          <div class="brand">
-            <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Gerenciar Solicitações Internas de Compra</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body class="pagina-gerenciar">
+  <header class="site-header">
+    <nav class="navbar">
+      <div class="navbar-item">
+        <div class="brand">
+          <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+        </div>
+      </div>
+      <div class="navbar-item">
+        <ul class="menu-principal">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html#sobre">Sobre</a></li>
+          <li><a href="index.html#ajudar">Como Ajudar</a></li>
+          <li><a href="index.html#transparencia">Transparência</a></li>
+          <li><a href="index.html#contato">Contato</a></li>
+          <li><a href="cadastro_doador.html">Doe</a></li>
+        </ul>
+      </div>
+      <div class="navbar-item">
+        <div class="navbar-login">
+          <a href="login_page.html" class="btn-login" role="button">Login</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <h1 class="titulo-pagina">Gerenciar Solicitações Internas de Compra</h1>
+  <p class="descricao-pagina">
+    Página para cadastro, edição e exclusão de solicitações internas de
+    compra.
+  </p>
+
+  <section class="crud-solicitacoes">
+    <div id="modalSolicitacao" class="modal" style="display: none">
+      <div class="modal-conteudo form-adicionar">
+        <span class="fechar" id="fecharModalSolicitacao">&times;</span>
+        <h2 id="tituloModalSolicitacao">Adicionar Solicitação</h2>
+        <form id="formSolicitacao" class="form-grid">
+          <input type="hidden" id="solicitacaoId" />
+          <div class="form-field">
+            <label for="tituloSolicitacao">Título:</label>
+            <input type="text" id="tituloSolicitacao" required />
           </div>
-        </div>
-        <div class="navbar-item">
-          <ul class="menu-principal">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="index.html#sobre">Sobre</a></li>
-            <li><a href="index.html#ajudar">Como Ajudar</a></li>
-            <li><a href="index.html#transparencia">Transparência</a></li>
-            <li><a href="index.html#contato">Contato</a></li>
-            <li><a href="cadastro_doador.html">Doe</a></li>
-          </ul>
-        </div>
-        <div class="navbar-item">
-          <div class="navbar-login">
-            <a href="login_page.html" class="btn-login" role="button">Login</a>
+          <div class="form-field">
+            <label for="dataSolicitacao">Data da solicitação:</label>
+            <input type="date" id="dataSolicitacao" />
           </div>
-        </div>
-      </nav>
-    </header>
-    <h1 class="titulo-pagina">Gerenciar Solicitações Internas de Compra</h1>
-    <p class="descricao-pagina">
-      Página para cadastro, edição e exclusão de solicitações internas de
-      compra.
-    </p>
-
-    <section class="crud-solicitacoes">
-  <div id="modalSolicitacao" class="modal" style="display:none;">
-        <div class="modal-conteudo form-adicionar">
-          <span class="fechar" id="fecharModalSolicitacao">&times;</span>
-          <h2 id="tituloModalSolicitacao">Adicionar Solicitação</h2>
-          <form id="formSolicitacao" class="form-grid">
-            <input type="hidden" id="solicitacaoId" />
-            <div class="form-field">
-              <label for="tituloSolicitacao">Título:</label>
-              <input type="text" id="tituloSolicitacao" required />
-            </div>
-            <div class="form-field">
-              <label for="dataSolicitacao">Data da solicitação:</label>
-              <input type="date" id="dataSolicitacao" />
-            </div>
-            <div class="form-field">
-              <label for="categoriaSolicitacao">Categoria:</label>
-              <select id="categoriaSolicitacao" required>
-                <option value="" disabled selected>
-                  Selecione uma categoria
-                </option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label for="solicitanteSolicitacao">Solicitante:</label>
-              <input
-                type="text"
-                id="solicitanteSolicitacao"
-                placeholder="Voluntário/Funcionário"
-              />
-            </div>
-            <div class="form-field">
-              <label for="statusSolicitacao">Status:</label>
-              <select id="statusSolicitacao">
-                <option value="pendente">Pendente</option>
-                <option value="aprovado">Aprovado</option>
-                <option value="em compra">Em compra</option>
-                <option value="atendido">Atendido</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label for="prioridadeSolicitacao">Prioridade:</label>
-              <select id="prioridadeSolicitacao">
-                <option value="baixa">Baixa</option>
-                <option value="normal">Normal</option>
-                <option value="urgente">Urgente</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label for="quantidadeValor">Quantidade:</label>
-              <input type="number" id="quantidadeValor" min="0" step="0.01" placeholder="Ex.: 10" />
-            </div>
-            <div class="form-field">
-              <label for="unidadeSolicitacao">Unidade:</label>
-              <select id="unidadeSolicitacao">
-                <option value="">Selecione...</option>
-                <option value="un">un</option>
-                <option value="kg">kg</option>
-                <option value="g">g</option>
-                <option value="l">L</option>
-                <option value="ml">mL</option>
-                <option value="cx">cx</option>
-                <option value="pct">pct</option>
-                <option value="sac">sac</option>
-                <option value="kit">kit</option>
-                <option value="lata">lata</option>
-              </select>
-            </div>
-            <div class="form-field full-width-field">
-              <label for="descricaoSolicitacao">Descrição:</label>
-              <textarea id="descricaoSolicitacao" rows="3"></textarea>
-            </div>
-            <div class="form-actions">
-              <button type="submit" class="btn-primary">Salvar</button>
-              <button
-                type="button"
-                class="btn-secondary"
-                id="fecharModalSolicitacaoBtn"
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
-        </div>
+          <div class="form-field">
+            <label for="categoriaSolicitacao">Categoria:</label>
+            <select id="categoriaSolicitacao" required>
+              <option value="" disabled selected>
+                Selecione uma categoria
+              </option>
+            </select>
+          </div>
+          <div class="form-field" id="campoItemCategoria" style="display:none;">
+            <label for="itemSolicitacao">Item da categoria:</label>
+            <select id="itemSolicitacao">
+              <option value="" disabled selected>Selecione o item</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="solicitanteSolicitacao">Solicitante:</label>
+            <input type="text" id="solicitanteSolicitacao" placeholder="Voluntário/Funcionário" />
+          </div>
+          <div class="form-field">
+            <label for="statusSolicitacao">Status:</label>
+            <select id="statusSolicitacao">
+              <option value="pendente">Pendente</option>
+              <option value="aprovado">Aprovado</option>
+              <option value="em compra">Em compra</option>
+              <option value="atendido">Atendido</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="prioridadeSolicitacao">Prioridade:</label>
+            <select id="prioridadeSolicitacao">
+              <option value="baixa">Baixa</option>
+              <option value="normal">Normal</option>
+              <option value="urgente">Urgente</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="quantidadeValor">Quantidade:</label>
+            <input type="number" id="quantidadeValor" min="0" step="0.01" placeholder="Ex.: 10" />
+          </div>
+          <div class="form-field">
+            <label for="unidadeSolicitacao">Unidade:</label>
+            <select id="unidadeSolicitacao">
+              <option value="">Selecione...</option>
+              <option value="un">un</option>
+              <option value="kg">kg</option>
+              <option value="g">g</option>
+              <option value="l">L</option>
+              <option value="ml">mL</option>
+              <option value="cx">cx</option>
+              <option value="pct">pct</option>
+              <option value="sac">sac</option>
+              <option value="kit">kit</option>
+              <option value="lata">lata</option>
+            </select>
+          </div>
+          <div class="form-field full-width-field">
+            <label for="descricaoSolicitacao">Descrição:</label>
+            <textarea id="descricaoSolicitacao" rows="3"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Salvar</button>
+            <button type="button" class="btn-secondary" id="fecharModalSolicitacaoBtn">
+              Cancelar
+            </button>
+          </div>
+        </form>
       </div>
+    </div>
 
-      <button id="btnAdicionarSolicitacao" class="btn-primary">
-        Adicionar Solicitação
-      </button>
+    <button id="btnAdicionarSolicitacao" class="btn-primary">
+      Adicionar Solicitação
+    </button>
 
-      <div class="filters-toolbar">
-        <div class="form-field">
-          <label for="fltDataDe">Data de:</label>
-          <input type="date" id="fltDataDe" />
-        </div>
-        <div class="form-field">
-          <label for="fltDataAte">Data até:</label>
-          <input type="date" id="fltDataAte" />
-        </div>
-        <div class="form-field">
-          <label for="fltStatus">Status:</label>
-          <select id="fltStatus">
-            <option value="">Todos</option>
-            <option value="pendente">Pendente</option>
-            <option value="aprovado">Aprovado</option>
-            <option value="em compra">Em compra</option>
-            <option value="atendido">Atendido</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label for="fltPrioridade">Prioridade:</label>
-          <select id="fltPrioridade">
-            <option value="">Todas</option>
-            <option value="baixa">Baixa</option>
-            <option value="normal">Normal</option>
-            <option value="urgente">Urgente</option>
-          </select>
-        </div>
-  <div class="form-field flex-1-min-220">
-          <label for="fltBusca">Buscar:</label>
-          <input
-            type="text"
-            id="fltBusca"
-            placeholder="Título, solicitante, categoria..."
-          />
-        </div>
-        <div class="form-field">
-          <label>&nbsp;</label>
-          <button
-            id="btnLimparFiltros"
-            class="btn-secondary w-100"
-          >
-            Limpar
-          </button>
-        </div>
+    <div class="filters-toolbar">
+      <div class="form-field">
+        <label for="fltDataDe">Data de:</label>
+        <input type="date" id="fltDataDe" />
       </div>
-
-      <table id="tabelaSolicitacoes" class="data-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Título</th>
-            <th>Data</th>
-            <th>Solicitante</th>
-            <th>Status</th>
-            <th>Prioridade</th>
-            <th>Qtd</th>
-            <th>Unidade</th>
-            <th>Categoria</th>
-            <th>Descrição</th>
-            <th>Atualizado em</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-  <div class="pagination pagination-bar" id="paginacaoSolicitacoes">
-        <button id="prevSolicitacoes" class="btn-secondary">Anterior</button>
-        <span id="infoSolicitacoes">Página 1 de 1</span>
-        <button id="nextSolicitacoes" class="btn-secondary">Próxima</button>
+      <div class="form-field">
+        <label for="fltDataAte">Data até:</label>
+        <input type="date" id="fltDataAte" />
       </div>
-    </section>
+      <div class="form-field">
+        <label for="fltStatus">Status:</label>
+        <select id="fltStatus">
+          <option value="">Todos</option>
+          <option value="pendente">Pendente</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="em compra">Em compra</option>
+          <option value="atendido">Atendido</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="fltPrioridade">Prioridade:</label>
+        <select id="fltPrioridade">
+          <option value="">Todas</option>
+          <option value="baixa">Baixa</option>
+          <option value="normal">Normal</option>
+          <option value="urgente">Urgente</option>
+        </select>
+      </div>
+      <div class="form-field flex-1-min-220">
+        <label for="fltBusca">Buscar:</label>
+        <input type="text" id="fltBusca" placeholder="Título, solicitante, item..." />
+      </div>
+      <div class="form-field">
+        <label>&nbsp;</label>
+        <button id="btnLimparFiltros" class="btn-secondary w-100">
+          Limpar
+        </button>
+      </div>
+    </div>
 
-    <script src="/js/gerenciar_solicitacoes.js"></script>
-    <script src="/js/auth.js"></script>
-    <footer class="rodape">
-  © 2025 ONG SEM FOME. Todos os direitos reservados.
-    </footer>
-  </body>
+    <table id="tabelaSolicitacoes" class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Data</th>
+          <th>Solicitante</th>
+          <th>Status</th>
+          <th>Prioridade</th>
+          <th>Qtd</th>
+          <th>Unidade</th>
+          <th>Categoria</th>
+          <th>Descrição</th>
+          <th>Atualizado em</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="pagination pagination-bar" id="paginacaoSolicitacoes">
+      <button id="prevSolicitacoes" class="btn-secondary">Anterior</button>
+      <span id="infoSolicitacoes">Página 1 de 1</span>
+      <button id="nextSolicitacoes" class="btn-secondary">Próxima</button>
+    </div>
+  </section>
+
+  <script src="/js/gerenciar_solicitacoes.js"></script>
+  <script src="/js/auth.js"></script>
+  <footer class="rodape">
+    © 2025 ONG SEM FOME. Todos os direitos reservados.
+  </footer>
+</body>
+
 </html>

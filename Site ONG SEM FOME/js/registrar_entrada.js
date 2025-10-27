@@ -3,6 +3,9 @@ let pageEntradas = 1;
 const limitEntradas = 30;
 let totalEntradas = 0;
 
+// Cache de categorias (id -> { id, nome, tipo })
+const cacheCategorias = new Map();
+
 // Utilidades e validações
 const onlyDigits = (v) => (v || "").replace(/\D/g, "");
 const unidadesValidas = new Set([
@@ -100,6 +103,8 @@ function abrirModalEntrada(editar = false, item = {}) {
   document.getElementById("solicitacaoRefEntrada").value = item.solicitacao_id || "";
 
   toggleCamposPorTipo(document.getElementById("tipoEntrada").value);
+  // Reinicia subitem (sempre oculto ao abrir)
+  if (typeof ocultarSubitem === 'function') ocultarSubitem();
 
   // Limpar mensagens de validação anteriores
   [
@@ -203,6 +208,8 @@ formEntrada.onsubmit = function (e) {
   const tipo = document.getElementById("tipoEntrada").value;
   const doador = document.getElementById("doadorEntrada").value;
   const categoria = document.getElementById("categoriaEntrada").value;
+  const categoriaOpt = document.querySelector('#categoriaEntrada option:checked');
+  const categoriaTipo = categoriaOpt?.dataset?.tipo || 'simples';
   const quantidadeStr = document.getElementById("quantidadeEntrada").value;
   const unidadeRaw = document.getElementById("unidadeEntrada").value;
   const campanha = document.getElementById("campanhaEntrada").value;
@@ -214,7 +221,8 @@ formEntrada.onsubmit = function (e) {
   // Validações
   const dataOk = validaData(data);
   const doadorOk = tipo === 'doacao' ? validaTextoMin(doador, 2) : true;
-  const categoriaOk = validaTextoMin(categoria, 2);
+  const categoriaOk = validaTextoMin(categoria, 1);
+  const itemOk = (categoriaTipo === 'composta') ? validaTextoMin(itemEntradaEl?.value || '', 1) : true;
   const qtdOk = validaQuantidade(quantidadeStr);
   const unidadeOk = validaUnidade(unidadeRaw);
   const fornecedorOk = tipo === 'compra' ? validaTextoMin(fornecedor, 2) : true;
@@ -231,6 +239,7 @@ formEntrada.onsubmit = function (e) {
   dataEl.setCustomValidity(dataOk ? "" : "Informe uma data válida (não futura)");
   doadorEl.setCustomValidity(doadorOk ? "" : "Informe o nome do doador");
   categoriaEl.setCustomValidity(categoriaOk ? "" : "Informe a categoria");
+  if (itemEntradaEl) itemEntradaEl.setCustomValidity(itemOk ? '' : 'Selecione o item');
   quantidadeEl.setCustomValidity(qtdOk ? "" : "Quantidade deve ser inteiro >= 1");
   unidadeEl.setCustomValidity(
     unidadeOk ? "" : "Unidade inválida. Use: un, kg, g, l, ml, cx, pct, sac, kit, lata"
@@ -238,7 +247,7 @@ formEntrada.onsubmit = function (e) {
   if (fornecedorEl) fornecedorEl.setCustomValidity(fornecedorOk ? '' : 'Informe o fornecedor');
   if (formaEl) formaEl.setCustomValidity(formaOk ? '' : 'Selecione a forma de pagamento');
 
-  if (!(dataOk && doadorOk && categoriaOk && qtdOk && unidadeOk && fornecedorOk && formaOk)) {
+  if (!(dataOk && doadorOk && categoriaOk && itemOk && qtdOk && unidadeOk && fornecedorOk && formaOk)) {
     formEntrada.reportValidity();
     return;
   }
@@ -248,11 +257,15 @@ formEntrada.onsubmit = function (e) {
 
   (async () => {
     try {
+      const categoriaNome = (categoriaTipo === 'composta')
+        ? (itemEntradaEl?.value || '')
+        : (categoriaOpt?.dataset?.nome || '');
+
       const payload = {
         data,
         tipo,
         doador,
-        categoria,
+        categoria: categoriaNome,
         quantidade,
         unidade,
         campanha,
@@ -297,30 +310,77 @@ if (doadorEntradaEl) {
   });
 }
 const categoriaEntradaEl = document.getElementById("categoriaEntrada");
+const campoItemCategoria = document.getElementById('campoItemCategoria');
+const itemEntradaEl = document.getElementById('itemEntrada');
 async function categoriasSelect(selectEl) {
   try {
     const r = await fetch(`/api/categorias?limit=1000`);
     if (!r.ok) throw new Error("Falha ao carregar categorias");
     const payload = await r.json();
     const cats = Array.isArray(payload) ? payload : (payload.data || []);
+    cacheCategorias.clear();
     selectEl.innerHTML = '<option value="" disabled selected>Selecione uma categoria</option>';
     cats
       .slice()
       .sort((a, b) => a.nome.localeCompare(b.nome))
       .forEach((c) => {
+        const id = String(c.id ?? c.id_categoria ?? '');
+        const nome = c.nome;
+        const tipo = String(c.tipo || 'simples').toLowerCase();
+        if (id) cacheCategorias.set(id, { id, nome, tipo });
         const opt = document.createElement("option");
-        opt.value = c.nome;
-        opt.textContent = c.nome;
+        opt.value = id || nome; // preferir id (para buscar subitens), fallback nome
+        opt.textContent = nome;
+        opt.dataset.nome = nome;
+        opt.dataset.tipo = tipo;
         selectEl.appendChild(opt);
       });
   } catch (err) {
     console.error(err);
   }
 }
+function ocultarSubitem(){
+  if (campoItemCategoria) campoItemCategoria.style.display = 'none';
+  if (itemEntradaEl){
+    itemEntradaEl.required = false;
+    itemEntradaEl.innerHTML = '<option value="" disabled selected>Selecione o item</option>';
+  }
+}
+
+async function carregarSubitens(categoriaId){
+  if (!itemEntradaEl || !categoriaId) return;
+  try {
+    itemEntradaEl.innerHTML = '<option value="" disabled selected>Carregando...</option>';
+    const r = await fetch(`/api/categorias/${categoriaId}/itens`);
+    const itens = r.ok ? await r.json() : [];
+    itemEntradaEl.innerHTML = '<option value="" disabled selected>Selecione o item</option>';
+    itens.forEach(it => {
+      const opt = document.createElement('option');
+      opt.value = it.nome; // enviaremos o nome do subitem como categoria
+      opt.textContent = it.nome;
+      itemEntradaEl.appendChild(opt);
+    });
+  } catch (err) { console.error(err); }
+}
+
+function aoTrocarCategoria(){
+  const opt = document.querySelector('#categoriaEntrada option:checked');
+  const tipo = opt?.dataset?.tipo || 'simples';
+  const idVal = opt?.value || '';
+  if (tipo === 'composta'){
+    if (campoItemCategoria) campoItemCategoria.style.display = '';
+    if (itemEntradaEl) itemEntradaEl.required = true;
+    carregarSubitens(idVal);
+  } else {
+    ocultarSubitem();
+  }
+}
+
 if (categoriaEntradaEl) {
   categoriasSelect(categoriaEntradaEl);
   categoriaEntradaEl.addEventListener("change", (e) => {
-    e.target.setCustomValidity(validaTextoMin(e.target.value, 2) ? "" : "Informe a categoria");
+    e.target.setCustomValidity(validaTextoMin(e.target.value, 1) ? "" : "Informe a categoria");
+    aoTrocarCategoria();
   });
 }
 const quantidadeEntradaEl = document.getElementById("quantidadeEntrada");

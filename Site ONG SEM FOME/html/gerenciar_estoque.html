@@ -1,296 +1,346 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-	<head>
-		<meta charset="UTF-8" />
-		<title>Gerenciar Estoque</title>
-		<link rel="stylesheet" href="/css/styles.css" />
-	</head>
-	<body class="pagina-gerenciar">
-		<header class="site-header">
-			<nav class="navbar">
-				<div class="navbar-item">
-					<div class="brand">
-						<h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
-					</div>
-				</div>
-				<div class="navbar-item">
-					<ul class="menu-principal">
-						<li><a href="index.html">Home</a></li>
-						<li><a href="index.html#sobre">Sobre</a></li>
-						<li><a href="index.html#ajudar">Como Ajudar</a></li>
-						<li><a href="index.html#transparencia">Transparência</a></li>
-						<li><a href="index.html#contato">Contato</a></li>
-						<li><a href="cadastro_doador.html">Doe</a></li>
-					</ul>
-				</div>
-				<div class="navbar-item">
-					<div class="navbar-login">
-						<a href="login_page.html" class="btn-login" role="button">Login</a>
-					</div>
-				</div>
-			</nav>
-		</header>
 
-		<h1 class="titulo-pagina">Gerenciar Estoque</h1>
-		<p class="descricao-pagina">
-			Visão geral do estoque consolidado por categoria e unidade, calculado a partir das entradas registradas.
-		</p>
+<head>
+	<meta charset="UTF-8" />
+	<title>Gerenciar Estoque</title>
+	<link rel="stylesheet" href="/css/styles.css" />
+</head>
 
-		<section class="estoque-container">
-			<div class="estoque-layout">
-				<aside class="estoque-sidebar">
-					<nav class="estoque-menu">
-						<h3 class="estoque-menu__titulo">Movimentações</h3>
-						<a class="menu-link" href="registrar_entrada.html">Registrar Entrada</a>
-						<a class="menu-link" href="distribuir_cestas.html">Registrar Saída</a>
-						<div class="estoque-menu__grupo">
-							<h4>Montagem de Cestas</h4>
-							<a class="menu-link" href="montar_cestas.html">Montar Cestas</a>
-						</div>
-					</nav>
-				</aside>
-
-				<div class="estoque-conteudo">
-					<div class="filtros flex-filtros">
-				<div class="form-field">
-					<label for="filtroCategoria">Categoria:</label>
-					<select id="filtroCategoria">
-						<option value="">Todas</option>
-					</select>
+<body class="pagina-gerenciar">
+	<header class="site-header">
+		<nav class="navbar">
+			<div class="navbar-item">
+				<div class="brand">
+					<h2 class="brand-title">
+						<a href="index.html">SEM FOME</a>
+					</h2>
 				</div>
-				<div class="form-field">
-					<label for="filtroBusca">Busca:</label>
-					<input type="text" id="filtroBusca" placeholder="Filtrar por categoria ou unidade" />
-				</div>
-						<div class="form-actions" style="margin-left:auto; display:flex; gap:.5rem;">
-							<button id="btnRelatorioEstoque" class="btn-secondary" onclick="Report.openForTable({ tableSelector: '#tabelaEstoque', filename: 'estoque.csv' })">Gerar Relatório (Estoque)</button>
-						</div>
-					</div>
-
-			<table id="tabelaEstoque" class="data-table">
-				<thead>
-					<tr>
-						<th>Categoria</th>
-						<th>Unidade</th>
-						<th>Em Estoque</th>
-						<th>Última Entrada</th>
-						<th>Ações</th>
-					</tr>
-				</thead>
-				<tbody>
-					<!-- Linhas geradas via JS -->
-				</tbody>
-			</table>
-
-			<div class="pagination pagination-bar" id="paginacaoEstoque">
-				<button id="prevEstoque" class="btn-secondary">Anterior</button>
-				<span id="infoEstoque">Página 1 de 1</span>
-				<button id="nextEstoque" class="btn-secondary">Próxima</button>
 			</div>
-
-			<!-- Modal Detalhes -->
-			<div id="modalDetalhesEstoque" class="modal" style="display:none;">
-				<div class="modal-conteudo" style="max-width: 900px;">
-
-					<span class="fechar" id="fecharModalDetalhes">&times;</span>
-					<h2 id="tituloModalDetalhes">Detalhes do Estoque</h2>
-					<div class="filtros flex-filtros" id="detFiltros">
-						<div class="form-field">
-							<label for="detDataDe">Data início:</label>
-							<input type="date" id="detDataDe" />
-						</div>
-						<div class="form-field">
-							<label for="detDataAte">Data fim:</label>
-							<input type="date" id="detDataAte" />
-						</div>
-						<div class="form-field">
-							<label for="detDoador">Doador:</label>
-							<select id="detDoador">
-								<option value="">Todos</option>
-							</select>
-						</div>
-						<div class="form-field">
-							<label for="detCampanha">Campanha:</label>
-							<select id="detCampanha">
-								<option value="">Todas</option>
-							</select>
-						</div>
-						<div class="form-field">
-							<label for="detTipo">Tipo:</label>
-							<select id="detTipo">
-								<option value="">Todos</option>
-								<option value="Entrada">Entrada</option>
-								<option value="Saída">Saída</option>
-							</select>
-						</div>
-						<div class="form-field flex-grow-200">
-							<label for="detBusca">Busca:</label>
-							<input type="text" id="detBusca" placeholder="Filtrar por doador, campanha ou observações" />
-						</div>
-						<div class="form-actions flex-end-auto">
-							<button id="detBtnLimpar" class="btn-secondary">Limpar filtros</button>
-						</div>
+			<div class="navbar-item">
+				<ul class="menu-principal">
+					<li>
+						<a href="index.html">Home</a>
+					</li>
+					<li>
+						<a href="index.html#sobre">Sobre</a>
+					</li>
+					<li>
+						<a href="index.html#ajudar">Como Ajudar</a>
+					</li>
+					<li>
+						<a href="index.html#transparencia">Transparência</a>
+					</li>
+					<li>
+						<a href="index.html#contato">Contato</a>
+					</li>
+					<li>
+						<a href="cadastro_doador.html">Doe</a>
+					</li>
+				</ul>
+			</div>
+			<div class="navbar-item">
+				<div class="navbar-login">
+					<a href="login_page.html" class="btn-login" role="button">Login</a>
+				</div>
+			</div>
+		</nav>
+	</header>
+	<h1 class="titulo-pagina">Gerenciar Estoque</h1>
+	<p class="descricao-pagina">
+		Visão geral do estoque consolidado por item e unidade, calculado a
+		partir das entradas registradas.
+	</p>
+	<section class="estoque-container">
+		<div class="estoque-layout">
+			<aside class="estoque-sidebar">
+				<nav class="estoque-menu">
+					<h3 class="estoque-menu__titulo">Movimentações</h3>
+					<a class="menu-link" href="registrar_entrada.html">Registrar Entrada
+					</a>
+					<a class="menu-link" href="distribuir_cestas.html">Registrar Saída
+					</a>
+					<div class="estoque-menu__grupo">
+						<h4>Montagem de Cestas</h4>
+						<a class="menu-link" href="montar_cestas.html">Montar Cestas</a>
 					</div>
-					<table id="tabelaDetalhesEstoque" class="data-table">
-						<thead>
-							<tr>
-								<th>Data</th>
+				</nav>
+			</aside>
+			<div class="estoque-conteudo">
+				<div class="filtros flex-filtros">
+					<div class="form-field">
+						<label for="filtroCategoria">Item:</label>
+						<select id="filtroCategoria">
+							<option value="">Todas</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="filtroBusca">Busca:</label>
+						<input type="text" id="filtroBusca" placeholder="Filtrar por item ou unidade" />
+					</div>
+					<div class="form-actions" style="margin-left: auto; display: flex; gap: 0.5rem">
+						<button id="btnRelatorioEstoque" class="btn-secondary"
+							onclick="Report.openForTable({ tableSelector: '#tabelaEstoque', filename: 'estoque.csv' })">
+							Relatório (Estoque)
+						</button>
+					</div>
+				</div>
+				<table id="tabelaEstoque" class="data-table">
+					<thead>
+						<tr>
+							<th>Item</th>
+							<th>Unidade</th>
+							<th>Em Estoque</th>
+							<th>Última Entrada</th>
+							<th>Ações</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- Linhas geradas via JS -->
+					</tbody>
+				</table>
+				<div class="pagination pagination-bar" id="paginacaoEstoque">
+					<button id="prevEstoque" class="btn-secondary">Anterior</button>
+					<span id="infoEstoque">Página 1 de 1</span>
+					<button id="nextEstoque" class="btn-secondary">Próxima</button>
+				</div>
+				<!-- Modal Detalhes -->
+				<div id="modalDetalhesEstoque" class="modal" style="display: none">
+					<div class="modal-conteudo" style="max-width: 900px">
+						<span class="fechar" id="fecharModalDetalhes">&times;</span>
+						<h2 id="tituloModalDetalhes">Detalhes do Estoque</h2>
+						<div class="filtros flex-filtros" id="detFiltros">
+							<div class="form-field">
+								<label for="detDataDe">Data início:</label>
+								<input type="date" id="detDataDe" />
+							</div>
+							<div class="form-field">
+								<label for="detDataAte">Data fim:</label>
+								<input type="date" id="detDataAte" />
+							</div>
+							<div class="form-field">
+								<label for="detDoador">Doador:</label>
+								<select id="detDoador">
+									<option value="">Todos</option>
+								</select>
+							</div>
+							<div class="form-field">
+								<label for="detCampanha">Campanha:</label>
+								<select id="detCampanha">
+									<option value="">Todas</option>
+								</select>
+							</div>
+							<div class="form-field">
+								<label for="detTipo">Tipo:</label>
+								<select id="detTipo">
+									<option value="">Todos</option>
+									<option value="Entrada">Entrada</option>
+									<option value="Saída">Saída</option>
+								</select>
+							</div>
+							<div class="form-field flex-grow-200">
+								<label for="detBusca">Busca:</label>
+								<input type="text" id="detBusca"
+									placeholder="Filtrar por doador, campanha ou observações" />
+							</div>
+							<div class="form-actions flex-end-auto">
+								<button id="detBtnLimpar" class="btn-secondary">
+									Limpar filtros
+								</button>
+							</div>
+						</div>
+						<table id="tabelaDetalhesEstoque" class="data-table">
+							<thead>
+								<tr>
+									<th>Data</th>
 									<th>Origem</th>
-								<th>Quantidade</th>
-								<th>Unidade</th>
-								<th>Campanha</th>
-								<th>Observações</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-					<div class="pagination pagination-bar" id="paginacaoDetalhes">
-						<button id="prevDetalhes" class="btn-secondary">Anterior</button>
-						<span id="infoDetalhes">Página 1 de 1</span>
-						<button id="nextDetalhes" class="btn-secondary">Próxima</button>
+									<th>Quantidade</th>
+									<th>Unidade</th>
+									<th>Campanha</th>
+									<th>Observações</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+						<div class="pagination pagination-bar" id="paginacaoDetalhes">
+							<button id="prevDetalhes" class="btn-secondary">
+								Anterior
+							</button>
+							<span id="infoDetalhes">Página 1 de 1</span>
+							<button id="nextDetalhes" class="btn-secondary">Próxima</button>
+						</div>
 					</div>
 				</div>
+				<h2 class="mt-2rem">Movimentações</h2>
+				<p class="descricao-pagina mt-02rem">
+					Lista cronológica de entradas e saídas, com saldo por
+					item/unidade.
+				</p>
+				<div class="filtros flex-filtros" id="movFiltros">
+					<div class="form-field">
+						<label for="movFiltroCategoria">Item:</label>
+						<select id="movFiltroCategoria">
+							<option value="">Todos</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="movFiltroUnidade">Unidade:</label>
+						<select id="movFiltroUnidade">
+							<option value="">Todas</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="movFiltroCampanha">Campanha:</label>
+						<select id="movFiltroCampanha">
+							<option value="">Todas</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="movFiltroTipo">Tipo:</label>
+						<select id="movFiltroTipo">
+							<option value="">Todos</option>
+							<option value="Entrada">Entrada</option>
+							<option value="Saída">Saída</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="movDataDe">Data início:</label>
+						<input type="date" id="movDataDe" />
+					</div>
+					<div class="form-field">
+						<label for="movDataAte">Data fim:</label>
+						<input type="date" id="movDataAte" />
+					</div>
+					<div class="form-field">
+						<label for="movOrder">Ordenação:</label>
+						<select id="movOrder">
+							<option value="desc" selected>Mais recente</option>
+							<option value="asc">Mais antigo</option>
+						</select>
+					</div>
+					<div class="form-actions">
+						<button id="movBtnLimpar" class="btn-secondary">
+							Limpar filtros
+						</button>
+					</div>
+					<div class="form-actions" style="margin-left: auto; display: flex; gap: 0.5rem">
+						<button id="btnRelatorioMovDoacoes" class="btn-secondary"
+							onclick="Report.openForTable({ tableSelector: '#tabelaMovimentacoes', filename: 'movimentacoes_doacoes.csv', rowFilter: (tr)=>{ const tds = tr.querySelectorAll('td'); return (tds[1]?.textContent||'').trim() === 'Entrada'; } })">
+							Relatório (Doações)
+						</button>
+					</div>
+				</div>
+				<table id="tabelaMovimentacoes" class="data-table">
+					<thead>
+						<tr>
+							<th>Data/Hora</th>
+							<th>Tipo</th>
+							<th>Item</th>
+							<th>Unidade</th>
+							<th>Quantidade</th>
+							<th>Origem/Doador</th>
+							<th>Campanha</th>
+							<th>Observações</th>
+							<th>Saldo (cat/unid)</th>
+							<th>Ações</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
 			</div>
-
-			<h2 class="mt-2rem">Movimentações</h2>
-			<p class="descricao-pagina mt-02rem">
-				Lista cronológica de entradas e saídas, com saldo por categoria/unidade.
-			</p>
-			<div class="filtros flex-filtros" id="movFiltros">
-				<div class="form-field">
-					<label for="movFiltroCategoria">Categoria:</label>
-					<select id="movFiltroCategoria">
-						<option value="">Todas</option>
-					</select>
-				</div>
-				<div class="form-field">
-					<label for="movFiltroUnidade">Unidade:</label>
-					<select id="movFiltroUnidade">
-						<option value="">Todas</option>
-					</select>
-				</div>
-				<div class="form-field">
-					<label for="movFiltroCampanha">Campanha:</label>
-					<select id="movFiltroCampanha">
-						<option value="">Todas</option>
-					</select>
-				</div>
-				<div class="form-field">
-					<label for="movFiltroTipo">Tipo:</label>
-					<select id="movFiltroTipo">
-						<option value="">Todos</option>
-						<option value="Entrada">Entrada</option>
-						<option value="Saída">Saída</option>
-					</select>
-				</div>
-				<div class="form-actions flex-end-auto" style="display:flex; gap:.5rem; align-items:end;">
-					<button id="movBtnLimpar" class="btn-secondary">Limpar filtros</button>
-					<button id="btnRelatorioMovDoacoes" class="btn-secondary" onclick="Report.openForTable({ tableSelector: '#tabelaMovimentacoes', filename: 'movimentacoes_doacoes.csv', rowFilter: (tr)=>{ const tds = tr.querySelectorAll('td'); return (tds[1]?.textContent||'').trim() === 'Entrada'; } })">Relatório (Doações)</button>
-				</div>
-			</div>
-			<table id="tabelaMovimentacoes" class="data-table">
-				<thead>
-					<tr>
-						<th>Data/Hora</th>
-						<th>Tipo</th>
-						<th>Categoria</th>
-						<th>Unidade</th>
-						<th>Quantidade</th>
-						<th>Origem/Doador</th>
-						<th>Campanha</th>
-						<th>Observações</th>
-						<th>Saldo (cat/unid)</th>
-						<th>Ações</th>
-					</tr>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-			<div class="pagination pagination-bar" id="paginacaoMov">
-				<label for="movPerPage">Por página:</label>
-				<select id="movPerPage" class="form-select">
-					<option value="10">10</option>
-					<option value="20" selected>20</option>
-					<option value="50">50</option>
-				</select>
-				<button id="prevMov" class="btn-secondary">Anterior</button>
-				<span id="infoMov">Página 1 de 1</span>
-				<button id="nextMov" class="btn-secondary">Próxima</button>
-			</div>
-
-			<!-- Modal Edição Movimentação -->
-			<div id="modalEditarMov" class="modal" style="display:none;">
-				<div class="modal-conteudo" style="max-width:600px;">
-					<span class="fechar" id="fecharModalEditarMov">&times;</span>
-					<h2 id="tituloModalEditarMov">Editar Movimentação</h2>
-					<form id="formEditarMov" class="form-grid form-grid-responsive">
-						<input type="hidden" id="editMovId" />
-						<input type="hidden" id="editMovTipo" />
-						<div class="form-field">
-							<label for="editData">Data:</label>
-							<input type="date" id="editData" required readonly title="A data não pode ser alterada" />
-						</div>
-						<div class="form-field" id="grpEditDoador">
-							<label for="editDoador">Doador:</label>
-							<input type="text" id="editDoador" />
-						</div>
-						<div class="form-field hidden" id="grpEditFamilia">
-							<label for="editFamiliaId">Família (ID):</label>
-							<input type="number" id="editFamiliaId" min="1" />
-						</div>
-						<div class="form-field hidden" id="grpEditResponsavel">
-							<label for="editResponsavel">Responsável:</label>
-							<input type="text" id="editResponsavel" />
-						</div>
+		</div>
+		<div class="pagination pagination-bar" id="paginacaoMov">
+			<label for="movPerPage">Por página:</label>
+			<select id="movPerPage" class="form-select">
+				<option value="10">10</option>
+				<option value="20" selected>20</option>
+				<option value="50">50</option>
+			</select>
+			<button id="prevMov" class="btn-secondary">Anterior</button>
+			<span id="infoMov">Página 1 de 1</span>
+			<button id="nextMov" class="btn-secondary">Próxima</button>
+		</div>
+		<!-- Modal Edição Movimentação -->
+		<div id="modalEditarMov" class="modal" style="display: none">
+			<div class="modal-conteudo" style="max-width: 600px">
+				<span class="fechar" id="fecharModalEditarMov">&times;</span>
+				<h2 id="tituloModalEditarMov">Editar Movimentação</h2>
+				<form id="formEditarMov" class="form-grid form-grid-responsive">
+					<input type="hidden" id="editMovId" />
+					<input type="hidden" id="editMovTipo" />
+					<div class="form-field">
+						<label for="editData">Data:</label>
+						<input type="date" id="editData" required readonly title="A data não pode ser alterada" />
+					</div>
+					<div class="form-field" id="grpEditDoador">
+						<label for="editDoador">Doador:</label>
+						<input type="text" id="editDoador" />
+					</div>
+					<div class="form-field hidden" id="grpEditFamilia">
+						<label for="editFamiliaId">Família (ID):</label>
+						<input type="number" id="editFamiliaId" min="1" />
+					</div>
+					<div class="form-field hidden" id="grpEditResponsavel">
+						<label for="editResponsavel">Responsável:</label>
+						<input type="text" id="editResponsavel" />
+					</div>
 						<div class="form-field">
 							<label for="editCategoria">Categoria:</label>
-							<input type="text" id="editCategoria" required />
-						</div>
-						<div class="form-field">
-							<label for="editQuantidade">Quantidade:</label>
-							<input type="number" step="1" id="editQuantidade" required />
-						</div>
-						<div class="form-field">
-							<label for="editUnidade">Unidade:</label>
-							<select id="editUnidade" required>
+							<select id="editCategoria" required>
 								<option value="">Selecione...</option>
-								<option value="un">un</option>
-								<option value="kg">kg</option>
-								<option value="g">g</option>
-								<option value="l">l</option>
-								<option value="ml">ml</option>
-								<option value="cx">cx</option>
-								<option value="pct">pct</option>
-								<option value="sac">sac</option>
-								<option value="kit">kit</option>
-								<option value="lata">lata</option>
 							</select>
 						</div>
-						<div class="form-field">
-							<label for="editCampanha">Campanha:</label>
-							<input type="text" id="editCampanha" />
+						<div class="form-field hidden" id="grpEditItemCategoria">
+							<label for="editItemCategoria">Item da categoria:</label>
+							<select id="editItemCategoria">
+								<option value="">Selecione o item</option>
+							</select>
 						</div>
-						<div class="form-field full-width-field">
-							<label for="editObs">Observações:</label>
-							<textarea id="editObs" rows="2"></textarea>
-						</div>
-						<div class="form-actions full-width-field" style="display:flex; gap:.6rem; justify-content:flex-end;">
-							<button type="button" id="cancelarEditarMov" class="btn-secondary">Cancelar</button>
-							<button type="submit" class="btn-primary">Salvar</button>
-						</div>
-					</form>
-				</div>
+					<div class="form-field">
+						<label for="editQuantidade">Quantidade:</label>
+						<input type="number" step="1" id="editQuantidade" required />
+					</div>
+					<div class="form-field">
+						<label for="editUnidade">Unidade:</label>
+						<select id="editUnidade" required>
+							<option value="">Selecione...</option>
+							<option value="un">un</option>
+							<option value="kg">kg</option>
+							<option value="g">g</option>
+							<option value="l">l</option>
+							<option value="ml">ml</option>
+							<option value="cx">cx</option>
+							<option value="pct">pct</option>
+							<option value="sac">sac</option>
+							<option value="kit">kit</option>
+							<option value="lata">lata</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="editCampanha">Campanha:</label>
+						<input type="text" id="editCampanha" />
+					</div>
+					<div class="form-field full-width-field">
+						<label for="editObs">Observações:</label>
+						<textarea id="editObs" rows="2"></textarea>
+					</div>
+					<div class="form-actions full-width-field"
+						style="display: flex; gap: 0.6rem; justify-content: flex-end">
+						<button type="button" id="cancelarEditarMov" class="btn-secondary">
+							Cancelar
+						</button>
+						<button type="submit" class="btn-primary">Salvar</button>
+					</div>
+				</form>
 			</div>
-			</div>
-			</div>
-		</section>
+		</div>
+	</section>
+	<script src="/js/report.js"></script>
+	<script src="/js/gerenciar_estoque.js"></script>
+	<script src="/js/auth.js"></script>
+	<footer class="rodape">
+		© 2025 ONG SEM FOME. Todos os direitos reservados.
+	</footer>
+</body>
 
-		<script src="/js/report.js"></script>
-		<script src="/js/gerenciar_estoque.js"></script>
-		<script src="/js/auth.js"></script>
-		<footer class="rodape">
-			© 2025 ONG SEM FOME. Todos os direitos reservados.
-		</footer>
-	</body>
-	</html>
-
+</html>
