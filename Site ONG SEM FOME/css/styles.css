@@ -910,6 +910,12 @@ p.info-destaque {
     margin-right: auto;
 }
 
+.input-email {
+    border-radius: 8px;
+    border: 1.5px solid rgba(0, 0, 0, 0.12);
+    padding: 10px 14px;
+}
+
 .login-cadastro {
     text-align: center;
     margin-top: 14px;
@@ -923,6 +929,19 @@ p.info-destaque {
     align-items: center;
     justify-content: space-between;
     margin-top: 12px;
+}
+
+.btn-forgot {
+    border: none;
+    color: var(--secondary-color);
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.btn-forgot:hover {
+    color: #2e8b57;
 }
 
 .btn-back {

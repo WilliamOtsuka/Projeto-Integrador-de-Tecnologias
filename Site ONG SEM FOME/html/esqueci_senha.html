@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Recuperar Senha - ONG SEM FOME</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="pagina-login">
+  <header class="site-header">
+    <nav class="navbar">
+      <div class="navbar-item">
+        <div class="brand">
+          <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main class="content">
+    <section class="login-box">
+      <div class="form-adicionar">
+        <h2>Recuperar senha</h2>
+        <p>Informe seu e-mail. Se ele existir no sistema, enviaremos as instruções para redefinição.</p>
+        <form id="forgotForm" class="login-form">
+          <div class="login-fields">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" class="input-email" required />
+            <div class="login-actions">
+              <button type="submit" class="btn-primary">Enviar</button>
+              <a href="login_page.html" class="btn-secondary btn-back">Voltar</a>
+            </div>
+          </div>
+        </form>
+        <div id="forgotMsg" class="mt-1"></div>
+        <div id="devTokenHint" class="mt-1" style="display:none;"></div>
+      </div>
+    </section>
+  </main>
+  <footer class="rodape">© 2025 ONG SEM FOME. Todos os direitos reservados.</footer>
+  <script src="/js/forgot_password.js"></script>
+</body>
+</html>

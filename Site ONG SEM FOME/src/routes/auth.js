@@ -1,5 +1,6 @@
 const pool = require('../config/db.js')
 const express = require('express');
+const crypto = require('crypto');
 const { asyncHandler } = require('../middleware/auth');
 const router = express.Router();
 
@@ -60,3 +61,81 @@ router.get('/me', (req, res) => {
 });
 
 module.exports = router;
+ 
+// ---------------- Password recovery ----------------
+// POST /api/password/forgot { email }
+router.post('/password/forgot', asyncHandler(async (req, res) => {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ error: 'Informe o e-mail' });
+    // Encontrar usuário por colaborador ou doador, aproveitando mesma lógica do login
+    let usuarioId = null;
+    let nome = null;
+    {
+        const [colab] = await pool.query('SELECT id_colaborador, nome FROM colaboradores WHERE email = ?', [email]);
+        if (colab.length) {
+            const [rows] = await pool.query(
+                `SELECT u.id_usuario as usuario_id FROM usuarios u WHERE u.id_colaborador = ?`,
+                [colab[0].id_colaborador]
+            );
+            if (rows.length) { usuarioId = rows[0].usuario_id; nome = colab[0].nome; }
+        }
+    }
+    if (!usuarioId) {
+        const [doadorRows] = await pool.query(
+            `SELECT u.id_usuario as usuario_id, d.nome
+                 FROM usuarios u
+                 JOIN doadores d ON u.id_colaborador = d.id_doador
+                WHERE d.email = ?`, [email]);
+        if (doadorRows.length) { usuarioId = doadorRows[0].usuario_id; nome = doadorRows[0].nome; }
+    }
+    // Resposta idempotente
+    if (!usuarioId) return res.json({ ok: true, message: 'Se o e-mail existir, enviaremos instruções' });
+    // Gera token e armazena com expiração (1h)
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000);
+    await pool.query(
+        `INSERT INTO password_resets (id_usuario, token, expires_at) VALUES (?, ?, ?)`,
+        [usuarioId, token, expires]
+    );
+    // Aqui poderíamos enviar e-mail; por ora, retornamos a indicação de sucesso e, em dev, o token
+    const isProd = process.env.NODE_ENV === 'production';
+    return res.json({ ok: true, message: 'Se o e-mail existir, enviaremos instruções', token: isProd ? undefined : token, hint: isProd ? undefined : 'Use o token na página de redefinição' });
+}));
+
+// GET /api/password/validate?token=...
+router.get('/password/validate', asyncHandler(async (req, res) => {
+    const { token } = req.query;
+    if (!token) return res.status(400).json({ ok: false, error: 'Token ausente' });
+    const [rows] = await pool.query(
+        `SELECT pr.id, pr.id_usuario, pr.expires_at, pr.used_at
+             FROM password_resets pr
+            WHERE pr.token = ?`, [token]
+    );
+    if (!rows.length) return res.status(404).json({ ok: false, error: 'Token inválido' });
+    const pr = rows[0];
+    if (pr.used_at) return res.status(400).json({ ok: false, error: 'Token já utilizado' });
+    if (new Date(pr.expires_at) < new Date()) return res.status(400).json({ ok: false, error: 'Token expirado' });
+    return res.json({ ok: true });
+}));
+
+// POST /api/password/reset { token, senha }
+router.post('/password/reset', asyncHandler(async (req, res) => {
+    const { token, senha } = req.body || {};
+    if (!token || !senha) return res.status(400).json({ error: 'Dados inválidos' });
+    const [rows] = await pool.query(
+        `SELECT pr.id, pr.id_usuario, pr.expires_at, pr.used_at
+             FROM password_resets pr
+            WHERE pr.token = ?`, [token]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Token inválido' });
+    const pr = rows[0];
+    if (pr.used_at) return res.status(400).json({ error: 'Token já utilizado' });
+    if (new Date(pr.expires_at) < new Date()) return res.status(400).json({ error: 'Token expirado' });
+    // Atualiza senha (observação: projeto usa senha em texto plano; ideal migrar para hash futuramente)
+    await pool.query(
+        `UPDATE logins SET senha = ? WHERE id_usuario = ?`,
+        [String(senha), pr.id_usuario]
+    );
+    await pool.query(`UPDATE password_resets SET used_at = NOW() WHERE id = ?`, [pr.id]);
+    return res.json({ ok: true, message: 'Senha redefinida com sucesso' });
+}));

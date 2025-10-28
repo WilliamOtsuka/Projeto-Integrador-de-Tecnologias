@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Redefinir Senha - ONG SEM FOME</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="pagina-login">
+  <header class="site-header">
+    <nav class="navbar">
+      <div class="navbar-item">
+        <div class="brand">
+          <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main class="content">
+    <section class="login-box">
+      <div class="form-adicionar">
+        <h2>Redefinir senha</h2>
+        <form id="resetForm" class="login-form">
+          <div class="login-fields">
+            <div hidden>
+                <label for="token" >Token</label>
+                <input type="text" id="token" name="token" required />
+            </div>
+            <label for="newPassword">Nova senha</label>
+            <input type="password" id="newPassword" name="newPassword" required />
+            <label for="confirmPassword">Confirmar nova senha</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required />
+            <div class="login-actions">
+              <button type="submit" class="btn-primary">Redefinir</button>
+              <a href="login_page.html" class="btn-secondary btn-back">Voltar</a>
+            </div>
+          </div>
+        </form>
+        <div id="resetMsg" class="mt-1"></div>
+      </div>
+    </section>
+  </main>
+  <footer class="rodape">© 2025 ONG SEM FOME. Todos os direitos reservados.</footer>
+  <script src="/js/reset_password.js"></script>
+</body>
+</html>

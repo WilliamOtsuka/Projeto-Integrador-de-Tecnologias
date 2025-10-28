@@ -30,8 +30,9 @@
         </div>
       </nav>
     </header>
-
+    
     <h1 class="titulo-pagina">Distribuição de Cestas</h1>
+    <p id="saldoCestas" class="mt-1rem"></p>
 
     <section class="crud">
       <div class="form-grid">
@@ -60,9 +61,9 @@
         </div>
       </div>
 
-  <p id="saldoCestas" class="mt-1rem"></p>
 
-  <h2 class="mt-24px">Saídas recentes</h2>
+      <h2 class="mt-24px">Saídas recentes</h2>
+      <button class="btn-secondary" style="margin-top:.6rem;" onclick="Report.openForTable({ tableSelector: '#tabSaidas', filename: 'saidas_cestas.csv' })">Gerar Relatório (Saídas)</button>
       <table class="data-table" id="tabSaidas">
         <thead>
           <tr><th>Data</th><th>Família</th><th>Qtd</th><th>Responsável</th><th>Obs</th></tr>
@@ -76,7 +77,6 @@
       </div>
     </section>
 
-  <button class="btn-secondary" style="margin-top:.6rem;" onclick="Report.openForTable({ tableSelector: '#tabSaidas', filename: 'saidas_cestas.csv' })">Gerar Relatório (Saídas)</button>
 
   <script src="/js/report.js"></script>
   <script src="/js/distribuir_cestas.js"></script>
