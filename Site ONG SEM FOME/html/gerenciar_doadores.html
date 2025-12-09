@@ -84,6 +84,17 @@
         Adicionar Doador
       </button>
       <button class="btn-secondary" id="btnRelatorioDoadores" onclick="Report.openForTable({ tableSelector: '#tabelaDoadores', filename: 'doadores.csv' })">Gerar Relatório</button>
+      <button id="btnHelpDoadores" class="btn-secondary">Help me</button>
+      <div class="filters-toolbar">
+        <div class="form-field flex-1-min-220">
+          <label for="fltBuscaDoadores">Buscar:</label>
+          <input type="text" id="fltBuscaDoadores" placeholder="Nome, e-mail, telefone, documento..." />
+        </div>
+        <div class="form-field">
+          <label>&nbsp;</label>
+          <button id="btnLimparBuscaDoadores" class="btn-secondary w-100">Limpar</button>
+        </div>
+      </div>
       <table id="tabelaDoadores" class="data-table">
         <thead>
           <tr>
@@ -99,6 +110,18 @@
           <!-- Linhas de doadores via JS -->
         </tbody>
       </table>
+      <div id="modalHelpDoadores" class="modal" style="display:none;">
+        <div class="modal-conteudo help-modal">
+          <span class="fechar" id="fecharHelpDoadores">&times;</span>
+          <h2>Como cadastrar um doador</h2>
+          <div id="helpDoadoresPassos" class="help-passos"></div>
+          <div class="help-navigation">
+            <button id="btnHelpPrevDoadores" class="btn-secondary">Anterior</button>
+            <span id="helpPassoInfoDoadores">Passo 1 de 1</span>
+            <button id="btnHelpNextDoadores" class="btn-primary">Próximo</button>
+          </div>
+        </div>
+      </div>
   <div class="pagination pagination-bar" id="paginacaoDoadores">
         <button id="prevDoadores" class="btn-secondary">Anterior</button>
         <span id="infoDoadores">Página 1 de 1</span>

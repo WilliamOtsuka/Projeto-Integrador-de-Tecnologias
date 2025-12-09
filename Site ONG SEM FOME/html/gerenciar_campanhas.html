@@ -77,6 +77,31 @@
         Adicionar Campanha
       </button>
       <button class="btn-secondary" id="btnRelatorioCampanhas" onclick="Report.openForTable({ tableSelector: '#tabelaCampanhas', filename: 'campanhas.csv' })">Gerar Relatório</button>
+      <button id="btnHelpCampanhas" class="btn-secondary">Help me</button>
+      <div class="filters-toolbar">
+        <div class="form-field flex-1-min-220">
+          <label for="fltBuscaCampanhas">Buscar:</label>
+          <input type="text" id="fltBuscaCampanhas" placeholder="Nome, meta, descrição..." />
+        </div>
+        <div class="form-field">
+          <label>&nbsp;</label>
+          <button id="btnLimparBuscaCampanhas" class="btn-secondary w-100">Limpar</button>
+        </div>
+      </div>
+        <div id="modalHelpCampanhas" class="modal" style="display:none;">
+          <div class="modal-conteudo help-modal">
+            <span class="fechar" id="fecharHelpCampanhas">&times;</span>
+            <h2>Como cadastrar uma campanha</h2>
+            <div id="helpCampanhasPassos" class="help-passos">
+              <!-- conteúdo preenchido via JS -->
+            </div>
+            <div class="help-navigation">
+              <button id="btnHelpPrev" class="btn-secondary">Anterior</button>
+              <span id="helpPassoInfo">Passo 1 de 1</span>
+              <button id="btnHelpNext" class="btn-primary">Próximo</button>
+            </div>
+          </div>
+        </div>
       <table id="tabelaCampanhas" class="data-table">
         <thead>
           <tr>

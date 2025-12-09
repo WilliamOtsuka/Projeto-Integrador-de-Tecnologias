@@ -7,7 +7,7 @@ router.post(
   "/",
   requireAuth,
   asyncHandler(async (req, res) => {
-    const { data, responsavel, qtd_cestas, obs, itens, solicitacao_id } = req.body;
+    const { data, responsavel_id, qtd_cestas, obs, itens, solicitacao_id } = req.body;
     if (!Array.isArray(itens) || itens.length === 0) {
       return res.status(400).json({ error: "Itens obrigatórios" });
     }
@@ -39,6 +39,12 @@ router.post(
           error: "Não é permitido utilizar cestas como item de montagem",
         });
     }
+    const respIdRaw = responsavel_id ?? req.body?.responsavelId;
+    const responsavelIdNum = Number(respIdRaw || 0);
+    if (!Number.isInteger(responsavelIdNum) || responsavelIdNum <= 0) {
+      return res.status(400).json({ error: "responsavel_id inválido" });
+    }
+
     const qtd = Number(qtd_cestas || 0);
     if (!Number.isInteger(qtd) || qtd <= 0) {
       return res.status(400).json({ error: "qtd_cestas inválida" });
@@ -48,6 +54,16 @@ router.post(
     try {
       await conn.beginTransaction();
 
+      const [[responsavelRow]] = await conn.execute(
+        'SELECT id_colaborador, nome FROM colaboradores WHERE id_colaborador = ?',
+        [responsavelIdNum]
+      );
+      if (!responsavelRow) {
+        await conn.rollback();
+        return res.status(404).json({ error: 'Responsável não encontrado' });
+      }
+      const responsavelNome = responsavelRow.nome;
+
       // Se houver solicitação vinculada, validar que é de 'Cesta Básica'
       let solicitacaoIdNum = null;
       if (solicitacao_id != null && solicitacao_id !== '') {
@@ -56,12 +72,19 @@ router.post(
           await conn.rollback();
           return res.status(400).json({ error: 'solicitacao_id inválido' });
         }
-  const [[sRow]] = await conn.execute('SELECT id_solicitacao AS id, categoria FROM solicitacoes WHERE id_solicitacao=?', [sId]);
+        const [[sRow]] = await conn.execute(
+          `SELECT s.id_solicitacao AS id,
+                  c.nome AS categoria_nome
+             FROM solicitacoes s
+        LEFT JOIN categorias c ON c.id_categoria = s.categoria_id
+            WHERE s.id_solicitacao = ?`,
+          [sId]
+        );
         if (!sRow) {
           await conn.rollback();
           return res.status(404).json({ error: 'Solicitação não encontrada' });
         }
-        const cat = String(sRow.categoria || '').trim().toLowerCase();
+        const cat = String(sRow.categoria_nome || '').trim().toLowerCase();
         if (cat !== 'cesta básica') {
           await conn.rollback();
           return res.status(400).json({ error: 'Apenas solicitações de Cesta Básica podem ser vinculadas à montagem' });
@@ -119,8 +142,8 @@ router.post(
           .map((c) => String(c.COLUMN_NAME).toLowerCase())
       );
 
-      const columns = ["data", "responsavel", "qtd_cestas", "obs"];
-      const values = [data, responsavel, qtd, obs || null];
+      const columns = ["data", "responsavel", "responsavel_id", "qtd_cestas", "obs"];
+      const values = [data, responsavelNome, responsavelIdNum, qtd, obs || null];
       // Se coluna legada 'quantidade' é NOT NULL, preencher com qtd de cestas
       if (mustInclude.has("quantidade") && !columns.includes("quantidade")) {
         columns.push("quantidade");
@@ -155,10 +178,11 @@ router.post(
       for (const it of normalizados) {
         const quantidadeTotal = -Math.abs(Number(it.quantidade)) * qtd; // quantidade por cesta x qtd de cestas
         await conn.execute(
-          "INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs) VALUES (?,?,?,?,?,?,?)",
+          "INSERT INTO entradas (data, doador, doador_id, categoria, quantidade, unidade, campanha_id, obs) VALUES (?,?,?,?,?,?,?,?)",
           [
             data,
             "MONTAGEM",
+            null,
             it.categoria,
             quantidadeTotal,
             it.unidade,
@@ -170,10 +194,11 @@ router.post(
       // 2) Entrada das cestas produzidas (opcionalmente vinculada à solicitação)
       if (solicitacaoIdNum) {
         await conn.execute(
-          "INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs, solicitacao_id) VALUES (?,?,?,?,?,?,?,?)",
+          "INSERT INTO entradas (data, doador, doador_id, categoria, quantidade, unidade, campanha_id, obs, solicitacao_id) VALUES (?,?,?,?,?,?,?,?,?)",
           [
             data,
             "MONTAGEM",
+            null,
             "Cesta Básica",
             qtd,
             "cx",
@@ -184,10 +209,11 @@ router.post(
         );
       } else {
         await conn.execute(
-          "INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs) VALUES (?,?,?,?,?,?,?)",
+          "INSERT INTO entradas (data, doador, doador_id, categoria, quantidade, unidade, campanha_id, obs) VALUES (?,?,?,?,?,?,?,?)",
           [
             data,
             "MONTAGEM",
+            null,
             "Cesta Básica",
             qtd,
             "cx",
@@ -213,7 +239,7 @@ router.post(
       await conn.commit();
       res
         .status(201)
-        .json({ id: montagemId, data, responsavel, qtd_cestas: qtd, obs, solicitacao_id: solicitacaoIdNum });
+        .json({ id: montagemId, data, responsavel: responsavelNome, responsavel_id: responsavelIdNum, qtd_cestas: qtd, obs, solicitacao_id: solicitacaoIdNum });
     } catch (err) {
       await conn.rollback();
       throw err;

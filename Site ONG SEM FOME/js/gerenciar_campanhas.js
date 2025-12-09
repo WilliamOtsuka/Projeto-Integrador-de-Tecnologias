@@ -2,13 +2,46 @@ let campanhas = [];
 let pageCampanhas = 1;
 const limitCampanhas = 30;
 let totalCampanhas = 0;
+const helpCampanhasSteps = [
+  {
+    titulo: "1. Abrir o formulário",
+    descricao:
+      "Clique no botão \"Adicionar Campanha\" para abrir o formulário de cadastro.",
+  },
+  {
+    titulo: "2. Informar nome e meta",
+    descricao:
+      "Preencha o nome da campanha e a meta (ex.: valor arrecadado, quantidade de cestas, etc.).",
+  },
+  {
+    titulo: "3. Descrever a campanha",
+    descricao:
+      "Use o campo de descrição para explicar objetivos, público-alvo e período da campanha (opcional, mas recomendado).",
+  },
+  {
+    titulo: "4. Salvar",
+    descricao:
+      "Revise as informações e clique em \"Salvar\". A campanha aparecerá imediatamente na tabela.",
+  },
+];
+let helpCampanhaStepIndex = 0;
+let filtroBuscaCampanhas = "";
 
 // Renderiza a tabela com os dados atuais
 function renderTabelaCampanhas() {
   const tbody = document.querySelector("#tabelaCampanhas tbody");
   if (!tbody) return;
   tbody.innerHTML = "";
-  campanhas.forEach((c) => {
+  const q = (filtroBuscaCampanhas || "").trim().toLowerCase();
+  campanhas
+    .filter((c) => {
+      if (!q) return true;
+      const txt = [c.id, c.nome, c.meta, c.descricao]
+        .map((v) => (v == null ? "" : String(v)).toLowerCase())
+        .join(" ");
+      return txt.includes(q);
+    })
+    .forEach((c) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${c.id}</td>
@@ -70,8 +103,10 @@ document.getElementById("fecharModalCampanhaBtn").onclick = fecharModalCampanha;
 
 // Fecha o modal ao clicar fora do conteúdo
 window.onclick = function (event) {
-  if (event.target == document.getElementById("modalCampanha"))
-    fecharModalCampanha();
+  const modalCampanhaEl = document.getElementById("modalCampanha");
+  const modalHelpEl = document.getElementById("modalHelpCampanhas");
+  if (event.target === modalCampanhaEl) fecharModalCampanha();
+  if (event.target === modalHelpEl) fecharHelpCampanhas();
 };
 
 // Submit do formulário: valida campos e chama (POST/PUT)
@@ -204,6 +239,93 @@ if (nextBtnCamp)
   });
 
 loadCampanhas();
+
+// Modal de ajuda (passo a passo)
+const helpModalEl = document.getElementById("modalHelpCampanhas");
+const helpPrevBtn = document.getElementById("btnHelpPrev");
+const helpNextBtn = document.getElementById("btnHelpNext");
+const helpInfoEl = document.getElementById("helpPassoInfo");
+const helpContentEl = document.getElementById("helpCampanhasPassos");
+
+function renderHelpCampanhasStep() {
+  if (!helpContentEl) return;
+  const step = helpCampanhasSteps[helpCampanhaStepIndex];
+  helpContentEl.innerHTML = `
+    <div class="help-step">
+      <h3>${step.titulo}</h3>
+      <p>${step.descricao}</p>
+    </div>`;
+  if (helpInfoEl)
+    helpInfoEl.textContent = `Passo ${helpCampanhaStepIndex + 1} de ${helpCampanhasSteps.length}`;
+  if (helpPrevBtn)
+    helpPrevBtn.disabled = helpCampanhaStepIndex === 0;
+  if (helpNextBtn)
+    helpNextBtn.disabled = helpCampanhaStepIndex === helpCampanhasSteps.length - 1;
+}
+
+function abrirHelpCampanhas() {
+  helpCampanhaStepIndex = 0;
+  renderHelpCampanhasStep();
+  if (!helpModalEl) return;
+  helpModalEl.classList.remove("saindo");
+  helpModalEl.style.display = "block";
+  void helpModalEl.offsetWidth;
+  helpModalEl.classList.add("mostrar");
+}
+
+function fecharHelpCampanhas() {
+  if (!helpModalEl) return;
+  helpModalEl.classList.remove("mostrar");
+  helpModalEl.classList.add("saindo");
+  const content = helpModalEl.querySelector(".modal-conteudo");
+  const done = () => {
+    helpModalEl.style.display = "none";
+    helpModalEl.classList.remove("saindo");
+    if (content) content.removeEventListener("transitionend", onEnd);
+  };
+  const onEnd = (e) => {
+    if (e.target === content) done();
+  };
+  if (content) content.addEventListener("transitionend", onEnd);
+  else setTimeout(done, 240);
+}
+
+const btnHelpCampanhas = document.getElementById("btnHelpCampanhas");
+if (btnHelpCampanhas) btnHelpCampanhas.addEventListener("click", abrirHelpCampanhas);
+const fecharHelpCampanhasBtn = document.getElementById("fecharHelpCampanhas");
+if (fecharHelpCampanhasBtn) fecharHelpCampanhasBtn.addEventListener("click", fecharHelpCampanhas);
+if (helpPrevBtn)
+  helpPrevBtn.addEventListener("click", () => {
+    if (helpCampanhaStepIndex > 0) {
+      helpCampanhaStepIndex--;
+      renderHelpCampanhasStep();
+    }
+  });
+if (helpNextBtn)
+  helpNextBtn.addEventListener("click", () => {
+    if (helpCampanhaStepIndex < helpCampanhasSteps.length - 1) {
+      helpCampanhaStepIndex++;
+      renderHelpCampanhasStep();
+    }
+  });
+
+// Filtro: busca na tabela de campanhas
+const fltBuscaCampanhasEl = document.getElementById("fltBuscaCampanhas");
+if (fltBuscaCampanhasEl) {
+  fltBuscaCampanhasEl.addEventListener("input", (e) => {
+    filtroBuscaCampanhas = (e.target.value || "").toLowerCase();
+    renderTabelaCampanhas();
+  });
+}
+const btnLimparBuscaCampanhas = document.getElementById("btnLimparBuscaCampanhas");
+if (btnLimparBuscaCampanhas && fltBuscaCampanhasEl) {
+  btnLimparBuscaCampanhas.addEventListener("click", (e) => {
+    e.preventDefault();
+    filtroBuscaCampanhas = "";
+    fltBuscaCampanhasEl.value = "";
+    renderTabelaCampanhas();
+  });
+}
 
 // Validações do formulário
 const nomeInput = document.getElementById("nomeCampanha");

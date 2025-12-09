@@ -113,10 +113,11 @@ router.post(
   const saidaId = ins.insertId;
 
         await conn.execute(
-          "INSERT INTO entradas (data, doador, categoria, quantidade, unidade, campanha, obs) VALUES (?,?,?,?,?,?,?)",
+          "INSERT INTO entradas (data, doador, doador_id, categoria, quantidade, unidade, campanha_id, obs) VALUES (?,?,?,?,?,?,?,?)",
           [
             data,
             "SAIDA",
+            null,
             "Cesta Básica",
             -Math.abs(nQtd),
             "cx",
@@ -158,6 +159,28 @@ router.put(
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
+
+      const [rowsSaida] = await conn.execute(
+        "SELECT qtd FROM saidas WHERE id_saida=?",
+        [id]
+      );
+      if (!rowsSaida.length) {
+        await conn.rollback();
+        return res.status(404).json({ error: "Saída não encontrada" });
+      }
+      const qtdAnterior = Number(rowsSaida[0].qtd || 0);
+
+      const [saldoRows] = await conn.execute(
+        "SELECT COALESCE(SUM(quantidade),0) AS saldo FROM entradas WHERE TRIM(categoria) COLLATE utf8mb4_unicode_ci = 'Cesta Básica'"
+      );
+      const saldoAtual = Number(saldoRows?.[0]?.saldo || 0);
+      const saldoDisponivel = saldoAtual + qtdAnterior;
+      if (nQtd > saldoDisponivel) {
+        await conn.rollback();
+        return res.status(400).json({
+          error: `Saldo insuficiente de cestas. Disponível: ${saldoDisponivel}, necessário: ${nQtd}`,
+        });
+      }
 
       // Atualiza saída
       const [upd] = await conn.execute(

@@ -25,3 +25,7 @@ Observações
 - O diretório `/html` é servido na raiz.
 - O CSS está em `/css`.
 - Se preferir usar outro servidor (live-server, http-server) também funciona; o Express é apenas uma opção para teste local.
+
+## Migrações de banco
+
+- Execute `npm run db:migrate:solicitacoes` após atualizar o projeto para garantir que a tabela `solicitacoes` esteja usando as novas chaves estrangeiras para categoria, item e solicitante.

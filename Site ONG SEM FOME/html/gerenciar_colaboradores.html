@@ -81,6 +81,17 @@
         Adicionar Colaborador
       </button>
       <button class="btn-secondary" id="btnRelatorioColaboradores" onclick="Report.openForTable({ tableSelector: '#tabelaColaboradores', filename: 'colaboradores.csv' })">Gerar Relatório</button>
+      <button id="btnHelpColaboradores" class="btn-secondary">Help me</button>
+      <div class="filters-toolbar">
+        <div class="form-field flex-1-min-220">
+          <label for="fltBuscaColab">Buscar:</label>
+          <input type="text" id="fltBuscaColab" placeholder="Nome, e-mail, telefone, cargo..." />
+        </div>
+        <div class="form-field">
+          <label>&nbsp;</label>
+          <button id="btnLimparBuscaColab" class="btn-secondary w-100">Limpar</button>
+        </div>
+      </div>
       <table id="tabelaColaboradores" class="data-table">
         <thead>
           <tr>
@@ -99,6 +110,18 @@
         <button id="prevColaboradores" class="btn-secondary">Anterior</button>
         <span id="infoColaboradores">Página 1 de 1</span>
         <button id="nextColaboradores" class="btn-secondary">Próxima</button>
+      </div>
+      <div id="modalHelpColaboradores" class="modal" style="display:none;">
+        <div class="modal-conteudo help-modal">
+          <span class="fechar" id="fecharHelpColaboradores">&times;</span>
+          <h2>Como cadastrar um colaborador</h2>
+          <div id="helpColaboradoresPassos" class="help-passos"></div>
+          <div class="help-navigation">
+            <button id="btnHelpPrevColaboradores" class="btn-secondary">Anterior</button>
+            <span id="helpPassoInfoColaboradores">Passo 1 de 1</span>
+            <button id="btnHelpNextColaboradores" class="btn-primary">Próximo</button>
+          </div>
+        </div>
       </div>
     </section>
 

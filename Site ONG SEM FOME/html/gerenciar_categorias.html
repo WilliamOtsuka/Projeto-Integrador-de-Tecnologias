@@ -80,6 +80,18 @@
       <button id="btnAdicionarCategoria" class="btn-primary">
         Adicionar Categoria
       </button>
+      <button class="btn-secondary" id="btnRelatorioCategorias" onclick="Report.openForTable({ tableSelector: '#tabelaCategorias', filename: 'categorias.csv' })">Gerar Relatório</button>
+      <button id="btnHelpCategorias" class="btn-secondary">Help me</button>
+      <div class="filters-toolbar">
+        <div class="form-field flex-1-min-220">
+          <label for="fltBuscaCategorias">Buscar:</label>
+          <input type="text" id="fltBuscaCategorias" placeholder="Nome ou tipo..." />
+        </div>
+        <div class="form-field">
+          <label>&nbsp;</label>
+          <button id="btnLimparBuscaCategorias" class="btn-secondary w-100">Limpar</button>
+        </div>
+      </div>
       <table id="tabelaCategorias" class="data-table">
         <thead>
           <tr>
@@ -104,8 +116,21 @@
         <span id="infoCategorias">Página 1 de 1</span>
         <button id="nextCategorias" class="btn-secondary">Próxima</button>
       </div>
+      <div id="modalHelpCategorias" class="modal" style="display:none;">
+        <div class="modal-conteudo help-modal">
+          <span class="fechar" id="fecharHelpCategorias">&times;</span>
+          <h2>Como cadastrar uma categoria</h2>
+          <div id="helpCategoriasPassos" class="help-passos"></div>
+          <div class="help-navigation">
+            <button id="btnHelpPrevCategorias" class="btn-secondary">Anterior</button>
+            <span id="helpPassoInfoCategorias">Passo 1 de 1</span>
+            <button id="btnHelpNextCategorias" class="btn-primary">Próximo</button>
+          </div>
+        </div>
+      </div>
     </section>
 
+    <script src="/js/report.js"></script>
     <script src="/js/gerenciar_categorias.js"></script>
     <script src="/js/auth.js"></script>
     <footer class="rodape">

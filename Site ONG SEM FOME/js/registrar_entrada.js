@@ -2,6 +2,32 @@ let entradas = [];
 let pageEntradas = 1;
 const limitEntradas = 30;
 let totalEntradas = 0;
+let doadoresCache = [];
+let cacheCampanhas = null;
+const helpEntradasSteps = [
+  {
+    titulo: "1. Abrir o formulário",
+    descricao:
+      "Clique em \"Adicionar Entrada\" para registrar itens recebidos por doação ou compra.",
+  },
+  {
+    titulo: "2. Informar tipo e categoria",
+    descricao:
+      "Escolha se é doação ou compra, selecione a categoria (e o subitem quando composto) e identifique o doador ou fornecedor.",
+  },
+  {
+    titulo: "3. Definir quantidade e detalhes",
+    descricao:
+      "Preencha quantidade, unidade, possíveis vínculos (campanha ou solicitação) e observações adicionais.",
+  },
+  {
+    titulo: "4. Salvar e conferir",
+    descricao:
+      "Revise os dados e clique em \"Salvar\". A entrada aparecerá na tabela e atualizará o estoque automaticamente.",
+  },
+];
+let helpEntradasStepIndex = 0;
+let filtroBuscaEntradas = "";
 
 // Cache de categorias (id -> { id, nome, tipo })
 const cacheCategorias = new Map();
@@ -58,12 +84,29 @@ function renderTabelaEntradas() {
   const tbody = document.querySelector("#tabelaEntradas tbody");
   if (!tbody) return;
   tbody.innerHTML = "";
+  const q = (filtroBuscaEntradas || "").trim().toLowerCase();
   entradas
     .filter((e) => Number(e.quantidade || 0) > 0)
+    .filter((e) => {
+      if (!q) return true;
+      const txt = [
+        e.data,
+        e.tipo,
+        e.doador,
+        e.fornecedor,
+        e.categoria || e.categoriaNome,
+        e.quantidade,
+        e.unidade,
+        e.campanha,
+        e.obs || e.observacoes || e.observacao,
+      ]
+        .map((v) => (v == null ? "" : String(v)).toLowerCase())
+        .join(" ");
+      return txt.includes(q);
+    })
     .forEach((e) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-            <td>${e.id}</td>
             <td>${formatDateDDMMYY(e.data)}</td>
             <td>${e.tipo || 'doacao'}</td>
             <td>${e.doador || '-'}</td>
@@ -92,11 +135,34 @@ function abrirModalEntrada(editar = false, item = {}) {
   document.getElementById("entradaId").value = item.id || "";
   document.getElementById("dataEntrada").value = item.data || "";
   document.getElementById("tipoEntrada").value = item.tipo || "doacao";
-  document.getElementById("doadorEntrada").value = item.doador || "";
+  const doadorSelect = document.getElementById("doadorEntrada");
+  if (doadorSelect) {
+    const selectedId = item.doador_id ?? item.doadorId ?? "";
+    if (selectedId) {
+      const targetValue = String(selectedId);
+      doadorSelect.value = targetValue;
+      if (doadorSelect.value !== targetValue && item.doador) {
+        const opt = document.createElement("option");
+        opt.value = targetValue;
+        opt.textContent = item.doador;
+        opt.dataset.temporario = "true";
+        doadorSelect.appendChild(opt);
+        doadorSelect.value = targetValue;
+      }
+    } else {
+      doadorSelect.value = "";
+    }
+  }
   document.getElementById("categoriaEntrada").value = item.categoria || "";
   document.getElementById("quantidadeEntrada").value = item.quantidade || "";
   document.getElementById("unidadeEntrada").value = item.unidade || "";
-  document.getElementById("campanhaEntrada").value = item.campanha || "";
+  const campanhaSelect = document.getElementById("campanhaEntrada");
+  if (campanhaSelect)
+    carregarCampanhasEntrada(
+      campanhaSelect,
+      item.campanha_id ?? "",
+      item.campanha || ""
+    );
   document.getElementById("obsEntrada").value = item.obs || "";
   document.getElementById("fornecedorEntrada").value = item.fornecedor || "";
   document.getElementById("formaPagamentoEntrada").value = item.forma_pagamento || "";
@@ -155,7 +221,9 @@ document.getElementById("fecharModalEntradaBtn").onclick = fecharModalEntrada;
 // Fecha o modal ao clicar fora do conteúdo
 document.addEventListener('click', (event) => {
   const modal = document.getElementById("modalEntrada");
+  const helpModal = document.getElementById('modalHelpEntradas');
   if (event.target === modal) fecharModalEntrada();
+  if (event.target === helpModal) fecharHelpEntradas();
 });
 
 function toggleCamposPorTipo(tipo) {
@@ -206,13 +274,18 @@ formEntrada.onsubmit = function (e) {
   const id = document.getElementById("entradaId").value;
   const data = document.getElementById("dataEntrada").value;
   const tipo = document.getElementById("tipoEntrada").value;
-  const doador = document.getElementById("doadorEntrada").value;
+  const doadorIdRaw = document.getElementById("doadorEntrada").value;
+  const doadorId = doadorIdRaw ? parseInt(doadorIdRaw, 10) : null;
   const categoria = document.getElementById("categoriaEntrada").value;
   const categoriaOpt = document.querySelector('#categoriaEntrada option:checked');
   const categoriaTipo = categoriaOpt?.dataset?.tipo || 'simples';
   const quantidadeStr = document.getElementById("quantidadeEntrada").value;
   const unidadeRaw = document.getElementById("unidadeEntrada").value;
-  const campanha = document.getElementById("campanhaEntrada").value;
+  const campanhaRaw = document.getElementById("campanhaEntrada").value;
+  const campanhaNum = Number(campanhaRaw);
+  const campanhaId = campanhaRaw && !Number.isNaN(campanhaNum)
+    ? campanhaNum
+    : null;
   const obs = document.getElementById("obsEntrada").value;
   const fornecedor = document.getElementById("fornecedorEntrada").value;
   const forma_pagamento = document.getElementById("formaPagamentoEntrada").value;
@@ -220,7 +293,7 @@ formEntrada.onsubmit = function (e) {
 
   // Validações
   const dataOk = validaData(data);
-  const doadorOk = tipo === 'doacao' ? validaTextoMin(doador, 2) : true;
+  const doadorOk = tipo === 'doacao' ? Number.isInteger(doadorId) && doadorId > 0 : true;
   const categoriaOk = validaTextoMin(categoria, 1);
   const itemOk = (categoriaTipo === 'composta') ? validaTextoMin(itemEntradaEl?.value || '', 1) : true;
   const qtdOk = validaQuantidade(quantidadeStr);
@@ -237,7 +310,7 @@ formEntrada.onsubmit = function (e) {
   const formaEl = document.getElementById("formaPagamentoEntrada");
 
   dataEl.setCustomValidity(dataOk ? "" : "Informe uma data válida (não futura)");
-  doadorEl.setCustomValidity(doadorOk ? "" : "Informe o nome do doador");
+  doadorEl.setCustomValidity(doadorOk ? "" : "Selecione o doador");
   categoriaEl.setCustomValidity(categoriaOk ? "" : "Informe a categoria");
   if (itemEntradaEl) itemEntradaEl.setCustomValidity(itemOk ? '' : 'Selecione o item');
   quantidadeEl.setCustomValidity(qtdOk ? "" : "Quantidade deve ser inteiro >= 1");
@@ -264,11 +337,11 @@ formEntrada.onsubmit = function (e) {
       const payload = {
         data,
         tipo,
-        doador,
+        doador_id: doadorId,
         categoria: categoriaNome,
         quantidade,
         unidade,
-        campanha,
+        campanha_id: campanhaId,
         obs,
         fornecedor,
         forma_pagamento,
@@ -305,13 +378,19 @@ if (dataEntradaEl) {
 }
 const doadorEntradaEl = document.getElementById("doadorEntrada");
 if (doadorEntradaEl) {
-  doadorEntradaEl.addEventListener("input", (e) => {
-    e.target.setCustomValidity(validaTextoMin(e.target.value, 2) ? "" : "Informe o nome do doador");
+  doadorEntradaEl.addEventListener("change", (e) => {
+    const val = e.target.value;
+    const valido = !val
+      ? false
+      : Number.isInteger(Number(val)) && Number(val) > 0;
+    e.target.setCustomValidity(valido ? "" : "Selecione o doador");
   });
 }
 const categoriaEntradaEl = document.getElementById("categoriaEntrada");
 const campoItemCategoria = document.getElementById('campoItemCategoria');
 const itemEntradaEl = document.getElementById('itemEntrada');
+const doadorSelectEl = document.getElementById('doadorEntrada');
+const campanhaEntradaEl = document.getElementById('campanhaEntrada');
 async function categoriasSelect(selectEl) {
   try {
     const r = await fetch(`/api/categorias?limit=1000`);
@@ -337,6 +416,65 @@ async function categoriasSelect(selectEl) {
       });
   } catch (err) {
     console.error(err);
+  }
+}
+
+async function carregarCampanhasEntrada(selectEl, selectedValue = "", selectedLabel = "") {
+  if (!selectEl) return;
+  selectEl.disabled = true;
+  try {
+    if (!Array.isArray(cacheCampanhas)) {
+      const r = await fetch('/api/campanhas?limit=1000');
+      if (!r.ok) throw new Error('Falha ao carregar campanhas');
+      const payload = await r.json();
+      cacheCampanhas = Array.isArray(payload) ? payload : (payload.data || []);
+    }
+    const campanhas = cacheCampanhas || [];
+    const current =
+      selectedValue !== undefined && selectedValue !== null && selectedValue !== ''
+        ? String(selectedValue)
+        : selectEl.value || '';
+    selectEl.innerHTML = '<option value="">Não vincular</option>';
+    campanhas
+      .slice()
+      .sort((a, b) => String(a.nome || a.titulo || '').localeCompare(String(b.nome || b.titulo || '')))
+      .forEach((camp) => {
+        const nome = camp.nome || camp.titulo || `Campanha ${camp.id}`;
+        const id = camp.id_campanha ?? camp.id;
+        if (!nome || id == null) return;
+        const opt = document.createElement('option');
+        opt.value = String(id);
+        opt.textContent = nome;
+        opt.dataset.nome = nome;
+        selectEl.appendChild(opt);
+      });
+    if (current) {
+      const existe = Array.from(selectEl.options).some((opt) => opt.value === current);
+      if (!existe) {
+        const opt = document.createElement('option');
+        opt.value = current;
+        opt.textContent = selectedLabel || `Campanha #${current}`;
+        opt.dataset.nome = selectedLabel || '';
+        selectEl.appendChild(opt);
+      }
+    }
+    selectEl.value = current || '';
+  } catch (err) {
+    console.error(err);
+    if (!selectEl.options.length) {
+      selectEl.innerHTML = '<option value="">Não vincular</option>';
+    }
+    if (selectedValue) {
+      const opt = document.createElement('option');
+      opt.value = String(selectedValue);
+      opt.textContent = selectedLabel || String(selectedValue);
+      selectEl.appendChild(opt);
+      selectEl.value = String(selectedValue);
+    } else {
+      selectEl.value = '';
+    }
+  } finally {
+    selectEl.disabled = false;
   }
 }
 function ocultarSubitem(){
@@ -401,6 +539,50 @@ if (unidadeEntradaEl) {
   });
 }
 
+async function carregarDoadoresCadastrados(selectedId) {
+  if (!doadorSelectEl) return;
+  try {
+    const r = await fetch('/api/doadores?limit=1000');
+    if (!r.ok) {
+      if (r.status === 401) {
+        alert('Sessão expirada. Faça login.');
+        window.location.href = 'login_page.html';
+        return;
+      }
+      throw new Error('Falha ao carregar doadores');
+    }
+    const payload = await r.json();
+    const data = Array.isArray(payload) ? payload : (payload.data || []);
+    doadoresCache = data;
+    const currentValue = selectedId ? String(selectedId) : doadorSelectEl.value;
+    doadorSelectEl.innerHTML = '<option value="" disabled selected>Selecione o doador</option>';
+    data
+      .slice()
+      .sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || '')))
+      .forEach((d) => {
+        const id = d.id ?? d.id_doador;
+        if (!id) return;
+        const opt = document.createElement('option');
+        opt.value = String(id);
+        opt.textContent = d.nome;
+        doadorSelectEl.appendChild(opt);
+      });
+    if (currentValue) {
+      doadorSelectEl.value = String(currentValue);
+      if (doadorSelectEl.value !== String(currentValue)) {
+        const opt = document.createElement('option');
+        opt.value = String(currentValue);
+        opt.textContent = 'Doador selecionado';
+        opt.dataset.temporario = 'true';
+        doadorSelectEl.appendChild(opt);
+        doadorSelectEl.value = String(currentValue);
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 // Paginação e carga
 function updatePaginacaoEntradasInfo() {
   const info = document.getElementById("infoEntradas");
@@ -448,4 +630,91 @@ if (nextBtnE) nextBtnE.addEventListener("click", async () => {
 toggleCamposPorTipo(document.getElementById('tipoEntrada')?.value || 'doacao');
 const solicitacaoRefEl = document.getElementById('solicitacaoRefEntrada');
 if (solicitacaoRefEl) { loadSolicitacoesAprovadas(solicitacaoRefEl); }
+if (campanhaEntradaEl) { carregarCampanhasEntrada(campanhaEntradaEl); }
+carregarDoadoresCadastrados();
 loadEntradas();
+
+// Help modal (passo a passo)
+const helpModalEntradas = document.getElementById('modalHelpEntradas');
+const helpPrevEntradas = document.getElementById('btnHelpPrevEntradas');
+const helpNextEntradas = document.getElementById('btnHelpNextEntradas');
+const helpInfoEntradas = document.getElementById('helpPassoInfoEntradas');
+const helpContentEntradas = document.getElementById('helpEntradasPassos');
+
+function renderHelpEntradasStep(){
+  if (!helpContentEntradas) return;
+  const step = helpEntradasSteps[helpEntradasStepIndex];
+  helpContentEntradas.innerHTML = `
+    <div class="help-step">
+      <h3>${step.titulo}</h3>
+      <p>${step.descricao}</p>
+    </div>`;
+  if (helpInfoEntradas)
+    helpInfoEntradas.textContent = `Passo ${helpEntradasStepIndex + 1} de ${helpEntradasSteps.length}`;
+  if (helpPrevEntradas)
+    helpPrevEntradas.disabled = helpEntradasStepIndex === 0;
+  if (helpNextEntradas)
+    helpNextEntradas.disabled = helpEntradasStepIndex === helpEntradasSteps.length - 1;
+}
+
+function abrirHelpEntradas(){
+  helpEntradasStepIndex = 0;
+  renderHelpEntradasStep();
+  if (!helpModalEntradas) return;
+  helpModalEntradas.classList.remove('saindo');
+  helpModalEntradas.style.display = 'block';
+  void helpModalEntradas.offsetWidth;
+  helpModalEntradas.classList.add('mostrar');
+}
+
+function fecharHelpEntradas(){
+  if (!helpModalEntradas) return;
+  helpModalEntradas.classList.remove('mostrar');
+  helpModalEntradas.classList.add('saindo');
+  const content = helpModalEntradas.querySelector('.modal-conteudo');
+  const done = () => {
+    helpModalEntradas.style.display = 'none';
+    helpModalEntradas.classList.remove('saindo');
+    if (content) content.removeEventListener('transitionend', onEnd);
+  };
+  const onEnd = (e) => {
+    if (e.target === content) done();
+  };
+  if (content) content.addEventListener('transitionend', onEnd);
+  else setTimeout(done, 240);
+}
+
+const btnHelpEntradas = document.getElementById('btnHelpEntradas');
+if (btnHelpEntradas) btnHelpEntradas.addEventListener('click', abrirHelpEntradas);
+const fecharHelpEntradasBtn = document.getElementById('fecharHelpEntradas');
+if (fecharHelpEntradasBtn) fecharHelpEntradasBtn.addEventListener('click', fecharHelpEntradas);
+if (helpPrevEntradas) helpPrevEntradas.addEventListener('click', () => {
+  if (helpEntradasStepIndex > 0){
+    helpEntradasStepIndex--;
+    renderHelpEntradasStep();
+  }
+});
+if (helpNextEntradas) helpNextEntradas.addEventListener('click', () => {
+  if (helpEntradasStepIndex < helpEntradasSteps.length - 1){
+    helpEntradasStepIndex++;
+    renderHelpEntradasStep();
+  }
+});
+
+// Filtro de busca (tabela)
+const buscaEntradasEl = document.getElementById("buscaEntradas");
+if (buscaEntradasEl) {
+  buscaEntradasEl.addEventListener("input", (e) => {
+    filtroBuscaEntradas = (e.target.value || "").toLowerCase();
+    renderTabelaEntradas();
+  });
+}
+const btnLimparBuscaEntradas = document.getElementById("btnLimparBuscaEntradas");
+if (btnLimparBuscaEntradas && buscaEntradasEl) {
+  btnLimparBuscaEntradas.addEventListener("click", (e) => {
+    e.preventDefault();
+    filtroBuscaEntradas = "";
+    buscaEntradasEl.value = "";
+    renderTabelaEntradas();
+  });
+}

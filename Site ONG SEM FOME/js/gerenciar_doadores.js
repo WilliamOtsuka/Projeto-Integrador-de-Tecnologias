@@ -2,6 +2,30 @@ let doadores = [];
 let pageDoadores = 1;
 const limitDoadores = 30;
 let totalDoadores = 0;
+const helpDoadoresSteps = [
+  {
+    titulo: "1. Abrir o formulário",
+    descricao:
+      "Clique em \"Adicionar Doador\" para abrir o formulário de cadastro.",
+  },
+  {
+    titulo: "2. Preencher dados básicos",
+    descricao:
+      "Informe nome completo, e-mail e telefone. Eles são usados para contato e confirmações.",
+  },
+  {
+    titulo: "3. Informar CPF ou CNPJ",
+    descricao:
+      "Digite o documento no formato correto. O sistema valida automaticamente CPF ou CNPJ.",
+  },
+  {
+    titulo: "4. Salvar o cadastro",
+    descricao:
+      "Revise os campos e clique em \"Salvar\" para adicionar o doador à lista.",
+  },
+];
+let helpDoadoresStepIndex = 0;
+let filtroBuscaDoadores = "";
 
 // Máscara/validação
 const onlyDigits = (v) => (v || "").replace(/\D/g, "");
@@ -175,7 +199,16 @@ function renderTabelaDoadores() {
   if (!tbody) return;
 
   tbody.innerHTML = "";
-  doadores.forEach((d) => {
+  const q = (filtroBuscaDoadores || "").trim().toLowerCase();
+  doadores
+    .filter((d) => {
+      if (!q) return true;
+      const txt = [d.id, d.nome, d.email, d.telefone, d.documento]
+        .map((v) => (v == null ? "" : String(v)).toLowerCase())
+        .join(" ");
+      return txt.includes(q);
+    })
+    .forEach((d) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${d.id}</td>
@@ -251,8 +284,13 @@ document.getElementById("fecharModalDoadorBtn").onclick = fecharModalDoador;
 
 // Fecha o modal
 window.onclick = function (event) {
-  if (event.target == document.getElementById("modalDoador")) {
+  const modalDoadorEl = document.getElementById("modalDoador");
+  const modalHelpEl = document.getElementById("modalHelpDoadores");
+  if (event.target === modalDoadorEl) {
     fecharModalDoador();
+  }
+  if (event.target === modalHelpEl) {
+    fecharHelpDoadores();
   }
 };
 
@@ -343,6 +381,93 @@ if (nextBtnD) nextBtnD.addEventListener("click", async () => {
 });
 
 loadDoadores();
+
+// Help modal
+const helpModalDoadores = document.getElementById("modalHelpDoadores");
+const helpPrevDoadores = document.getElementById("btnHelpPrevDoadores");
+const helpNextDoadores = document.getElementById("btnHelpNextDoadores");
+const helpInfoDoadores = document.getElementById("helpPassoInfoDoadores");
+const helpContentDoadores = document.getElementById("helpDoadoresPassos");
+
+function renderHelpDoadoresStep() {
+  if (!helpContentDoadores) return;
+  const step = helpDoadoresSteps[helpDoadoresStepIndex];
+  helpContentDoadores.innerHTML = `
+    <div class="help-step">
+      <h3>${step.titulo}</h3>
+      <p>${step.descricao}</p>
+    </div>`;
+  if (helpInfoDoadores)
+    helpInfoDoadores.textContent = `Passo ${helpDoadoresStepIndex + 1} de ${helpDoadoresSteps.length}`;
+  if (helpPrevDoadores)
+    helpPrevDoadores.disabled = helpDoadoresStepIndex === 0;
+  if (helpNextDoadores)
+    helpNextDoadores.disabled = helpDoadoresStepIndex === helpDoadoresSteps.length - 1;
+}
+
+function abrirHelpDoadores() {
+  helpDoadoresStepIndex = 0;
+  renderHelpDoadoresStep();
+  if (!helpModalDoadores) return;
+  helpModalDoadores.classList.remove("saindo");
+  helpModalDoadores.style.display = "block";
+  void helpModalDoadores.offsetWidth;
+  helpModalDoadores.classList.add("mostrar");
+}
+
+function fecharHelpDoadores() {
+  if (!helpModalDoadores) return;
+  helpModalDoadores.classList.remove("mostrar");
+  helpModalDoadores.classList.add("saindo");
+  const content = helpModalDoadores.querySelector(".modal-conteudo");
+  const done = () => {
+    helpModalDoadores.style.display = "none";
+    helpModalDoadores.classList.remove("saindo");
+    if (content) content.removeEventListener("transitionend", onEnd);
+  };
+  const onEnd = (e) => {
+    if (e.target === content) done();
+  };
+  if (content) content.addEventListener("transitionend", onEnd);
+  else setTimeout(done, 240);
+}
+
+const btnHelpDoadores = document.getElementById("btnHelpDoadores");
+if (btnHelpDoadores) btnHelpDoadores.addEventListener("click", abrirHelpDoadores);
+const fecharHelpDoadoresBtn = document.getElementById("fecharHelpDoadores");
+if (fecharHelpDoadoresBtn) fecharHelpDoadoresBtn.addEventListener("click", fecharHelpDoadores);
+if (helpPrevDoadores)
+  helpPrevDoadores.addEventListener("click", () => {
+    if (helpDoadoresStepIndex > 0) {
+      helpDoadoresStepIndex--;
+      renderHelpDoadoresStep();
+    }
+  });
+if (helpNextDoadores)
+  helpNextDoadores.addEventListener("click", () => {
+    if (helpDoadoresStepIndex < helpDoadoresSteps.length - 1) {
+      helpDoadoresStepIndex++;
+      renderHelpDoadoresStep();
+    }
+  });
+
+// Filtro: buscar na tabela de doadores
+const fltBuscaDoadoresEl = document.getElementById("fltBuscaDoadores");
+if (fltBuscaDoadoresEl) {
+  fltBuscaDoadoresEl.addEventListener("input", (e) => {
+    filtroBuscaDoadores = (e.target.value || "").toLowerCase();
+    renderTabelaDoadores();
+  });
+}
+const btnLimparBuscaDoadores = document.getElementById("btnLimparBuscaDoadores");
+if (btnLimparBuscaDoadores && fltBuscaDoadoresEl) {
+  btnLimparBuscaDoadores.addEventListener("click", (e) => {
+    e.preventDefault();
+    filtroBuscaDoadores = "";
+    fltBuscaDoadoresEl.value = "";
+    renderTabelaDoadores();
+  });
+}
 
 // Validações e máscaras
 const nomeInput = document.getElementById("nomeDoador");

@@ -7,7 +7,8 @@
     "start": "node scripts/apply-schema.js && node server.js",
     "dev": "nodemon --exec \"node scripts/apply-schema.js && node src/server.js\"",
     "db:seed": "node scripts/seed.js",
-    "db:schema": "node scripts/apply-schema.js"
+    "db:schema": "node scripts/apply-schema.js",
+    "db:migrate:solicitacoes": "node scripts/migrate-solicitacoes-fks.js"
   },
   "engines": {
     "node": ">=14"

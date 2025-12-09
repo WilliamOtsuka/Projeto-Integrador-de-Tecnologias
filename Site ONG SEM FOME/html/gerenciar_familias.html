@@ -140,6 +140,18 @@
       <button id="btnAdicionarFamilia" class="btn-primary">
         Adicionar Família
       </button>
+      <button class="btn-secondary" id="btnRelatorioFamilias" onclick="Report.openForTable({ tableSelector: '#tabelaFamilias', filename: 'familias.csv' })">Gerar Relatório</button>
+      <button id="btnHelpFamilias" class="btn-secondary">Help me</button>
+      <div class="filters-toolbar">
+        <div class="form-field flex-1-min-220">
+          <label for="fltBuscaFamilias">Buscar:</label>
+          <input type="text" id="fltBuscaFamilias" placeholder="Nome, responsável, contato, endereço..." />
+        </div>
+        <div class="form-field">
+          <label>&nbsp;</label>
+          <button id="btnLimparBuscaFamilias" class="btn-secondary w-100">Limpar</button>
+        </div>
+      </div>
       <table id="tabelaFamilias" class="data-table">
         <thead>
           <tr>
@@ -160,9 +172,22 @@
         <span id="infoFamilias">Página 1 de 1</span>
         <button id="nextFamilias" class="btn-secondary">Próxima</button>
       </div>
+     <div id="modalHelpFamilias" class="modal" style="display:none;">
+       <div class="modal-conteudo help-modal">
+         <span class="fechar" id="fecharHelpFamilias">&times;</span>
+         <h2>Como cadastrar uma família</h2>
+         <div id="helpFamiliasPassos" class="help-passos"></div>
+         <div class="help-navigation">
+           <button id="btnHelpPrevFamilias" class="btn-secondary">Anterior</button>
+           <span id="helpPassoInfoFamilias">Passo 1 de 1</span>
+           <button id="btnHelpNextFamilias" class="btn-primary">Próximo</button>
+         </div>
+       </div>
+     </div>
     </section>
 
-    <script src="/js/gerenciar_familias.js"></script>
+  <script src="/js/report.js"></script>
+  <script src="/js/gerenciar_familias.js"></script>
     <script src="/js/auth.js"></script>
     <footer class="rodape">
   © 2025 ONG SEM FOME. Todos os direitos reservados.

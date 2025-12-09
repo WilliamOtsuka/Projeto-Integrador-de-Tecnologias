@@ -1,6 +1,29 @@
 let estoque = [];
 let itensSelecionados = [];
 let solicitacoesCesta = [];
+const helpMontagemSteps = [
+  {
+    titulo: "1. Defina a montagem",
+    descricao:
+      "Informe data, responsável e quantidade de cestas. Esses campos determinam quando e por quem a montagem será realizada.",
+  },
+  {
+    titulo: "2. Vincule solicitações e observações",
+    descricao:
+      "Selecione uma solicitação aprovada, se aplicável, e registre observações importantes para rastreabilidade.",
+  },
+  {
+    titulo: "3. Adicione itens do estoque",
+    descricao:
+      "Escolha cada item disponível, informe a quantidade por cesta e clique em Adicionar. Use ao menos três itens diferentes.",
+  },
+  {
+    titulo: "4. Valide e salve",
+    descricao:
+      "Verifique se há saldo suficiente para todas as cestas e clique em \"Salvar Montagem\" para atualizar o estoque automaticamente.",
+  },
+];
+let helpMontagemStepIndex = 0;
 
 async function carregarEstoque() {
   const r = await fetch("/api/entradas?limit=10000");
@@ -45,10 +68,11 @@ async function carregarSolicitacoesCestaBasica() {
     if (!r.ok) return;
     const payload = await r.json();
     const lista = Array.isArray(payload) ? payload : (payload.data || []);
-    solicitacoesCesta = lista.filter(s =>
-      (String(s.status || '').toLowerCase() === 'aprovado' || String(s.status || '').toLowerCase() === 'em compra') &&
-      String(s.categoria || '') === 'Cesta Básica'
-    );
+    solicitacoesCesta = lista.filter(s => {
+      const statusAtual = String(s.status || '').toLowerCase();
+      const categoriaNome = (s.categoria_nome || s.categoria || '').toLowerCase();
+      return (statusAtual === 'aprovado' || statusAtual === 'em compra') && categoriaNome === 'cesta básica';
+    });
     const sel = document.getElementById('mcSolicitacao');
     if (!sel) return;
     sel.innerHTML = '<option value="">Não vincular</option>';
@@ -61,6 +85,31 @@ async function carregarSolicitacoesCestaBasica() {
     });
   } catch (e) {
     console.error('Falha ao carregar solicitações de Cesta Básica', e);
+  }
+}
+
+async function carregarResponsaveisMontagem() {
+  const sel = document.getElementById('mcResp');
+  if (!sel) return;
+  try {
+    const r = await fetch('/api/colaboradores?limit=1000');
+    if (!r.ok) throw new Error('Falha ao carregar colaboradores');
+    const payload = await r.json();
+    const lista = Array.isArray(payload) ? payload : (payload.data || []);
+    sel.innerHTML = '<option value="" disabled selected>Selecione o responsável</option>';
+    lista
+      .slice()
+      .sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || '')))
+      .forEach((col) => {
+        const opt = document.createElement('option');
+        const id = col.id ?? col.id_colaborador;
+        opt.value = id;
+        opt.textContent = col.nome;
+        sel.appendChild(opt);
+      });
+  } catch (e) {
+    console.error('Falha ao carregar responsáveis', e);
+    sel.innerHTML = '<option value="" disabled selected>Falha ao carregar responsáveis</option>';
   }
 }
 
@@ -137,14 +186,15 @@ document
   .getElementById("btnSalvarMontagem")
   .addEventListener("click", async () => {
     const data = document.getElementById("mcData").value;
-    const responsavel = document.getElementById("mcResp").value.trim();
+    const responsavelSel = document.getElementById('mcResp');
+    const responsavelId = parseInt(responsavelSel?.value || '0', 10) || 0;
     const qtd_cestas =
       parseInt(document.getElementById("mcQtd").value, 10) || 0;
   const obs = document.getElementById("mcObs").value;
   const solicitacao_id = document.getElementById('mcSolicitacao')?.value || null;
     if (
       !data ||
-      !responsavel ||
+      !responsavelId ||
       qtd_cestas <= 0 ||
       itensSelecionados.length === 0
     ) {
@@ -190,7 +240,7 @@ document
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           data,
-          responsavel,
+          responsavel_id: responsavelId,
           qtd_cestas,
           obs,
           itens: itensSelecionados,
@@ -211,10 +261,86 @@ document
     }
   });
 
-Promise.all([carregarEstoque(), carregarSolicitacoesCestaBasica()]).catch((err) => {
+Promise.all([carregarEstoque(), carregarSolicitacoesCestaBasica(), carregarResponsaveisMontagem()]).catch((err) => {
   console.error(err);
   if (err?.message?.includes("401")) {
     alert("Sessão expirada. Faça login.");
     window.location.href = "login_page.html";
+  }
+});
+
+const helpModalMontagem = document.getElementById("modalHelpMontagem");
+const helpContentMontagem = document.getElementById("helpMontagemPassos");
+const helpInfoMontagem = document.getElementById("helpPassoInfoMontagem");
+const helpPrevMontagem = document.getElementById("btnHelpPrevMontagem");
+const helpNextMontagem = document.getElementById("btnHelpNextMontagem");
+
+function renderHelpMontagemStep() {
+  if (!helpMontagemSteps.length || !helpContentMontagem) return;
+  const step = helpMontagemSteps[helpMontagemStepIndex];
+  helpContentMontagem.innerHTML = `
+    <div class="help-step">
+      <h3>${step.titulo}</h3>
+      <p>${step.descricao}</p>
+    </div>`;
+  if (helpInfoMontagem) {
+    helpInfoMontagem.textContent = `Passo ${helpMontagemStepIndex + 1} de ${helpMontagemSteps.length}`;
+  }
+  if (helpPrevMontagem) helpPrevMontagem.disabled = helpMontagemStepIndex === 0;
+  if (helpNextMontagem)
+    helpNextMontagem.disabled = helpMontagemStepIndex === helpMontagemSteps.length - 1;
+}
+
+function abrirHelpMontagem() {
+  if (!helpModalMontagem) return;
+  helpMontagemStepIndex = 0;
+  renderHelpMontagemStep();
+  helpModalMontagem.classList.remove("saindo");
+  helpModalMontagem.style.display = "block";
+  void helpModalMontagem.offsetWidth;
+  helpModalMontagem.classList.add("mostrar");
+}
+
+function fecharHelpMontagem() {
+  if (!helpModalMontagem) return;
+  helpModalMontagem.classList.remove("mostrar");
+  helpModalMontagem.classList.add("saindo");
+  const content = helpModalMontagem.querySelector(".modal-conteudo");
+  const done = () => {
+    helpModalMontagem.style.display = "none";
+    helpModalMontagem.classList.remove("saindo");
+    if (content) content.removeEventListener("transitionend", onEnd);
+  };
+  const onEnd = (event) => {
+    if (event.target === content) done();
+  };
+  if (content) {
+    content.addEventListener("transitionend", onEnd);
+  } else {
+    setTimeout(done, 240);
+  }
+}
+
+const btnHelpMontagem = document.getElementById("btnHelpMontagem");
+const fecharHelpMontagemBtn = document.getElementById("fecharHelpMontagem");
+if (btnHelpMontagem) btnHelpMontagem.addEventListener("click", abrirHelpMontagem);
+if (fecharHelpMontagemBtn)
+  fecharHelpMontagemBtn.addEventListener("click", fecharHelpMontagem);
+if (helpPrevMontagem)
+  helpPrevMontagem.addEventListener("click", () => {
+    if (helpMontagemStepIndex === 0) return;
+    helpMontagemStepIndex -= 1;
+    renderHelpMontagemStep();
+  });
+if (helpNextMontagem)
+  helpNextMontagem.addEventListener("click", () => {
+    if (helpMontagemStepIndex >= helpMontagemSteps.length - 1) return;
+    helpMontagemStepIndex += 1;
+    renderHelpMontagemStep();
+  });
+
+document.addEventListener("click", (event) => {
+  if (event.target === helpModalMontagem) {
+    fecharHelpMontagem();
   }
 });

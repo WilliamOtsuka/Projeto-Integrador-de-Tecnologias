@@ -69,7 +69,9 @@
           </div>
           <div class="form-field">
             <label for="solicitanteSolicitacao">Solicitante:</label>
-            <input type="text" id="solicitanteSolicitacao" placeholder="Voluntário/Funcionário" />
+            <select id="solicitanteSolicitacao">
+              <option value="">Selecione o colaborador</option>
+            </select>
           </div>
           <div class="form-field">
             <label for="statusSolicitacao">Status:</label>
@@ -125,6 +127,10 @@
     <button id="btnAdicionarSolicitacao" class="btn-primary">
       Adicionar Solicitação
     </button>
+    <button class="btn-secondary" id="btnRelatorioSolicitacoes" onclick="Report.openForTable({ tableSelector: '#tabelaSolicitacoes', filename: 'solicitacoes.csv' })">
+      Gerar Relatório
+    </button>
+    <button id="btnHelpSolicitacoes" class="btn-secondary">Help me</button>
 
     <div class="filters-toolbar">
       <div class="form-field">
@@ -190,8 +196,21 @@
       <span id="infoSolicitacoes">Página 1 de 1</span>
       <button id="nextSolicitacoes" class="btn-secondary">Próxima</button>
     </div>
+    <div id="modalHelpSolicitacoes" class="modal" style="display:none;">
+      <div class="modal-conteudo help-modal">
+        <span class="fechar" id="fecharHelpSolicitacoes">&times;</span>
+        <h2>Como registrar uma solicitação</h2>
+        <div id="helpSolicitacoesPassos" class="help-passos"></div>
+        <div class="help-navigation">
+          <button id="btnHelpPrevSolicitacoes" class="btn-secondary">Anterior</button>
+          <span id="helpPassoInfoSolicitacoes">Passo 1 de 1</span>
+          <button id="btnHelpNextSolicitacoes" class="btn-primary">Próximo</button>
+        </div>
+      </div>
+    </div>
   </section>
 
+  <script src="/js/report.js"></script>
   <script src="/js/gerenciar_solicitacoes.js"></script>
   <script src="/js/auth.js"></script>
   <footer class="rodape">

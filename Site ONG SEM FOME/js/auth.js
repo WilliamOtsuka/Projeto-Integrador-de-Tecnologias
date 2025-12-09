@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "gerenciar_familias.html",
     "gerenciar_solicitacoes.html",
     "efetuar_doacao.html",
+    "registrar_entrada.html",
+    "registrar_saida_produtos.html",
   ]);
 
   const currentPage = (() => {

@@ -58,8 +58,10 @@
 					<h3 class="estoque-menu__titulo">Movimentações</h3>
 					<a class="menu-link" href="registrar_entrada.html">Registrar Entrada
 					</a>
-					<a class="menu-link" href="distribuir_cestas.html">Registrar Saída
+					<a class="menu-link" href="registrar_saida_produtos.html">Registrar Saída
 					</a>
+					<a class="menu-link" href="distribuir_cestas.html">Registrar Distribuição de Cestas
+					</a>	
 					<div class="estoque-menu__grupo">
 						<h4>Montagem de Cestas</h4>
 						<a class="menu-link" href="montar_cestas.html">Montar Cestas</a>
@@ -318,7 +320,9 @@
 					</div>
 					<div class="form-field">
 						<label for="editCampanha">Campanha:</label>
-						<input type="text" id="editCampanha" />
+						<select id="editCampanha">
+							<option value="">Não vincular</option>
+						</select>
 					</div>
 					<div class="form-field full-width-field">
 						<label for="editObs">Observações:</label>

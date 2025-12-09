@@ -41,7 +41,9 @@
         </div>
         <div class="form-field">
           <label>Responsável</label>
-          <input type="text" id="mcResp" placeholder="Nome do responsável" />
+          <select id="mcResp">
+            <option value="" disabled selected>Selecione o responsável</option>
+          </select>
         </div>
         <div class="form-field">
           <label>Qtd cestas</label>
@@ -94,8 +96,22 @@
         <button class="btn-primary" id="btnSalvarMontagem">
           Salvar Montagem
         </button>
+        <button class="btn-secondary" id="btnHelpMontagem">Help me</button>
       </div>
     </section>
+
+    <div id="modalHelpMontagem" class="modal" style="display:none;">
+      <div class="modal-conteudo help-modal">
+        <span class="fechar" id="fecharHelpMontagem">&times;</span>
+        <h2>Como montar cestas</h2>
+        <div id="helpMontagemPassos" class="help-passos"></div>
+        <div class="help-navigation">
+          <button id="btnHelpPrevMontagem" class="btn-secondary">Anterior</button>
+          <span id="helpPassoInfoMontagem">Passo 1 de 1</span>
+          <button id="btnHelpNextMontagem" class="btn-primary">Próximo</button>
+        </div>
+      </div>
+    </div>
 
     <script src="/js/montar_cestas.js"></script>
     <script src="/js/auth.js"></script>

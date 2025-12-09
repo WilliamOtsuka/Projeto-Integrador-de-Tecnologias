@@ -60,7 +60,10 @@
 
           <div class="form-field" id="campoDoador">
             <label for="doadorEntrada">Doador:</label>
-            <input type="text" id="doadorEntrada" placeholder="Nome do doador" />
+            <select id="doadorEntrada">
+              <option value="" disabled selected>Selecione o doador</option>
+            </select>
+            <small class="text-muted">Não encontrou? <a href="gerenciar_doadores.html" target="_blank" rel="noopener">Cadastre o doador</a>.</small>
           </div>
 
           <div class="form-field">
@@ -125,7 +128,9 @@
 
           <div class="form-field">
             <label for="campanhaEntrada">Campanha (opcional):</label>
-            <input type="text" id="campanhaEntrada" placeholder="Vincule a uma campanha, se houver" />
+            <select id="campanhaEntrada">
+              <option value="">Não vincular</option>
+            </select>
           </div>
 
           <div class="form-field full-width-field">
@@ -146,10 +151,23 @@
     <button id="btnAdicionarEntrada" class="btn-primary">
       Adicionar Entrada
     </button>
+    <button id="btnRelatorioEntradas" class="btn-secondary" onclick="Report.openForTable({ tableSelector: '#tabelaEntradas', filename: 'entradas.csv' })">
+      Gerar Relatório (Entradas)
+    </button>
+    <button id="btnHelpEntradas" class="btn-secondary">Help me</button>
+    <div class="filters-toolbar">
+      <div class="form-field flex-1-min-220">
+        <label for="buscaEntradas">Buscar:</label>
+        <input type="text" id="buscaEntradas" placeholder="Categoria, item, doador, campanha..." />
+      </div>
+      <div class="form-field">
+        <label>&nbsp;</label>
+        <button id="btnLimparBuscaEntradas" class="btn-secondary w-100">Limpar</button>
+      </div>
+    </div>
     <table id="tabelaEntradas" class="data-table">
       <thead>
         <tr>
-          <th>ID</th>
           <th>Data</th>
           <th>Tipo</th>
           <th>Doador</th>
@@ -170,6 +188,20 @@
     </div>
   </section>
 
+  <div id="modalHelpEntradas" class="modal" style="display:none;">
+    <div class="modal-conteudo help-modal">
+      <span class="fechar" id="fecharHelpEntradas">&times;</span>
+      <h2>Como registrar uma entrada</h2>
+      <div id="helpEntradasPassos" class="help-passos"></div>
+      <div class="help-navigation">
+        <button id="btnHelpPrevEntradas" class="btn-secondary">Anterior</button>
+        <span id="helpPassoInfoEntradas">Passo 1 de 1</span>
+        <button id="btnHelpNextEntradas" class="btn-primary">Próximo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/report.js"></script>
   <script src="/js/registrar_entrada.js"></script>
   <script src="/js/auth.js"></script>
   <footer class="rodape">

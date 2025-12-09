@@ -2,6 +2,29 @@ let categorias = [];
 let pageCategorias = 1;
 const limitCategorias = 30;
 let totalCategorias = 0;
+const helpCategoriasSteps = [
+  {
+    titulo: "1. Abrir o formulário",
+    descricao: "Clique em \"Adicionar Categoria\" para iniciar um novo registro.",
+  },
+  {
+    titulo: "2. Definir nome e tipo",
+    descricao:
+      "Informe o nome da categoria e escolha se será simples ou composta (com subitens).",
+  },
+  {
+    titulo: "3. Gerenciar subitens (opcional)",
+    descricao:
+      "Se a categoria for composta, utilize a área de subitens para listar cada item disponível.",
+  },
+  {
+    titulo: "4. Salvar",
+    descricao:
+      "Clique em \"Salvar\" para armazenar e visualizar a categoria na tabela.",
+  },
+];
+let helpCategoriasStepIndex = 0;
+let filtroBuscaCategorias = "";
 
 // Renderiza a tabela
 function renderTabelaCategorias() {
@@ -9,7 +32,17 @@ function renderTabelaCategorias() {
 
   if (!tbody) return;
   tbody.innerHTML = "";
-  categorias.forEach((c) => {
+  const q = (filtroBuscaCategorias || "").trim().toLowerCase();
+  categorias
+    .filter((c) => {
+      if (!q) return true;
+      const tipoVal = String(c.tipo || 'simples').toLowerCase();
+      const txt = [c.id, c.nome, tipoVal]
+        .map((v) => (v == null ? "" : String(v)).toLowerCase())
+        .join(" ");
+      return txt.includes(q);
+    })
+    .forEach((c) => {
     const tr = document.createElement("tr");
     const tipo = String(c.tipo || 'simples').toLowerCase();
     tr.innerHTML = `
@@ -86,8 +119,10 @@ document.getElementById("fecharModalCategoriaBtn").onclick =
 
 // Fecha o modal ao clicar fora do conteúdo
 window.onclick = function (event) {
-  if (event.target == document.getElementById("modalCategoria"))
-    fecharModalCategoria();
+  const modalCategoriaEl = document.getElementById("modalCategoria");
+  const modalHelpEl = document.getElementById("modalHelpCategorias");
+  if (event.target === modalCategoriaEl) fecharModalCategoria();
+  if (event.target === modalHelpEl) fecharHelpCategorias();
 };
 
 // Submit do formulário
@@ -282,6 +317,24 @@ if (nextBtnCat) nextBtnCat.addEventListener("click", async () => {
 
 loadCategorias();
 
+// Filtro: busca na tabela de categorias
+const fltBuscaCategoriasEl = document.getElementById("fltBuscaCategorias");
+if (fltBuscaCategoriasEl) {
+  fltBuscaCategoriasEl.addEventListener("input", (e) => {
+    filtroBuscaCategorias = (e.target.value || "").toLowerCase();
+    renderTabelaCategorias();
+  });
+}
+const btnLimparBuscaCategorias = document.getElementById("btnLimparBuscaCategorias");
+if (btnLimparBuscaCategorias && fltBuscaCategoriasEl) {
+  btnLimparBuscaCategorias.addEventListener("click", (e) => {
+    e.preventDefault();
+    filtroBuscaCategorias = "";
+    fltBuscaCategoriasEl.value = "";
+    renderTabelaCategorias();
+  });
+}
+
 // Validações do campo de nome
 const nomeInput = document.getElementById("nomeCategoria");
 if (nomeInput) {
@@ -293,3 +346,72 @@ if (nomeInput) {
     )
   );
 }
+
+// Help modal
+const helpModalCategorias = document.getElementById("modalHelpCategorias");
+const helpPrevCategorias = document.getElementById("btnHelpPrevCategorias");
+const helpNextCategorias = document.getElementById("btnHelpNextCategorias");
+const helpInfoCategorias = document.getElementById("helpPassoInfoCategorias");
+const helpContentCategorias = document.getElementById("helpCategoriasPassos");
+
+function renderHelpCategoriasStep() {
+  if (!helpContentCategorias) return;
+  const step = helpCategoriasSteps[helpCategoriasStepIndex];
+  helpContentCategorias.innerHTML = `
+    <div class="help-step">
+      <h3>${step.titulo}</h3>
+      <p>${step.descricao}</p>
+    </div>`;
+  if (helpInfoCategorias)
+    helpInfoCategorias.textContent = `Passo ${helpCategoriasStepIndex + 1} de ${helpCategoriasSteps.length}`;
+  if (helpPrevCategorias)
+    helpPrevCategorias.disabled = helpCategoriasStepIndex === 0;
+  if (helpNextCategorias)
+    helpNextCategorias.disabled = helpCategoriasStepIndex === helpCategoriasSteps.length - 1;
+}
+
+function abrirHelpCategorias() {
+  helpCategoriasStepIndex = 0;
+  renderHelpCategoriasStep();
+  if (!helpModalCategorias) return;
+  helpModalCategorias.classList.remove("saindo");
+  helpModalCategorias.style.display = "block";
+  void helpModalCategorias.offsetWidth;
+  helpModalCategorias.classList.add("mostrar");
+}
+
+function fecharHelpCategorias() {
+  if (!helpModalCategorias) return;
+  helpModalCategorias.classList.remove("mostrar");
+  helpModalCategorias.classList.add("saindo");
+  const content = helpModalCategorias.querySelector(".modal-conteudo");
+  const done = () => {
+    helpModalCategorias.style.display = "none";
+    helpModalCategorias.classList.remove("saindo");
+    if (content) content.removeEventListener("transitionend", onEnd);
+  };
+  const onEnd = (e) => {
+    if (e.target === content) done();
+  };
+  if (content) content.addEventListener("transitionend", onEnd);
+  else setTimeout(done, 240);
+}
+
+const btnHelpCategoriasEl = document.getElementById("btnHelpCategorias");
+if (btnHelpCategoriasEl) btnHelpCategoriasEl.addEventListener("click", abrirHelpCategorias);
+const fecharHelpCategoriasBtn = document.getElementById("fecharHelpCategorias");
+if (fecharHelpCategoriasBtn) fecharHelpCategoriasBtn.addEventListener("click", fecharHelpCategorias);
+if (helpPrevCategorias)
+  helpPrevCategorias.addEventListener("click", () => {
+    if (helpCategoriasStepIndex > 0) {
+      helpCategoriasStepIndex--;
+      renderHelpCategoriasStep();
+    }
+  });
+if (helpNextCategorias)
+  helpNextCategorias.addEventListener("click", () => {
+    if (helpCategoriasStepIndex < helpCategoriasSteps.length - 1) {
+      helpCategoriasStepIndex++;
+      renderHelpCategoriasStep();
+    }
+  });

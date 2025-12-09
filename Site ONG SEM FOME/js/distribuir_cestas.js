@@ -116,8 +116,8 @@ async function carregarSaidasRecentes() {
   }
 }
 
-// registra nova saída
-async function registrarSaida() {
+// registra nova saída de cestas
+async function distribuirCestas() {
   const data = document.getElementById("saData").value;
   const familia_id =
     parseInt(document.getElementById("saFamilia").value, 10) || null;
@@ -150,7 +150,7 @@ async function registrarSaida() {
   document.getElementById("saData").valueAsDate = new Date();
   document
     .getElementById("btnDistribuir")
-    .addEventListener("click", registrarSaida);
+    .addEventListener("click", distribuirCestas);
   carregarColaboradores();
   carregarFamilias();
   carregarSaldoCestas();

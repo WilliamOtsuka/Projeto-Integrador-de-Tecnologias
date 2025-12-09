@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Registrar Saída de Produtos</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="pagina-gerenciar">
+    <header class="site-header">
+      <nav class="navbar">
+        <div class="navbar-item">
+          <div class="brand">
+            <h2 class="brand-title"><a href="index.html">SEM FOME</a></h2>
+          </div>
+        </div>
+        <div class="navbar-item">
+          <ul class="menu-principal">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#sobre">Sobre</a></li>
+            <li><a href="index.html#ajudar">Como Ajudar</a></li>
+            <li><a href="index.html#transparencia">Transparência</a></li>
+            <li><a href="index.html#contato">Contato</a></li>
+            <li><a href="cadastro_doador.html">Doe</a></li>
+          </ul>
+        </div>
+        <div class="navbar-item">
+          <div class="navbar-login">
+            <a href="login_page.html" class="btn-login" role="button">Login</a>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <h1 class="titulo-pagina">Registrar Saída de Produtos</h1>
+    <p class="descricao-pagina">Baixe qualquer item do estoque, registrando o motivo, destino e responsável.</p>
+
+    <section class="crud">
+      <form id="formSaidaProdutos" class="form-grid">
+        <div class="form-field">
+          <label for="spData">Data</label>
+          <input type="date" id="spData" required />
+        </div>
+        <div class="form-field">
+          <label for="spResponsavel">Responsável</label>
+          <select id="spResponsavel" required>
+            <option value="" disabled selected>Selecione</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="spTipoSaida">Tipo de saída</label>
+          <select id="spTipoSaida" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="familia">Entrega para família</option>
+            <option value="institucional">Entrega para instituição/parceiro</option>
+            <option value="perda">Perda / vencimento</option>
+            <option value="dano">Dano / avaria</option>
+            <option value="ajuste">Ajuste no estoque</option>
+            <option value="uso">Uso interno</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-field" id="campoFamiliaSaida" style="display:none;">
+          <label for="spFamilia">Família beneficiada</label>
+          <select id="spFamilia">
+            <option value="" disabled selected>Selecione</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="spCategoria">Categoria / item</label>
+          <select id="spCategoria" required>
+            <option value="" disabled selected>Selecione a categoria</option>
+          </select>
+        </div>
+        <div class="form-field" id="campoItemSaida" style="display:none;">
+          <label for="spItem">Item da categoria</label>
+          <select id="spItem">
+            <option value="" disabled selected>Selecione o item</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="spUnidade">Unidade</label>
+          <select id="spUnidade" required>
+            <option value="" disabled selected>Selecione...</option>
+            <option value="un">un</option>
+            <option value="kg">kg</option>
+            <option value="g">g</option>
+            <option value="l">l</option>
+            <option value="ml">ml</option>
+            <option value="cx">cx</option>
+            <option value="pct">pct</option>
+            <option value="sac">sac</option>
+            <option value="kit">kit</option>
+            <option value="lata">lata</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="spQuantidade">Quantidade</label>
+          <input type="number" id="spQuantidade" min="1" step="1" required />
+          <small id="spSaldoInfo" class="text-muted"></small>
+        </div>
+        <div class="form-field full-width-field">
+          <label for="spObs">Observações</label>
+          <textarea id="spObs" rows="2" placeholder="Detalhes adicionais"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Registrar Saída</button>
+        </div>
+      </form>
+    </section>
+
+    <script src="/js/registrar_saida_produtos.js"></script>
+    <script src="/js/auth.js"></script>
+    <footer class="rodape">© 2025 ONG SEM FOME. Todos os direitos reservados.</footer>
+  </body>
+</html>

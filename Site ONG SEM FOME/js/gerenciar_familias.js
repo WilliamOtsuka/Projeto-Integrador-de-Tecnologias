@@ -3,6 +3,30 @@ let familias = [];
 let pageFamilias = 1;
 const limitFamilias = 30;
 let totalFamilias = 0;
+const helpFamiliasSteps = [
+  {
+    titulo: "1. Abrir o formulário",
+    descricao:
+      "Clique em \"Adicionar Família\" para iniciar um novo cadastro.",
+  },
+  {
+    titulo: "2. Informar responsáveis",
+    descricao:
+      "Preencha o nome da família, responsável e contato para que possamos identificá-los facilmente.",
+  },
+  {
+    titulo: "3. Completar endereço",
+    descricao:
+      "Use o CEP para buscar automaticamente rua, bairro, cidade e UF. Complete número e complemento.",
+  },
+  {
+    titulo: "4. Salvar",
+    descricao:
+      "Depois de conferir, clique em \"Salvar\" e a família aparecerá na tabela.",
+  },
+];
+let helpFamiliasStepIndex = 0;
+let filtroBuscaFamilias = "";
 
 // Helpers de formatação/validação (CEP, UF, telefone, etc.)
 const onlyDigits = (v) => (v || "").replace(/\D/g, "");
@@ -68,7 +92,17 @@ function enderecoResumo(f) {
 function renderTabela() {
   const tbody = document.querySelector("#tabelaFamilias tbody");
   tbody.innerHTML = "";
-  familias.forEach((fam) => {
+  const q = (filtroBuscaFamilias || "").trim().toLowerCase();
+  familias
+    .filter((fam) => {
+      if (!q) return true;
+      const addr = enderecoResumo(fam) || "";
+      const txt = [fam.id, fam.nome, fam.responsavel, fam.contato, addr]
+        .map((v) => (v == null ? "" : String(v)).toLowerCase())
+        .join(" ");
+      return txt.includes(q);
+    })
+    .forEach((fam) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
 			<td>${fam.id}</td>
@@ -152,8 +186,13 @@ document.querySelectorAll("#fecharModalBtn").forEach((el) => {
 
 // Fecha o modal ao clicar fora do conteúdo
 window.onclick = function (event) {
-  if (event.target == document.getElementById("modalFamilia")) {
+  const modalFamilia = document.getElementById("modalFamilia");
+  const modalHelp = document.getElementById("modalHelpFamilias");
+  if (event.target === modalFamilia) {
     fecharModal();
+  }
+  if (event.target === modalHelp) {
+    fecharHelpFamilias();
   }
 };
 
@@ -337,6 +376,93 @@ if (nextBtnF) nextBtnF.addEventListener("click", async () => {
 });
 
 loadFamilias();
+
+// Help modal
+const helpModalFamilias = document.getElementById("modalHelpFamilias");
+const helpPrevFamilias = document.getElementById("btnHelpPrevFamilias");
+const helpNextFamilias = document.getElementById("btnHelpNextFamilias");
+const helpInfoFamilias = document.getElementById("helpPassoInfoFamilias");
+const helpContentFamilias = document.getElementById("helpFamiliasPassos");
+
+function renderHelpFamiliasStep() {
+  if (!helpContentFamilias) return;
+  const step = helpFamiliasSteps[helpFamiliasStepIndex];
+  helpContentFamilias.innerHTML = `
+    <div class="help-step">
+      <h3>${step.titulo}</h3>
+      <p>${step.descricao}</p>
+    </div>`;
+  if (helpInfoFamilias)
+    helpInfoFamilias.textContent = `Passo ${helpFamiliasStepIndex + 1} de ${helpFamiliasSteps.length}`;
+  if (helpPrevFamilias)
+    helpPrevFamilias.disabled = helpFamiliasStepIndex === 0;
+  if (helpNextFamilias)
+    helpNextFamilias.disabled = helpFamiliasStepIndex === helpFamiliasSteps.length - 1;
+}
+
+function abrirHelpFamilias() {
+  helpFamiliasStepIndex = 0;
+  renderHelpFamiliasStep();
+  if (!helpModalFamilias) return;
+  helpModalFamilias.classList.remove("saindo");
+  helpModalFamilias.style.display = "block";
+  void helpModalFamilias.offsetWidth;
+  helpModalFamilias.classList.add("mostrar");
+}
+
+function fecharHelpFamilias() {
+  if (!helpModalFamilias) return;
+  helpModalFamilias.classList.remove("mostrar");
+  helpModalFamilias.classList.add("saindo");
+  const content = helpModalFamilias.querySelector(".modal-conteudo");
+  const done = () => {
+    helpModalFamilias.style.display = "none";
+    helpModalFamilias.classList.remove("saindo");
+    if (content) content.removeEventListener("transitionend", onEnd);
+  };
+  const onEnd = (e) => {
+    if (e.target === content) done();
+  };
+  if (content) content.addEventListener("transitionend", onEnd);
+  else setTimeout(done, 240);
+}
+
+const btnHelpFamilias = document.getElementById("btnHelpFamilias");
+if (btnHelpFamilias) btnHelpFamilias.addEventListener("click", abrirHelpFamilias);
+const fecharHelpFamiliasBtn = document.getElementById("fecharHelpFamilias");
+if (fecharHelpFamiliasBtn) fecharHelpFamiliasBtn.addEventListener("click", fecharHelpFamilias);
+if (helpPrevFamilias)
+  helpPrevFamilias.addEventListener("click", () => {
+    if (helpFamiliasStepIndex > 0) {
+      helpFamiliasStepIndex--;
+      renderHelpFamiliasStep();
+    }
+  });
+if (helpNextFamilias)
+  helpNextFamilias.addEventListener("click", () => {
+    if (helpFamiliasStepIndex < helpFamiliasSteps.length - 1) {
+      helpFamiliasStepIndex++;
+      renderHelpFamiliasStep();
+    }
+  });
+
+// Filtro: busca na tabela de famílias
+const fltBuscaFamiliasEl = document.getElementById("fltBuscaFamilias");
+if (fltBuscaFamiliasEl) {
+  fltBuscaFamiliasEl.addEventListener("input", (e) => {
+    filtroBuscaFamilias = (e.target.value || "").toLowerCase();
+    renderTabela();
+  });
+}
+const btnLimparBuscaFamilias = document.getElementById("btnLimparBuscaFamilias");
+if (btnLimparBuscaFamilias && fltBuscaFamiliasEl) {
+  btnLimparBuscaFamilias.addEventListener("click", (e) => {
+    e.preventDefault();
+    filtroBuscaFamilias = "";
+    fltBuscaFamiliasEl.value = "";
+    renderTabela();
+  });
+}
 
 // ViaCEP: máscara e busca do endereço por CEP
 const cepInput = document.getElementById("cepFamilia");
