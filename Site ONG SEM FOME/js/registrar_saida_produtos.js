@@ -3,6 +3,35 @@ const normalizaUnidade = (v = "") => v.trim().toLowerCase();
 const apenasDigitos = (v = "") => v.replace(/\D/g, "");
 const normalizaTexto = (v = "") => v.trim().toLowerCase();
 
+const helpSaidasSteps = [
+  {
+    titulo: "1. Preencha a data e responsável",
+    descricao:
+      "Selecione a data da movimentação e quem está autorizando a saída. Esses campos são obrigatórios para rastreabilidade.",
+  },
+  {
+    titulo: "2. Informe o tipo e destino",
+    descricao:
+      "Escolha o tipo de saída (família, parceiro, perda, etc.). Para entregas a famílias, indique o cadastro correspondente.",
+  },
+  {
+    titulo: "3. Escolha o item do estoque",
+    descricao:
+      "Selecione a categoria e, quando necessário, o item específico. O sistema mostra apenas unidades com saldo disponível.",
+  },
+  {
+    titulo: "4. Defina unidade e quantidade",
+    descricao:
+      "Use a mesma unidade cadastrada no estoque e uma quantidade menor ou igual ao saldo exibido ao lado do campo.",
+  },
+  {
+    titulo: "5. Revise e registre",
+    descricao:
+      "Acrescente observações relevantes (ex.: número do protocolo) e clique em \"Registrar Saída\" para concluir.",
+  },
+];
+let helpSaidasStepIndex = 0;
+
 const categoriaSaidaEl = document.getElementById("spCategoria");
 const itemSaidaEl = document.getElementById("spItem");
 const campoItemSaida = document.getElementById("campoItemSaida");
@@ -16,6 +45,13 @@ const responsavelEl = document.getElementById("spResponsavel");
 const dataEl = document.getElementById("spData");
 const obsEl = document.getElementById("spObs");
 const formSaidaProdutos = document.getElementById("formSaidaProdutos");
+const helpSaidasModal = document.getElementById("modalHelpSaidas");
+const helpSaidasContentEl = document.getElementById("helpSaidasPassos");
+const helpSaidasInfoEl = document.getElementById("helpSaidasPassoInfo");
+const helpSaidasPrevBtn = document.getElementById("btnHelpSaidasPrev");
+const helpSaidasNextBtn = document.getElementById("btnHelpSaidasNext");
+const helpSaidasOpenBtn = document.getElementById("btnHelpSaidas");
+const helpSaidasCloseBtn = document.getElementById("fecharHelpSaidas");
 
 const estoqueAggregado = new Map();
 
@@ -358,6 +394,70 @@ formSaidaProdutos?.addEventListener("submit", async (event) => {
     console.error(err);
     alert(`Erro ao registrar saída: ${err.message}`);
   }
+});
+
+function renderHelpSaidasStep() {
+  if (!helpSaidasContentEl || !helpSaidasSteps.length) return;
+  const step = helpSaidasSteps[helpSaidasStepIndex];
+  helpSaidasContentEl.innerHTML = `
+    <div class="help-step">
+      <h3>${step.titulo}</h3>
+      <p>${step.descricao}</p>
+    </div>`;
+  if (helpSaidasInfoEl) {
+    helpSaidasInfoEl.textContent = `Passo ${helpSaidasStepIndex + 1} de ${helpSaidasSteps.length}`;
+  }
+  if (helpSaidasPrevBtn) {
+    helpSaidasPrevBtn.disabled = helpSaidasStepIndex === 0;
+  }
+  if (helpSaidasNextBtn) {
+    helpSaidasNextBtn.disabled = helpSaidasStepIndex === helpSaidasSteps.length - 1;
+  }
+}
+
+function abrirHelpSaidas() {
+  if (!helpSaidasModal) return;
+  helpSaidasStepIndex = 0;
+  renderHelpSaidasStep();
+  helpSaidasModal.classList.remove("saindo");
+  helpSaidasModal.style.display = "block";
+  void helpSaidasModal.offsetWidth;
+  helpSaidasModal.classList.add("mostrar");
+}
+
+function fecharHelpSaidas() {
+  if (!helpSaidasModal) return;
+  helpSaidasModal.classList.remove("mostrar");
+  helpSaidasModal.classList.add("saindo");
+  const content = helpSaidasModal.querySelector(".modal-conteudo");
+  const done = () => {
+    helpSaidasModal.style.display = "none";
+    helpSaidasModal.classList.remove("saindo");
+    if (content) content.removeEventListener("transitionend", onEnd);
+  };
+  const onEnd = (e) => {
+    if (e.target === content) done();
+  };
+  if (content) content.addEventListener("transitionend", onEnd);
+  else setTimeout(done, 240);
+}
+
+helpSaidasOpenBtn?.addEventListener("click", abrirHelpSaidas);
+helpSaidasCloseBtn?.addEventListener("click", fecharHelpSaidas);
+helpSaidasPrevBtn?.addEventListener("click", () => {
+  if (helpSaidasStepIndex > 0) {
+    helpSaidasStepIndex--;
+    renderHelpSaidasStep();
+  }
+});
+helpSaidasNextBtn?.addEventListener("click", () => {
+  if (helpSaidasStepIndex < helpSaidasSteps.length - 1) {
+    helpSaidasStepIndex++;
+    renderHelpSaidasStep();
+  }
+});
+window.addEventListener("click", (evt) => {
+  if (evt.target === helpSaidasModal) fecharHelpSaidas();
 });
 
 (async function initSaidaProdutos() {

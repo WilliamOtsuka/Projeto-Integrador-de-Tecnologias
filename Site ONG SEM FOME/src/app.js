@@ -4,7 +4,6 @@ const session = require("express-session");
 
 const app = express();
 
-// Core middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
@@ -16,14 +15,12 @@ app.use(
   })
 );
 
-// Static assets (mantidos nas pastas existentes na raiz)
 const ROOT = path.join(__dirname, "..");
 app.use("/css", express.static(path.join(ROOT, "css")));
 app.use("/js", express.static(path.join(ROOT, "js")));
 app.use("/img", express.static(path.join(ROOT, "img")));
 app.use("/", express.static(path.join(ROOT, "html")));
 
-// Health check
 app.get("/status", (req, res) =>
   res.json({ status: "ok", uptime: process.uptime() })
 );
@@ -42,9 +39,9 @@ app.use("/api/montagens/custom", require("./routes/montar_cestas"));
 app.use("/api/saidas", require("./routes/saidas"));
 app.use("/api/estoque", require("./routes/estoque.js"));
 app.use("/api/doacao", require("./routes/doacao"))
+
 // Error handler
 app.use((err, req, res, next) => {
-  // eslint-disable-next-line no-console
   console.error("Erro na API:", err);
   if (res.headersSent) {
     return next(err);

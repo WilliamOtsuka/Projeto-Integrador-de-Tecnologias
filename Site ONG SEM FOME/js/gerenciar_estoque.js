@@ -126,6 +126,7 @@ async function loadEntradasForEstoque() {
       idEntrada: e.idEntrada ?? e.id_entrada ?? e.id,
       data: e.data,
       doador: e.doador,
+      doador_id: e.doador_id ?? e.doadorId ?? null,
       categoria: e.categoria,
       quantidade: Number(e.quantidade ?? 0),
       unidade: String(e.unidade || "").toLowerCase(),
@@ -471,6 +472,7 @@ async function editarEntrada(id) {
     id: item.idEntrada,
     data: item.data,
     doador: item.doador,
+    doador_id: item.doador_id,
     categoria: item.categoria,
     quantidade: item.quantidade,
     unidade: item.unidade,
@@ -536,6 +538,7 @@ async function reloadAfterChange() {
     idEntrada: e.idEntrada ?? e.id_entrada ?? e.id,
     data: e.data,
     doador: e.doador,
+      doador_id: e.doador_id ?? e.doadorId ?? null,
     categoria: e.categoria,
     quantidade: Number(e.quantidade ?? 0),
     unidade: String(e.unidade || "").toLowerCase(),
@@ -565,7 +568,6 @@ async function renderFiltros() {
     const payload = r.ok ? await r.json() : [];
     const cats = Array.isArray(payload) ? payload : payload.data || [];
 
-    // mantém a opção Todas já existente
     // limpa as outras
     while (select.options.length > 1) select.remove(1);
 
@@ -598,14 +600,13 @@ function applyFilters() {
       item.unidade.toLowerCase().includes(q);
     return matchCat && matchBusca;
   });
-  // Reset páginas ao aplicar filtros globais
+
   pageEstoque = 1;
   pageMov = 1;
   renderTabelaEstoque();
   renderMovimentacoes();
 }
 
-// Renderiza tabela de estoque com paginação
 function renderTabelaEstoque() {
   const tbody = document.querySelector("#tabelaEstoque tbody");
   if (!tbody) return;
@@ -663,9 +664,8 @@ function abrirDetalhes(idx) {
   const title = document.getElementById("tituloModalDetalhes");
 
   title.textContent = `Detalhes: ${item.categoria} (${item.unidade})`;
-  // Save current details in modal dataset for filtering
   modal.dataset.idx = String(idx);
-  // Reset paginação de detalhes ao abrir
+
   pageDetalhes = 1;
   preencherFiltrosDetalhes(item.itens);
   renderDetalhesFiltrados();
@@ -703,7 +703,6 @@ function preencherFiltrosDetalhes(itens) {
   fill("detCampanha", camps);
 }
 
-// Renderiza detalhes filtrados com paginação
 function renderDetalhesFiltrados() {
   const modal = document.getElementById("modalDetalhesEstoque");
   const idx = Number(modal.dataset.idx || -1);
@@ -738,7 +737,6 @@ function renderDetalhesFiltrados() {
       matchTipo && matchDoador && matchCamp && matchDe && matchAte && matchBusca
     );
   });
-  // Atualiza paginação detalhes
   totalDetalhesPages = Math.max(1, Math.ceil(filtered.length / limitDetalhes));
   if (pageDetalhes > totalDetalhesPages) pageDetalhes = totalDetalhesPages;
   const start = (pageDetalhes - 1) * limitDetalhes;
@@ -1062,6 +1060,7 @@ function openEditarMovModal(data) {
   }
   setValue("editData", dateForInput);
   setValue("editDoador", data.doador || "");
+  setValue("editDoadorId", data.doador_id || "");
   // Carregar categorias no select e preparar subitens
   (async () => {
     try {
@@ -1167,6 +1166,8 @@ async function onSubmitEditarMov(e) {
   const obs = document.getElementById("editObs")?.value || null;
   if (modo === "entrada") {
     const doador = document.getElementById("editDoador")?.value;
+    const doadorIdRaw = document.getElementById("editDoadorId")?.value || "";
+    const doador_id = doadorIdRaw ? Number(doadorIdRaw) : null;
     const selCat = document.getElementById("editCategoria");
     const catOpt = selCat?.querySelector("option:checked");
     const catTipo = catOpt?.dataset?.tipo || "simples";
@@ -1224,6 +1225,7 @@ async function onSubmitEditarMov(e) {
       body: JSON.stringify({
         data,
         doador,
+        doador_id,
         categoria: categoriaNome,
         quantidade,
         unidade,

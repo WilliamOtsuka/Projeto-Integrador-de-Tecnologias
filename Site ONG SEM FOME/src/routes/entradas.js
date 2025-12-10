@@ -80,6 +80,10 @@ router.post('/', requireAuth, asyncHandler(async (req, res) => {
 router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { data, doador, doador_id, categoria, quantidade, unidade, campanha_id, obs, tipo, fornecedor, forma_pagamento, solicitacao_id } = req.body;
+  const [[oldRow]] = await pool.query('SELECT solicitacao_id, doador_id FROM entradas WHERE id_entrada=?', [id]);
+  if (!oldRow) {
+    return res.status(404).json({ error: 'Entrada não encontrada' });
+  }
   const campanhaId = campanha_id === undefined || campanha_id === null || campanha_id === ''
     ? null
     : Number(campanha_id);
@@ -88,7 +92,10 @@ router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
   }
   const t = (tipo === 'compra') ? 'compra' : (tipo === 'saida' ? 'saida' : 'doacao');
   const rawDoadorId = doador_id ?? req.body?.doadorId ?? null;
-  const doadorId = rawDoadorId === '' || rawDoadorId === null || rawDoadorId === undefined ? null : Number(rawDoadorId);
+  let doadorId = rawDoadorId === '' || rawDoadorId === null || rawDoadorId === undefined ? null : Number(rawDoadorId);
+  if ((doadorId === null || Number.isNaN(doadorId)) && oldRow.doador_id) {
+    doadorId = Number(oldRow.doador_id);
+  }
   if (doadorId !== null && (!Number.isInteger(doadorId) || doadorId <= 0)) {
     return res.status(400).json({ error: 'doador_id inválido' });
   }
@@ -105,7 +112,6 @@ router.put('/:id', requireAuth, asyncHandler(async (req, res) => {
   }
   const doadorTexto = doadorNome || doador || fornecedor || (t === 'saida' ? 'RETIRADA' : 'N/A');
   // Captura o vínculo anterior (se houver) para recomputar depois
-  const [[oldRow]] = await pool.query('SELECT solicitacao_id FROM entradas WHERE id_entrada=?', [id]);
   await pool.execute(
   'UPDATE entradas SET data=?, doador=?, doador_id=?, categoria=?, quantidade=?, unidade=?, campanha_id=?, obs=?, tipo=?, fornecedor=?, forma_pagamento=?, solicitacao_id=? WHERE id_entrada=?',
   [data, doadorTexto, doadorId, categoria, quantidade, unidade, campanhaId, obs || null, t, fornecedor || null, forma_pagamento || null, solicitacao_id || null, id]

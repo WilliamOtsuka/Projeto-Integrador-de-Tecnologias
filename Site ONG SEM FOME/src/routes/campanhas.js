@@ -7,7 +7,7 @@ router.get('/', requireAuth, asyncHandler(async (req, res) => {
   const page = Math.max(parseInt(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(parseInt(req.query.limit) || 30, 1), 200);
   const offset = (page - 1) * limit;
-  const [rows] = await pool.query('SELECT * FROM campanhas ORDER BY id_campanha DESC LIMIT ? OFFSET ?', [limit, offset]);
+  const [rows] = await pool.query('SELECT id_campanha AS id, nome, meta, descricao FROM campanhas ORDER BY id_campanha DESC LIMIT ? OFFSET ?', [limit, offset]);
   const [[cnt]] = await pool.query('SELECT COUNT(*) AS total FROM campanhas');
   res.json({ data: rows, total: Number(cnt.total||0), page, limit });
 }));

@@ -200,6 +200,8 @@ SELECT * FROM (
   SELECT 'Maria Silva' AS nome, 'maria.silva@example.com' AS email, '(11) 91234-5678' AS telefone, '123.456.789-00' AS documento
   UNION ALL SELECT 'João Pereira', 'joao.pereira@example.com', '(21) 99876-5432', '987.654.321-00'
   UNION ALL SELECT 'Empresa Solidária LTDA', 'contato@empresasolidaria.com.br', '(11) 4002-8922', '12.345.678/0001-90'
+  UNION ALL SELECT 'Associação Cuidar', 'contato@associacaocuidar.org', '(31) 4002-0999', '45.678.123/0001-10'
+  UNION ALL SELECT 'Luiza Costa', 'luiza.costa@example.com', '(71) 92345-8876', '456.789.123-11'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM doadores);
 
@@ -211,6 +213,8 @@ SELECT * FROM (
   SELECT 'Família Silva', 'Maria Silva', '(11) 91234-5678', '01001-000', 'Praça da Sé', '100', NULL, 'Sé', 'São Paulo', 'SP'
   UNION ALL SELECT 'Família Oliveira', 'Carlos Oliveira', '(21) 99888-7777', '20040-010', 'Rua da Assembleia', '250', 'Ap 302', 'Centro', 'Rio de Janeiro', 'RJ'
   UNION ALL SELECT 'Família Souza', 'Ana Souza', '(31) 98765-4321', '30130-010', 'Av. Afonso Pena', '1500', NULL, 'Centro', 'Belo Horizonte', 'MG'
+  UNION ALL SELECT 'Família Lima', 'Roberta Lima', '(41) 95555-1234', '80010-000', 'Rua XV de Novembro', '890', NULL, 'Centro', 'Curitiba', 'PR'
+  UNION ALL SELECT 'Família Almeida', 'Paulo Almeida', '(71) 97777-6543', '40015-000', 'Av. Sete de Setembro', '210', 'Casa 02', 'Centro', 'Salvador', 'BA'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM familias);
 
@@ -220,6 +224,8 @@ SELECT * FROM (
   SELECT 'Ana Souza', 'ana.souza@example.com', '(11) 90000-1111', 'Coordenadora'
   UNION ALL SELECT 'Carlos Lima', 'carlos.lima@example.com', '(11) 90000-2222', 'Voluntário'
   UNION ALL SELECT 'Beatriz Nunes', 'beatriz.nunes@example.com', '(11) 90000-3333', 'Assistente Social'
+  UNION ALL SELECT 'Ricardo Alves', 'ricardo.alves@example.com', '(21) 90000-4444', 'Logística'
+  UNION ALL SELECT 'Fernanda Rocha', 'fernanda.rocha@example.com', '(31) 90000-5555', 'Nutricionista'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM colaboradores);
 
@@ -230,6 +236,8 @@ FROM (
   SELECT (SELECT id_colaborador FROM colaboradores WHERE email = 'ana.souza@example.com' LIMIT 1) AS id_colaborador, 'admin' AS tipo
   UNION ALL SELECT (SELECT id_colaborador FROM colaboradores WHERE email = 'carlos.lima@example.com' LIMIT 1), 'voluntario'
   UNION ALL SELECT (SELECT id_colaborador FROM colaboradores WHERE email = 'beatriz.nunes@example.com' LIMIT 1), 'colaborador'
+  UNION ALL SELECT (SELECT id_colaborador FROM colaboradores WHERE email = 'ricardo.alves@example.com' LIMIT 1), 'logistica'
+  UNION ALL SELECT (SELECT id_colaborador FROM colaboradores WHERE email = 'fernanda.rocha@example.com' LIMIT 1), 'nutricionista'
 ) AS tmp
 WHERE id_colaborador IS NOT NULL
   AND NOT EXISTS (SELECT 1 FROM usuarios);
@@ -259,6 +267,20 @@ FROM (
       WHERE c.email = 'beatriz.nunes@example.com'
       LIMIT 1
     ), 'colaborador123'
+  UNION ALL SELECT (
+      SELECT u.id_usuario
+      FROM usuarios u
+      JOIN colaboradores c ON c.id_colaborador = u.id_colaborador
+      WHERE c.email = 'ricardo.alves@example.com'
+      LIMIT 1
+    ), 'logistica123'
+  UNION ALL SELECT (
+      SELECT u.id_usuario
+      FROM usuarios u
+      JOIN colaboradores c ON c.id_colaborador = u.id_colaborador
+      WHERE c.email = 'fernanda.rocha@example.com'
+      LIMIT 1
+    ), 'nutri123'
 ) AS tmp
 WHERE id_usuario IS NOT NULL
   AND NOT EXISTS (SELECT 1 FROM logins);
@@ -269,6 +291,7 @@ SELECT * FROM (
   SELECT 'Natal Solidário', '500 cestas', 'Campanha para montar cestas básicas no Natal.'
   UNION ALL SELECT 'Inverno Quentinho', '300 cobertores', 'Arrecadação de roupas e cobertores para o inverno.'
   UNION ALL SELECT 'Doação de Alimentos', '1000 kg', 'Arrecadação contínua de alimentos não perecíveis.'
+  UNION ALL SELECT 'Mães Presentes', '250 kits de higiene', 'Apoio a famílias lideradas por mães solo.'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM campanhas);
 
@@ -305,6 +328,26 @@ SELECT * FROM (
     'baixa',
     10,
     'kit'
+  UNION ALL SELECT 'Sabonetes para abrigo',
+    (SELECT id_categoria FROM categorias WHERE nome='Higiene' LIMIT 1),
+    (SELECT id_item FROM categorias_itens WHERE nome_item='Sabonete' AND categoria_id=(SELECT id_categoria FROM categorias WHERE nome='Higiene' LIMIT 1) LIMIT 1),
+    'Abrigo parceiro solicita sabonetes em barra.',
+    CURDATE(),
+    (SELECT id_colaborador FROM colaboradores WHERE nome='Ricardo Alves' LIMIT 1),
+    'pendente',
+    'normal',
+    50,
+    'unidade'
+  UNION ALL SELECT 'Materiais de limpeza comunitária',
+    (SELECT id_categoria FROM categorias WHERE nome='Limpeza' LIMIT 1),
+    (SELECT id_item FROM categorias_itens WHERE nome_item='Detergente' AND categoria_id=(SELECT id_categoria FROM categorias WHERE nome='Limpeza' LIMIT 1) LIMIT 1),
+    'Mutirão de limpeza precisa de detergentes extras.',
+    CURDATE(),
+    (SELECT id_colaborador FROM colaboradores WHERE nome='Fernanda Rocha' LIMIT 1),
+    'pendente',
+    'alta',
+    30,
+    'frasco'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM solicitacoes);
 
@@ -314,6 +357,8 @@ SELECT * FROM (
   SELECT CURDATE(), 'Maria Silva', (SELECT id_doador FROM doadores WHERE email='maria.silva@example.com' LIMIT 1), 'Arroz', (SELECT id_categoria FROM categorias WHERE nome='Alimentos' LIMIT 1), 10, 'kg', (SELECT id_campanha FROM campanhas WHERE nome='Doação de Alimentos' LIMIT 1), 'Doação inicial'
   UNION ALL SELECT CURDATE(), 'Empresa Solidária LTDA', (SELECT id_doador FROM doadores WHERE email='contato@empresasolidaria.com.br' LIMIT 1), 'Feijão', (SELECT id_categoria FROM categorias WHERE nome='Alimentos' LIMIT 1), 20, 'kg', (SELECT id_campanha FROM campanhas WHERE nome='Doação de Alimentos' LIMIT 1), 'Lote corporativo'
   UNION ALL SELECT CURDATE(), 'João Pereira', (SELECT id_doador FROM doadores WHERE email='joao.pereira@example.com' LIMIT 1), 'Leite', (SELECT id_categoria FROM categorias WHERE nome='Leite' LIMIT 1), 30, 'L', (SELECT id_campanha FROM campanhas WHERE nome='Natal Solidário' LIMIT 1), 'Leite longa vida'
+  UNION ALL SELECT CURDATE(), 'Associação Cuidar', (SELECT id_doador FROM doadores WHERE email='contato@associacaocuidar.org' LIMIT 1), 'Sabonete', (SELECT id_categoria FROM categorias WHERE nome='Higiene' LIMIT 1), 80, 'un', (SELECT id_campanha FROM campanhas WHERE nome='Mães Presentes' LIMIT 1), 'Doação para kits'
+  UNION ALL SELECT CURDATE(), 'Luiza Costa', (SELECT id_doador FROM doadores WHERE email='luiza.costa@example.com' LIMIT 1), 'Detergente', (SELECT id_categoria FROM categorias WHERE nome='Limpeza' LIMIT 1), 40, 'frasco', (SELECT id_campanha FROM campanhas WHERE nome='Volta às Aulas' LIMIT 1), 'Apoio a mutirão'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM entradas);
 
@@ -329,6 +374,11 @@ FROM (
   UNION ALL SELECT 'Higiene', 'Kit higiene'
   UNION ALL SELECT 'Limpeza', 'Detergente'
   UNION ALL SELECT 'Limpeza', 'Água Sanitária'
+  UNION ALL SELECT 'Limpeza', 'Sabão em pó'
+  UNION ALL SELECT 'Enlatados', 'Milho em lata'
+  UNION ALL SELECT 'Enlatados', 'Seleta de legumes'
+  UNION ALL SELECT 'Alimentos', 'Macarrão'
+  UNION ALL SELECT 'Higiene', 'Creme dental'
 ) AS seeds
 JOIN categorias c ON c.nome = seeds.categoria_nome
 LEFT JOIN categorias_itens ci
@@ -339,6 +389,8 @@ INSERT INTO saidas (data, familia_id, responsavel, qtd, obs)
 SELECT * FROM (
   SELECT CURDATE(), (SELECT id_familia FROM familias WHERE nome='Família Silva'), 'Ana Souza', 1, 'Entrega de cesta básica'
   UNION ALL SELECT CURDATE(), (SELECT id_familia FROM familias WHERE nome='Família Oliveira'), 'Carlos Lima', 1, 'Entrega de cesta básica'
+  UNION ALL SELECT CURDATE(), (SELECT id_familia FROM familias WHERE nome='Família Lima'), 'Ricardo Alves', 1, 'Entrega emergencial'
+  UNION ALL SELECT CURDATE(), (SELECT id_familia FROM familias WHERE nome='Família Almeida'), 'Fernanda Rocha', 2, 'Kits de higiene e limpeza'
 ) AS tmp
 WHERE NOT EXISTS (SELECT 1 FROM saidas);
 -- ------------------------------------------------------------

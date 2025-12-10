@@ -33,6 +33,9 @@
 
     <h1 class="titulo-pagina">Registrar Saída de Produtos</h1>
     <p class="descricao-pagina">Baixe qualquer item do estoque, registrando o motivo, destino e responsável.</p>
+    <div class="page-actions">
+      <button type="button" class="btn-secondary" id="btnHelpSaidas">Help me</button>
+    </div>
 
     <section class="crud">
       <form id="formSaidaProdutos" class="form-grid">
@@ -107,6 +110,19 @@
         </div>
       </form>
     </section>
+
+    <div id="modalHelpSaidas" class="modal" style="display:none;">
+      <div class="modal-conteudo help-modal">
+        <span class="fechar" id="fecharHelpSaidas">&times;</span>
+        <h2>Como registrar uma saída</h2>
+        <div id="helpSaidasPassos" class="help-passos"></div>
+        <div class="help-navigation">
+          <button id="btnHelpSaidasPrev" class="btn-secondary">Anterior</button>
+          <span id="helpSaidasPassoInfo">Passo 1 de 1</span>
+          <button id="btnHelpSaidasNext" class="btn-primary">Próximo</button>
+        </div>
+      </div>
+    </div>
 
     <script src="/js/registrar_saida_produtos.js"></script>
     <script src="/js/auth.js"></script>
